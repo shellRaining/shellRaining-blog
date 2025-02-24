@@ -1,0 +1,9 @@
+{
+  "include": ["./.vitepress/**/*.ts"],
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "skipLibCheck": true
+  }
+}
