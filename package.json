@@ -1,0 +1,21 @@
+{
+  "name": "shellraining-blog",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run -F '@shellraining-blog/content' dev",
+    "build": "bun run -F '@shellraining-blog/content' build",
+    "preview": "bun run -F '@shellraining-blog/content' preview"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "workspaces": [
+    "packages/*"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "tsup": "^8.3.6"
+  }
+}

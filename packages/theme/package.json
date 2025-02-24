@@ -1,0 +1,28 @@
+{
+  "name": "@shellraining-blog/theme",
+  "version": "1.0.0",
+  "author": "shellRaining",
+  "exports": {
+    ".": "./src/index.ts",
+    "./config": "./dist/config.js"
+  },
+  "types": "./dist/config.d.ts",
+  "main": "./src/index.ts",
+  "description": "shellRaining's blog theme",
+  "keywords": [],
+  "license": "ISC",
+  "scripts": {
+    "build": "tsup ./src/config.ts --dts --format esm"
+  },
+  "type": "module",
+  "dependencies": {
+    "dayjs": "^1.11.13",
+    "markdown-it-mathjax3": "^4.3.2",
+    "viewerjs": "^1.11.7",
+    "vitepress": "^1.6.3",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.5"
+  }
+}
