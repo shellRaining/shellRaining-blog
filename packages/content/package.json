@@ -12,7 +12,9 @@
   "author": "shellRaining",
   "license": "ISC",
   "dependencies": {
-    "@shellraining-blog/theme": "workspace:*",
-    "vitepress": "^1.6.3"
+    "@shellraining-blog/theme": "workspace:*"
+  },
+  "peerDependencies": {
+    "vitepress": "^1.6.4"
   }
 }
