@@ -89,7 +89,7 @@ TypeScript 工程中的 `node_modules/@types` 是一个特殊的目录，TypeScr
 
 ---
 
-除此之外还有很多的编译选项，比如针对 JavaScript 的类型检查编译等，我们暂不介绍，以后使用到再补充。
+除此之外还有很多的编译选项，比如针对 JavaScript 的类型检查编译等，我们后续补充
 
 ### 继承配置
 
@@ -156,3 +156,124 @@ declare var settings: JQuery.AjaxSettings;
 ### `/// <reference lib="..." />`
 
 用来指定对语言内置的某个声明文件的依赖，他和编译选项中的 `target` 是一样的，因此不推荐使用这个指令
+
+## 更多的编译选项
+
+### isolatedModules
+
+**背景与定义**
+
+这个编译选项是用来确保代码在单文件编译环境中也能正常工作的，通常和 `Babel`，`vite` 等构建打包工具结合使用，其核心目的是确保每个 TypeScript 文件可以独立编译，而不依赖于整个项目的上下文。当启用此选项时，编译器会执行额外的检查，警告可能在单文件转译过程中出现问题的代码。
+
+具体来说，`isolatedModules` 不改变代码的行为或 TypeScript 的检查/输出过程，而是提供警告，帮助开发者识别潜在问题。
+
+**功能**
+
+`isolatedModules` 在执行检查的时候主要关注下面几个方面：
+
+1. **导出非值标识符**：如果导出的是类型（如 `export type SomeType = string;`），在导入时必须使用类型导入，否则会报错
+2. **非模块文件中的命名空间**：命名空间仅允许在有 `import` 或 `export` 的模块文件中使用。如果在非模块文件中使用命名空间，`isolatedModules` 会报错
+3. **const enum 的引用**：`const enum` 在编译时会被内联，但单文件编译器可能无法正确处理，导致运行时错误。
+
+**示例**
+
+1. **导出类型的问题**：
+
+   ```typescript some-module.ts
+   export type User = { name: string; };
+   ```
+
+   ```typescript main.ts
+   export { User } from './some-module';
+   ```
+
+   在 isolatedModules 为 true 时，编译器会警告 main.ts，因为 User 只是类型，JavaScript 输出中不会生成值，可能会导致运行时错误（如尝试从空模块导入）。解决方法是避免导出类型，或者使用类型导入：
+
+   ```typescript main.ts
+   import type { User } from "./some-module";
+   // 使用 User 但不导出
+   ```
+
+2. **const enum 的使用**：
+
+   ```typescript enums.ts
+   export const enum Colors { Red, Green, Blue }
+   ```
+
+   ```typescript usages.ts
+   import { Colors } from "./enums";
+   console.log(Colors.Red);
+   ```
+
+   在完整编译中，`usage.js` 会内联为 `console.log(0);`（假设 Red 为 0）。但在单文件编译中，`enums.js` 的 `const enum` 可能无法正确处理，`isolatedModules` 会警告开发者注意潜在问题。可以将 const 标识符去掉来解决
+
+**性能问题**
+
+根据 [Performance with isolatedModules=true · Issue #32294 · microsoft/TypeScript](https://github.com/microsoft/TypeScript/issues/32294)，启用 `isolatedModules=true` 可能会影响类型检查性能，尤其是在 React 应用中。研究显示，在某些情况下，禁用 `isolatedModules` 可以显著减少类型检查时间（例如从 5 秒降至 1 秒以下）。但在 Babel 工具链中，`isolatedModules=true` 被推荐使用，以确保语法兼容性。这形成了性能与兼容性之间的权衡，开发者需要根据具体需求选择。
+
+### useDefineForClassFields
+
+**定义**
+
+`useDefineForClassFields` 决定了 TypeScript 如何编译类中的字段声明。这个选项在 TypeScript 3.7 版本引入，默认在 TypeScript 4.0+ 中为 `true`（当 target 是 ES2022 或更高版本时）。
+
+**功能**
+
+这个选项主要影响两件事：
+
+1. 类字段的初始化方式
+2. 继承时字段的覆盖行为
+
+当 `useDefineForClassFields` 为 `true` 时，TypeScript 使用 ECMAScript 标准中的 `Object.defineProperty()` 来定义类字段，符合 ES2022 的类字段标准。
+
+这个选项主要影响两件事：
+
+1. 类字段的初始化方式
+2. 继承时字段的覆盖行为
+
+当 `useDefineForClassFields` 为 `true` 时，TypeScript 使用 ECMAScript 标准中的 `Object.defineProperty()` 来定义类字段，符合 ES2022 的类字段标准。
+
+**示例**
+
+```typescript
+// useDefineForClassFields: true
+class Example {
+  value = 123;
+}
+```
+
+编译后的 JavaScript 代码：
+
+```javascript
+class Example {
+  constructor() {
+    Object.defineProperty(this, "value", {
+      enumerable: true,
+      configurable: true,
+      writable: true,
+      value: 123
+    });
+  }
+}
+```
+
+当设置为 `false` 时，则会简单地使用赋值语句：
+
+```javascript
+class Example {
+  constructor() {
+    this.value = 123;
+  }
+}
+```
+
+继承部分比较复杂，暂不讲解
+
+**最佳实践**
+
+对于新项目，推荐使用默认的 `true` 值，这符合 ECMAScript 标准
+
+在以下情况下，你可能希望设置为 `false`：
+
+1. 迁移旧代码，保持与旧版本 TypeScript 行为一致
+2. 与某些库（如 MobX、Vue 2）结合使用时，这些库可能依赖于特定的初始化顺序
