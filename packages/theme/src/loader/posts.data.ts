@@ -9,10 +9,12 @@ export { data };
 
 export default createContentLoader("docs/**/*.md", {
   transform(rawData) {
-    return rawData.sort((a, b) => {
-      const timeA = dayjs(a.frontmatter.date);
-      const timeB = dayjs(b.frontmatter.date);
-      return timeA.isBefore(timeB) ? 1 : -1;
-    });
+    return rawData
+      .sort((a, b) => {
+        const timeA = dayjs(a.frontmatter.date);
+        const timeB = dayjs(b.frontmatter.date);
+        return timeA.isBefore(timeB) ? 1 : -1;
+      })
+      .filter((post) => post.frontmatter?.title);
   },
 });

@@ -48,11 +48,10 @@ onMounted(() => {
   color: var(--sr-c-text);
   font-weight: normal;
   padding: 0 1rem;
-  transition: all 0.5s ease;
+  transition: color 0.5s ease;
 
   &:hover {
     color: var(--sr-c-text-hover);
-    font-weight: bold;
   }
 }
 </style>

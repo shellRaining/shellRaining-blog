@@ -11,7 +11,7 @@ export const shellRainingBlogConfig: UserConfig<DefaultTheme.Config> = {
   appearance: false,
   vite: {
     build: {
-      target: "es2020",
+      target: "esnext",
     },
   },
   head: [

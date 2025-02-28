@@ -19,7 +19,7 @@ onContentUpdated(() => {
 </script>
 
 <template>
-  <div>
+  <div v-if="pageData.frontmatter.title">
     <h1 class="title">{{ pageData.title }}</h1>
     <div class="meta-info">
       <time class="date">🕒 Published at: {{ publishDate }}</time>
