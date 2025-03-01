@@ -14,8 +14,10 @@
   "workspaces": [
     "packages/*"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "vitepress": "../vitepress"
+  },
   "devDependencies": {
-    "tsup": "^8.3.6"
+    "tsup": "^8.4.0"
   }
 }

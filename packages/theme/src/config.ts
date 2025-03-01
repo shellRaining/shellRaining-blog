@@ -4,6 +4,7 @@ import markdownItMark from "markdown-it-mark";
 import markdownItSup from "markdown-it-sup";
 import markdownItSub from "markdown-it-sub";
 import markdownItTaskLists from "markdown-it-task-lists";
+import { readFileSync } from "node:fs";
 
 const APPEARANCE_KEY = "shellRaining-blog-theme";
 
@@ -46,5 +47,18 @@ export const shellRainingBlogConfig: UserConfig<DefaultTheme.Config> = {
       md.use(markdownItSup);
       md.use(markdownItTaskLists, { enabled: false });
     },
+  },
+  buildEnd(siteConfig) {
+    const mdFiles = siteConfig.pages;
+    const allChars = new Set();
+
+    for (const mdFile of mdFiles) {
+      const content = readFileSync(mdFile, "utf-8");
+      for (const char of content) {
+        allChars.add(char);
+      }
+    }
+
+    console.log(`一共有：${allChars.size} 字符`);
   },
 };
