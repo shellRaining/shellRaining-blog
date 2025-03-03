@@ -4,8 +4,7 @@
   "author": "shellRaining",
   "exports": {
     ".": "./src/index.ts",
-    "./config": "./dist/node/config.js",
-    "./fontmin": "./dist/node/fontmin.js"
+    "./config": "./dist/node/config.js"
   },
   "types": "./dist/node/config.d.ts",
   "main": "./src/index.ts",
@@ -35,6 +34,7 @@
     "@types/node": "^22.13.8",
     "@types/subset-font": "^2.3.0",
     "glob": "^11.0.1",
+    "picocolors": "^1.1.1",
     "rolldown": "^1.0.0-beta.3",
     "subset-font": "^2.4.0",
     "typescript": "^5.8.2"

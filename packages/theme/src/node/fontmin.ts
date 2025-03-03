@@ -1,11 +1,9 @@
 import { readFileSync, mkdirSync, writeFileSync, unlinkSync } from "fs";
 import type { SiteConfig } from "vitepress";
 import path from "path";
-import _debug from "debug";
 import subsetFontKit from "subset-font";
 import type { ShellRainingBlogThemeConfig } from "./config";
-
-const debug = _debug("blog:fontmin");
+import pc from "picocolors"; // 引入 picocolors 用于着色
 
 export interface FontConfig {
   /** 字体在网站上展示的名称 */
@@ -25,7 +23,8 @@ function getAllChars(siteConfig: SiteConfig) {
   const mdFiles = siteConfig.pages;
   const allChars = new Set();
 
-  for (const mdFile of mdFiles) {
+  for (let i = 0; i < mdFiles.length; i++) {
+    const mdFile = mdFiles[i];
     const content = readFileSync(mdFile, "utf-8");
     for (const char of content) {
       allChars.add(char);
@@ -67,10 +66,11 @@ function generateFontFaceCSS(fonts: FontConfig[], outputDir: string) {
 `;
 
   writeFileSync(cssFilePath, cssContent);
-  debug(`Generated CSS file with @font-face rules: ${cssFilePath}`);
 }
 
 export async function subsetFont(siteConfig: SiteConfig) {
+  console.log(pc.cyan(pc.bold("\n📦 开始字体子集化处理...")));
+
   const chars = getAllChars(siteConfig);
   const text = Array.from(chars).join("");
   const publicDir = path.join(siteConfig.root, "/public");
@@ -83,50 +83,94 @@ export async function subsetFont(siteConfig: SiteConfig) {
   const fonts = themeConfig.font || [];
 
   if (!fonts.length) {
-    debug("No fonts configured in theme config, skipping font subsetting");
+    console.log(pc.yellow("⚠️ 未在主题配置中找到字体设置，跳过字体子集化"));
     return;
   }
 
-  debug(`Processing ${fonts.length} font configurations`);
+  console.log(pc.cyan(`找到 ${pc.bold(fonts.length.toString())} 个字体配置`));
 
-  // 为每个字体生成子集
-  for (const font of fonts) {
+  let processedCnt = 0;
+  const fontProcesses = fonts.map(async (font) => {
     const srcPath = path.join(publicDir, font.src.replace(/^\//, ""));
     const fileName = path.basename(font.src, path.extname(font.src));
     const destFileName = `${fileName}-subset.woff2`;
     const destPath = path.join(fontDestDir, destFileName);
 
-    debug(
-      `Subsetting font: ${font.displayName} (${font.id}) weight ${font.weight}`,
-    );
-    debug(`Source: ${srcPath}`);
-    debug(`Destination: ${destPath}`);
-
     try {
+      // 字体子集化并写入文件
       const fontBuffer = readFileSync(srcPath);
+      const originalSizeKB = Math.round(fontBuffer.length / 1024);
       const subsetBuffer = await subsetFontKit(fontBuffer, text, {
         targetFormat: "woff2",
       });
+      const subsetSizeKB = Math.round(subsetBuffer.length / 1024);
       writeFileSync(destPath, subsetBuffer);
 
-      debug(`Successfully created subset font: ${destPath}`);
+      processedCnt++;
+      console.log(
+        pc.cyan(
+          `🔍 (${processedCnt}/${fonts.length}) 已子集化字体 ${font.displayName} (${font.id})...`,
+        ),
+      );
 
+      // 删除原始文件
       const origDestPath = path.join(fontDestDir, path.basename(font.src));
       try {
         unlinkSync(origDestPath);
-        debug(`Removed original font file from output: ${origDestPath}`);
-      } catch (err) {
-        debug(
-          `Could not remove original font (may not exist): ${origDestPath}`,
-        );
-      }
+      } catch (err) {}
+
+      return {
+        success: true,
+        font,
+        originalSize: originalSizeKB,
+        subsetSize: subsetSizeKB,
+      };
     } catch (err) {
+      processedCnt++;
       console.error(
-        `Error processing font ${font.displayName} (${font.id}):`,
+        pc.red(`❌ 处理字体 ${font.displayName} (${font.id}) 时出错:`),
         err,
       );
+      return {
+        success: false,
+        font,
+        error: err,
+      };
     }
+  });
+
+  const results = await Promise.all(fontProcesses);
+
+  // 显示汇总信息
+  const successful = results.filter((r) => r.success);
+  const failed = results.filter((r) => !r.success);
+
+  console.log("\n" + pc.cyan(pc.bold("📊 字体子集化完成汇总:")));
+
+  if (successful.length > 0) {
+    const totalOriginal = successful.reduce(
+      (sum, r: any) => sum + r.originalSize,
+      0,
+    );
+    const totalSubset = successful.reduce(
+      (sum, r: any) => sum + r.subsetSize,
+      0,
+    );
+    const savingsPercent = Math.round((1 - totalSubset / totalOriginal) * 100);
+
+    console.log(pc.green(`✅ 成功处理: ${successful.length} 个字体`));
+    console.log(
+      pc.green(
+        `💾 总大小减少: ${totalOriginal}KB → ${totalSubset}KB (节省了 ${savingsPercent}%)`,
+      ),
+    );
   }
 
+  if (failed.length > 0) {
+    console.log(pc.red(`❌ 处理失败: ${failed.length} 个字体`));
+  }
+
+  // 最后生成CSS
   generateFontFaceCSS(fonts, fontDestDir);
+  console.log(pc.green(pc.bold("\n✨ 字体子集化全部处理完成!\n")));
 }

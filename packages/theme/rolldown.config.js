@@ -1,7 +1,7 @@
 import typescript from "@rollup/plugin-typescript";
 import terser from "@rollup/plugin-terser";
 import { defineConfig } from "rolldown";
-import esmShim from '@rollup/plugin-esm-shim';
+import esmShim from "@rollup/plugin-esm-shim";
 import { glob } from "glob";
 import path from "path";
 
@@ -28,7 +28,7 @@ const entries = glob
         file: `dist/node/${baseName}.js`,
         format: "esm",
       },
-      external: ["fs", "path"],
+      external: ["fs", "path", "node:process", "picocolors"],
       plugins,
     };
   });
