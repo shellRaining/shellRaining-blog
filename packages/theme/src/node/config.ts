@@ -18,6 +18,7 @@ export const shellRainingBlogConfig: UserConfig<ShellRainingBlogThemeConfig> = {
     build: {
       target: "esnext",
     },
+    plugins: []
   },
   head: [
     [

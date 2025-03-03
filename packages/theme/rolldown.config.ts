@@ -1,6 +1,6 @@
 import typescript from "@rollup/plugin-typescript";
 import terser from "@rollup/plugin-terser";
-import { defineConfig } from "rolldown";
+import { defineConfig, type RolldownOptions } from "rolldown";
 import esmShim from "@rollup/plugin-esm-shim";
 import { glob } from "glob";
 import path from "path";
@@ -12,9 +12,9 @@ const plugins = [
     include: "./src/node/*.ts",
     outDir: "dist/node",
   }),
-  // terser({ format: { comments: false } }),
+  terser({ format: { comments: false } }),
   esmShim(),
-];
+]
 
 // Use glob to find all entry files
 const entries = glob
@@ -31,6 +31,6 @@ const entries = glob
       external: ["fs", "path", "node:process", "picocolors"],
       plugins,
     };
-  });
+  }) as RolldownOptions[]
 
 export default defineConfig(entries);

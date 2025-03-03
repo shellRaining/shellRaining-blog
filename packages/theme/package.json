@@ -12,8 +12,8 @@
   "keywords": [],
   "license": "ISC",
   "scripts": {
-    "build": "rm -rf ./dist/ && rolldown -c ./rolldown.config.js",
-    "build:watch": "rolldown -c ./rolldown.config.js -w"
+    "build": "rm -rf ./dist/ && rolldown -c ./rolldown.config.ts",
+    "build:watch": "rolldown -c ./rolldown.config.ts -w"
   },
   "type": "module",
   "dependencies": {
