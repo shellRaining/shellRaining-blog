@@ -4,11 +4,15 @@ import markdownItMark from "markdown-it-mark";
 import markdownItSup from "markdown-it-sup";
 import markdownItSub from "markdown-it-sub";
 import markdownItTaskLists from "markdown-it-task-lists";
-import { readFileSync } from "node:fs";
+import { subsetFont, type FontConfig } from "./fontmin";
 
 const APPEARANCE_KEY = "shellRaining-blog-theme";
 
-export const shellRainingBlogConfig: UserConfig<DefaultTheme.Config> = {
+export type ShellRainingBlogThemeConfig = DefaultTheme.Config & {
+  font: FontConfig[];
+};
+
+export const shellRainingBlogConfig: UserConfig<ShellRainingBlogThemeConfig> = {
   appearance: false,
   vite: {
     build: {
@@ -35,6 +39,12 @@ export const shellRainingBlogConfig: UserConfig<DefaultTheme.Config> = {
               document.documentElement.classList.add('dark')
           })()`,
     ],
+    [
+      "link",
+      { rel: "mask-icon", href: "/safari-pinned-tab.svg", color: "#5bbad5" },
+    ],
+    ["link", { rel: "icon", href: "/favicon.ico" }],
+    ["link", { rel: "stylesheet", href: "/fonts/custom-fonts.css", type: "text/css" }],
   ],
   sitemap: {
     hostname: "https://shellraining.xyz",
@@ -48,17 +58,7 @@ export const shellRainingBlogConfig: UserConfig<DefaultTheme.Config> = {
       md.use(markdownItTaskLists, { enabled: false });
     },
   },
-  buildEnd(siteConfig) {
-    const mdFiles = siteConfig.pages;
-    const allChars = new Set();
-
-    for (const mdFile of mdFiles) {
-      const content = readFileSync(mdFile, "utf-8");
-      for (const char of content) {
-        allChars.add(char);
-      }
-    }
-
-    console.log(`一共有：${allChars.size} 字符`);
+  async buildEnd(siteConfig) {
+    await subsetFont(siteConfig);
   },
 };

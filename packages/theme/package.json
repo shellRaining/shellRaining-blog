@@ -4,16 +4,17 @@
   "author": "shellRaining",
   "exports": {
     ".": "./src/index.ts",
-    "./config": "./dist/config.js"
+    "./config": "./dist/node/config.js",
+    "./fontmin": "./dist/node/fontmin.js"
   },
-  "types": "./dist/config.d.ts",
+  "types": "./dist/node/config.d.ts",
   "main": "./src/index.ts",
   "description": "shellRaining's blog theme",
   "keywords": [],
   "license": "ISC",
   "scripts": {
-    "build": "tsup ./src/config.ts --dts --format esm",
-    "build:watch": "tsup ./src/config.ts --dts --format esm --watch"
+    "build": "rm -rf ./dist/ && rolldown -c ./rolldown.config.js",
+    "build:watch": "rolldown -c ./rolldown.config.js -w"
   },
   "type": "module",
   "dependencies": {
@@ -28,8 +29,14 @@
     "vue": "^3.5.13"
   },
   "devDependencies": {
-    "@types/node": "^22.13.5",
-    "fontmin": "^2.0.0",
+    "@rollup/plugin-esm-shim": "^0.1.8",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^12.1.2",
+    "@types/node": "^22.13.8",
+    "@types/subset-font": "^2.3.0",
+    "glob": "^11.0.1",
+    "rolldown": "^1.0.0-beta.3",
+    "subset-font": "^2.4.0",
     "typescript": "^5.8.2"
   },
   "peerDependencies": {

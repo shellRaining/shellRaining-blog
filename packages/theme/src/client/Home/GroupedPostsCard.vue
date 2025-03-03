@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ContentData } from "vitepress";
+import type { ContentData } from "vitepress";
 import PostItem from "./PostItem.vue";
 import { onMounted, ref } from "vue";
 
