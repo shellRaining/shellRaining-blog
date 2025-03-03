@@ -13,7 +13,8 @@
   "license": "ISC",
   "scripts": {
     "build": "rm -rf ./dist/ && rolldown -c ./rolldown.config.ts",
-    "build:watch": "rolldown -c ./rolldown.config.ts -w"
+    "build:watch": "rolldown -c ./rolldown.config.ts -w",
+    "test": "vitest"
   },
   "type": "module",
   "dependencies": {
@@ -37,7 +38,8 @@
     "picocolors": "^1.1.1",
     "rolldown": "^1.0.0-beta.3",
     "subset-font": "^2.4.0",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.7"
   },
   "peerDependencies": {
     "vitepress": "^1.6.3"
