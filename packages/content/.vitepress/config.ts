@@ -1,9 +1,8 @@
-import { defineConfig } from "vitepress";
+import { defineConfigWithTheme } from "vitepress";
 import { shellRainingBlogConfig } from "@shellraining-blog/theme/config";
+import type { ShellRainingBlogThemeConfig } from "@shellraining-blog/theme/config";
 
-const fontPath = "/font/LXGWWenKaiScreen.woff2";
-
-export default defineConfig({
+export default defineConfigWithTheme<ShellRainingBlogThemeConfig>({
   extends: shellRainingBlogConfig,
   lang: "zh-cn",
   title: "shellRaining's blog",
@@ -19,27 +18,19 @@ export default defineConfig({
       },
     },
     outline: "deep",
-  },
-  head: [
-    [
-      "link",
-      { rel: "mask-icon", href: "/safari-pinned-tab.svg", color: "#5bbad5" },
-    ],
-    ["link", { rel: "icon", href: "/favicon.ico" }],
-    [
-      "link",
+    font: [
       {
-        rel: "preload",
-        href: fontPath,
-        type: "font/woff2",
-        as: "font",
-        crossorigin: "anonymous",
+        displayName: "霞鹜文楷",
+        id: "LXGWWenKai",
+        weight: 400,
+        src: "/fonts/LXGWWenKai-Regular.ttf",
+      },
+      {
+        displayName: "霞鹜文楷",
+        id: "LXGWWenKai",
+        weight: 600,
+        src: "/fonts/LXGWWenKai-Medium.ttf",
       },
     ],
-    [
-      "style",
-      {},
-      `@font-face{font-family:"LXGW WenKai Screen";src:url('${fontPath}') format("woff2");font-weight:normal;font-style:normal;font-display:swap}:root{--vp-font-family-base:"LXGW WenKai Screen",sans-serif`,
-    ],
-  ],
+  },
 });

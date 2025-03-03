@@ -251,7 +251,7 @@ class Example {
       enumerable: true,
       configurable: true,
       writable: true,
-      value: 123
+      value: 123,
     });
   }
 }
