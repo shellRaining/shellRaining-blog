@@ -1,5 +1,4 @@
 import type { DefaultTheme, SiteConfig, UserConfig } from "vitepress";
-
 import markdownItMark from "markdown-it-mark";
 import markdownItSup from "markdown-it-sup";
 import markdownItSub from "markdown-it-sub";
@@ -13,6 +12,7 @@ import {
 import { join } from "path";
 import { basename, dirname } from "path";
 import { unlinkSync } from "fs";
+import { getVersions } from "./injectVersion";
 
 const APPEARANCE_KEY = "shellRaining-blog-theme";
 
@@ -131,5 +131,9 @@ export const shellRainingBlogConfig: UserConfig<ShellRainingBlogThemeConfig> = {
       md.use(markdownItSup);
       md.use(markdownItTaskLists, { enabled: false });
     },
+  },
+  async transformPageData(pageData, ctx) {
+    const versions = await getVersions(pageData, ctx);
+    pageData.versions = versions;
   },
 };
