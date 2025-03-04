@@ -16,3 +16,4 @@ pnpm-global
 TODOs.md
 docs/private
 public/font
+*.woff2

@@ -11,7 +11,7 @@ import {
   type FontConfig,
 } from "./fontmin";
 import { join } from "path";
-import { basename, dirname } from "path/posix";
+import { basename, dirname } from "path";
 import { unlinkSync } from "fs";
 
 const APPEARANCE_KEY = "shellRaining-blog-theme";

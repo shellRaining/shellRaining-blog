@@ -16,8 +16,5 @@
   ],
   "dependencies": {
     "vitepress": "../vitepress"
-  },
-  "devDependencies": {
-    "tsup": "^8.4.0"
   }
 }
