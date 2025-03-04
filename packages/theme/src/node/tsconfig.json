@@ -1,9 +1,9 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "baseUrl": ".",
-    "outDir": "../../dist/node",
-    "types": ["@types/node"]
+    "declaration": true,
+    "allowSyntheticDefaultImports": true,
+    "outDir": "../../dist/node"
   },
   "include": ["."]
 }

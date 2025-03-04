@@ -11,11 +11,5 @@
     "verbatimModuleSyntax": true,
     "lib": ["esnext", "dom", "dom.iterable"]
   },
-  "exclude": [
-    "**/dist/**",
-    "template",
-    "bin",
-    "docs/snippets",
-    "scripts"
-  ]
+  "exclude": ["**/dist/**", "template", "bin", "docs/snippets", "scripts"]
 }

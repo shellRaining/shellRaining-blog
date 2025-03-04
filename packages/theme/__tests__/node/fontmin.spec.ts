@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import * as fs from "fs";
-import * as path from "path";
-import { subsetFont, getAllChars } from "../../src/node/fontmin.ts";
+import { subsetFont, getAllChars } from "../../src/node/fontmin";
 import subsetFontKit from "subset-font";
 
 // Mock 外部依赖

@@ -7,14 +7,11 @@ import path from "path";
 
 const plugins = [
   typescript({
-    declaration: true,
-    allowSyntheticDefaultImports: true,
-    include: "./src/node/*.ts",
-    outDir: "dist/node",
+    tsconfig: "./src/node/tsconfig.json",
   }),
   terser({ format: { comments: false } }),
   esmShim(),
-]
+];
 
 // Use glob to find all entry files
 const entries = glob
@@ -28,9 +25,9 @@ const entries = glob
         file: `dist/node/${baseName}.js`,
         format: "esm",
       },
-      external: ["fs", "path", "node:process", "picocolors"],
+      external: ["fs", "path", "node:process", "picocolors", "child_process"],
       plugins,
     };
-  }) as RolldownOptions[]
+  }) as RolldownOptions[];
 
 export default defineConfig(entries);
