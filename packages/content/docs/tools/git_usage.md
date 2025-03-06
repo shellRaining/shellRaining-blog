@@ -213,4 +213,3 @@ git lfs pull
 如果这个文件已经跟踪，同时经常有一些不必要（或者不可避免触发）的文件更改，可以使用 `git update-index --skip-worktree filename` 来忽略这个文件的更改，他会完全忽略这个文件，并且其他人的改动也不会被合并或者更新。如果要取消这个设置，可以使用 `git update-index --no-skip-worktree filename`
 
 如果希望自己本地的改动不被合并，但是其他人的改动可以被合并，可以使用 `git update-index --assume-unchanged filename` 来实现，如果要取消这个设置，可以使用 `git update-index --no-assume-unchanged filename`
-

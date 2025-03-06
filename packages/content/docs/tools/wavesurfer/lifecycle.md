@@ -151,7 +151,7 @@ this.renderer.on('click', (relativeX, relativeY) => {
 >   onInit() {
 >     this.container = this.container || this.wavesurfer.getWrapper()
 >     this.container.appendChild(this.wrapper)
-> 
+>
 >     if (this.wavesurfer.options.fillParent) {
 >       Object.assign(this.wrapper.style, {
 >         width: '100%',

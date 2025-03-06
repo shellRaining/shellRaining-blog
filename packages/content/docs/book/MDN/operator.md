@@ -25,12 +25,18 @@ await expression;
 > 如果给定的值是一个 promise，异步函数会返回一个不同的*引用*，而 `Promise.resolve` 会返回相同的引用，具体原因可以看 Promise.resolve 的实现原理
 >
 > ```javascript
-> const p = new Promise((res, rej) => { res(1) });
->   async function asyncReturn() { return p }
-> function basicReturn() { return Promise.resolve(p) }
+> const p = new Promise((res, rej) => {
+>   res(1);
+> });
+> async function asyncReturn() {
+>   return p;
+> }
+> function basicReturn() {
+>   return Promise.resolve(p);
+> }
 >
 > console.log(p === basicReturn()); // true
->   console.log(p === asyncReturn()); // false
+> console.log(p === asyncReturn()); // false
 > ```
 
 ## import.meta
@@ -97,8 +103,8 @@ function myNew(ctor, ...args) {
   if (typeof ctor !== "function") throw new TypeError("");
   const obj = Object.create(ctor.prototype); // 第一步和第二步
   const res = ctor.apply(obj, args); // 第三步
-  if (res !== null && (typeof res === "object" || typeof res === "function")) return res;
+  if (res !== null && (typeof res === "object" || typeof res === "function"))
+    return res;
   else return obj;
 }
 ```
-

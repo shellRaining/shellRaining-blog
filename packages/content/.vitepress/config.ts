@@ -26,13 +26,6 @@ export default defineConfigWithTheme<ShellRainingBlogThemeConfig>({
         src: "/fonts/LXGWWenKai-Regular.ttf",
         dest: "/fonts/LXGWWenKai-Regular.woff2",
       },
-      {
-        displayName: "霞鹜文楷",
-        id: "LXGWWenKai",
-        weight: 600,
-        src: "/fonts/LXGWWenKai-Medium.ttf",
-        dest: "/fonts/LXGWWenKai-Medium.woff2",
-      },
     ],
   },
 });

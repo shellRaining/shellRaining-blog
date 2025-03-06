@@ -101,7 +101,15 @@ DOM 型 XSS 跟前两种 XSS 的区别：DOM 型 XSS 攻击中，取出和执行
 
 1. 受害者登录 `a.com`，并保留了登录凭证 Cookie
 1. 攻击者**引诱**受害者访问了 `b.com`
-1. `b.com` 向 `a.com` 发送了一个请求
+1. `b.com` 向 `a.com` 发送了一个请求，比如通过自动发送请求的图片、iframe 等
+
+   ```html
+   <img
+     src="https://a.com/api/transfer?from=victim&to=attacker&amount=1000"
+     style="display:none"
+   />
+   ```
+
 1. `a.com` 接收到请求后，对请求进行验证，并确认是受害者的凭证，误以为是受害者自己发送的请求
 1. `a.com` 以受害者的名义执行了 `act=xxx`
 1. 攻击完成，攻击者在受害者不知情的情况下，冒充受害者，让 `a.com` 执行了自己定义的操作
@@ -144,8 +152,8 @@ DOM 型 XSS 跟前两种 XSS 的区别：DOM 型 XSS 攻击中，取出和执行
 
 1. 同样 jwt 也可以缓解 CSRF 攻击，因为 jwt 并不是随着浏览器的请求自动发送的，而是需要手动设置在请求头中
 
-> [!tip]
-> `SameSite` 是用来防御 CSRF 攻击的，而 `HttpOnly` 是用来防御 XSS 攻击的。
+    > [!tip]
+    > `SameSite` 是用来防御 CSRF 攻击的，而 `HttpOnly` 是用来防御 XSS 攻击的。
 
 ## 参考
 
