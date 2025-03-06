@@ -60,21 +60,11 @@ export function generateFontFaceCSS(fonts: FontConfig[]): string {
     for (const font of fontConfigs) {
       // 使用 dest 路径的文件名作为引用
       const destFileName = path.basename(font.dest);
-      cssContent += `@font-face {
-  font-family: "${id}";
-  font-weight: ${font.weight};
-  font-display: swap;
-  src: url("/fonts/${destFileName}") format("woff2");
-}
-`;
+      cssContent += `@font-face { font-family: "${id}"; font-weight: ${font.weight}; font-display: swap; src: url("/fonts/${destFileName}") format("woff2"); } `;
     }
   }
 
-  cssContent += `
-:root {
-  --vp-font-family-base: ${Object.keys(fontGroups).join(", ")};
-}
-`;
+  cssContent += ` :root { --vp-font-family-base: ${Object.keys(fontGroups).join(", ")}; } `;
 
   return cssContent;
 }

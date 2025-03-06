@@ -15,7 +15,7 @@ const plugins = [
 
 // Use glob to find all entry files
 const entries = glob
-  .sync("./src/node/[!.]*.ts")
+  .sync("./src/node/**/[!.]*.ts")
   .filter((file) => !file.endsWith(".d.ts"))
   .map((file) => {
     const baseName = path.basename(file, ".ts");
