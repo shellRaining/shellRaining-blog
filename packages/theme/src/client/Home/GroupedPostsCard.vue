@@ -29,7 +29,7 @@ onMounted(() => {
   isMounted.value = true;
   const liEls = foldEl.value.querySelectorAll("li");
   liEls.forEach((el, idx) => {
-    el.style.transition = `all 1s ease-out ${String(idx * 0.1)}s`;
+    el.style.transition = `all 1s ease-out ${String(idx * 0.07)}s`;
   });
 });
 </script>

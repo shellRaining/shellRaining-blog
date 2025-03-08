@@ -43,6 +43,7 @@ async function toggleAppearance({ x, y }: MouseEvent) {
 
 <style scoped>
 .appearance-toggle {
+  z-index: 1000; /* 避免被 sidebar 遮挡 */
   position: fixed;
   left: 0;
   top: calc(var(--vp-nav-height) + 1rem);

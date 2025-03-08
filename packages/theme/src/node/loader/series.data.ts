@@ -7,7 +7,7 @@ type SeriesData = {
   /** 这篇文章的 URL */
   url: string;
 
-  /** 这篇文章在系列中的序号 */
+  /** 这篇文章在系列中的序号，以 1 为起始坐标 */
   part: number;
 };
 
