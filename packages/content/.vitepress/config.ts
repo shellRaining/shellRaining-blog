@@ -21,10 +21,10 @@ export default defineConfigWithTheme<ShellRainingBlogThemeConfig>({
     font: [
       {
         displayName: "霞鹜文楷",
-        id: "LXGWWenKai",
+        id: "LXGWWenKaiGBScreen",
         weight: 400,
-        src: "/fonts/LXGWWenKai-Regular.ttf",
-        dest: "/fonts/LXGWWenKai-Regular.woff2",
+        src: "/fonts/LXGWWenKaiGBScreen.ttf",
+        dest: "/fonts/LXGWWenKaiGBScreen.woff2",
       },
     ],
   },

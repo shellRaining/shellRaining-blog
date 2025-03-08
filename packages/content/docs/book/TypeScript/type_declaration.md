@@ -26,7 +26,9 @@ import type { SomeType } from "./some-module";
 > [!note]
 > 说到类型导入会被删除，我们可以想一下如果导入一个带有副作用的模块会发生什么
 >
-> ```typescript index.ts
+> ::: code-group
+>
+> ```typescript [index.ts]
 > import { Point } from "./point";
 > const p: Point = { x: 1, y: 2 };
 > if (globalThis.ctrl) {
@@ -34,13 +36,15 @@ import type { SomeType } from "./some-module";
 > }
 > ```
 >
-> ```typescript point.ts
+> ```typescript [point.ts]
 > globalThis.ctrl = true;
 > export interface Point {
 >   x: number;
 >   y: number;
 > }
 > ```
+>
+> :::
 >
 > 虽然 TypeScript 源代码中导入了 `point.ts` 文件，但是实际上编译后的代码中并没有导入 `point.js` 文件，因为 `Point` 只是作为一个类型被使用，就被莫名其妙的 treeshaking 了！
 > 如果非要这个副作用不可，可以使用 `import "./point"` 再导入一次，这是最简洁有效的方法，当然也可以设置 `tsconfig.json` 中的 `verbatimModuleSyntax` 字段，这是 TypeScript 5.0 引入的新选项。其规则更为简单，任何未使用类型修饰符的导入或导出都会保留，而使用了类型修饰符的内容则会被完全移除。

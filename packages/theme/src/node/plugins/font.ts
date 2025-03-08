@@ -40,17 +40,6 @@ export const fontPlugin = {
           fileName: dest,
           source: subsettedFontBuffer,
         });
-      siteConfig.site.head.push([
-        "link",
-        {
-          rel: "preload",
-          as: "font",
-          href: dest,
-          type: "font/woff2",
-          crossorigin: "anonymous",
-        },
-        "",
-      ]);
     }
 
     const fontFaceCSS = generateFontFaceCSS(userFontConfig);
