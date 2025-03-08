@@ -1,41 +1,12 @@
 <script lang="ts" setup>
 import type { ContentData } from "vitepress";
-import { useRouter, withBase } from "vitepress";
-import { onMounted, ref } from "vue";
+import { withBase } from "vitepress";
 
 defineProps<{ post: ContentData }>();
-
-const router = useRouter();
-
-function changeRoute(to: string) {
-  if (!document.startViewTransition) {
-    router.go(to);
-    return;
-  }
-  // to avoid animation confict with the global transition
-  const VPContentEl = document.querySelector(".VPContent")! as HTMLElement;
-  VPContentEl.style.setProperty("view-transition-name", "route");
-  const transition = document.startViewTransition(async () => {
-    await router.go(to);
-  });
-  transition.finished.then(() => {
-    VPContentEl.style.removeProperty("view-transition-name");
-  });
-}
-
-const viewTransitionsEnabled = ref(false);
-onMounted(() => {
-  viewTransitionsEnabled.value = "startViewTransition" in document;
-});
 </script>
 
 <template>
-  <a
-    class="post-title"
-    :class="viewTransitionsEnabled && 'vp-raw'"
-    :href="withBase(post.url)"
-    @click.prevent="changeRoute(post.url)"
-  >
+  <a class="post-title" :href="withBase(post.url)">
     {{ post.frontmatter.title }}
   </a>
 </template>
