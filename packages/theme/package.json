@@ -2,34 +2,7 @@
   "name": "@shellraining-blog/theme",
   "version": "1.0.0",
   "author": "shellRaining",
-  "exports": {
-    ".": "./src/index.ts",
-    "./config": "./dist/node/config.js"
-  },
-  "types": "./dist/node/config.d.ts",
   "main": "./src/index.ts",
-  "description": "shellRaining's blog theme",
-  "keywords": [
-    "vitepress",
-    "theme",
-    "blog"
-  ],
-  "license": "MIT",
-  "files": [
-    "dist",
-    "src",
-    "README.md"
-  ],
-  "scripts": {
-    "build": "rm -rf ./dist/ && rolldown -c ./rolldown.config.ts",
-    "build:watch": "rolldown -c ./rolldown.config.ts -w",
-    "prepublishOnly": "bun run build",
-    "test": "vitest"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "type": "module",
   "dependencies": {
     "@vueuse/core": "^10.11.1",
     "dayjs": "^1.11.13",
@@ -43,5 +16,36 @@
   },
   "peerDependencies": {
     "vitepress": "^v2.0.0-alpha.3"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./config": "./dist/node/config.js"
+  },
+  "description": "shellRaining's blog theme",
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ],
+  "keywords": [
+    "vitepress",
+    "theme",
+    "blog"
+  ],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "rm -rf ./dist/ && rolldown -c ./rolldown.config.ts",
+    "build:watch": "rolldown -c ./rolldown.config.ts -w",
+    "prepublishOnly": "bun run build",
+    "test": "vitest"
+  },
+  "type": "module",
+  "types": "./dist/node/config.d.ts",
+  "devDependencies": {
+    "rolldown": "^1.0.0-beta.3",
+    "rollup": "^4.34.9"
   }
 }

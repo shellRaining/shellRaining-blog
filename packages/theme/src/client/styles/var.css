@@ -16,10 +16,12 @@
 :root {
   --sr-c-text: #57534e;
   --sr-c-text-hover: #0c0a09;
+  --sr-c-text-muted: rgba(87, 83, 78, 0.7);
 }
 .dark {
   --sr-c-text: #a8a29e;
   --sr-c-text-hover: #fafaf9;
+  --sr-c-text-muted: rgba(168, 162, 158, 0.7);
 }
 
 /* border */

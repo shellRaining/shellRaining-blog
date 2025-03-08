@@ -6,7 +6,7 @@ import { headPlugin } from "./plugins/head";
 import { markdownPlugin } from "./plugins/markdown";
 
 export type ShellRainingBlogThemeConfig = DefaultTheme.Config & {
-  font: FontConfig[];
+  font?: FontConfig[];
 };
 
 export const shellRainingBlogConfig: UserConfig<ShellRainingBlogThemeConfig> = {
@@ -18,6 +18,14 @@ export const shellRainingBlogConfig: UserConfig<ShellRainingBlogThemeConfig> = {
     plugins: [fontPlugin],
   },
   head: headPlugin,
+  themeConfig: {
+    sidebar: [
+      {
+        text: "",
+        items: [],
+      },
+    ],
+  },
   sitemap: {
     hostname: "https://shellraining.xyz",
   },
@@ -25,5 +33,6 @@ export const shellRainingBlogConfig: UserConfig<ShellRainingBlogThemeConfig> = {
   async transformPageData(pageData, ctx) {
     const versions = await getVersions(pageData, ctx);
     pageData.versions = versions;
+    pageData.frontmatter.sidebar = !!pageData.frontmatter.series;
   },
 };
