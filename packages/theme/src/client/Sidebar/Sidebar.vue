@@ -66,7 +66,7 @@ const getItemStatus = (index: number) => {
   font-size: 18px;
   font-weight: 600;
   margin: 0;
-  color: var(--sr-c-text);
+  color: var(--sr-c-text-active);
 }
 
 .series-description {
@@ -125,21 +125,21 @@ const getItemStatus = (index: number) => {
 
 .series-text {
   font-size: 12px;
-  color: var(--sr-c-text);
+  color: var(--sr-c-small-text);
   transition: color 0.3s;
 }
 
 .series-link:hover .series-text {
-  color: var(--sr-c-text-hover);
+  color: var(--sr-c-small-text-hover);
 }
 
 .series-item.current .series-text {
   font-weight: 600;
-  color: var(--sr-c-text-hover);
+  color: var(--sr-c-small-text-active);
 }
 
 .series-item.unread .series-text {
-  color: var(--sr-c-text-muted);
+  color: var(--sr-c-small-text-muted);
 }
 
 @keyframes enterFromLeft {

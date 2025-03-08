@@ -17,11 +17,21 @@
   --sr-c-text: #57534e;
   --sr-c-text-hover: #0c0a09;
   --sr-c-text-muted: rgba(87, 83, 78, 0.7);
+  --sr-c-text-active: #0c0a09;
+  --sr-c-small-text: #222222; /* 小字体的基本颜色 - 深灰色，接近黑色 */
+  --sr-c-small-text-muted: #505050; /* 小字体的弱化颜色 - 中灰色 */
+  --sr-c-small-text-hover: #000000; /* 小字体悬停颜色 - 纯黑色 */
+  --sr-c-small-text-active: #000000; /* 小字体激活颜色 - 纯黑色 */
 }
 .dark {
   --sr-c-text: #a8a29e;
   --sr-c-text-hover: #fafaf9;
   --sr-c-text-muted: rgba(168, 162, 158, 0.7);
+  --sr-c-text-active: #fafaf9;
+  --sr-c-small-text: #e6e6e6; /* 小字体的基本颜色 - 亮灰色，接近白色 */
+  --sr-c-small-text-muted: #aaaaaa; /* 小字体的弱化颜色 - 中亮灰色 */
+  --sr-c-small-text-hover: #ffffff; /* 小字体悬停颜色 - 纯白色 */
+  --sr-c-small-text-active: #ffffff; /* 小字体激活颜色 - 纯白色 */
 }
 
 /* border */
