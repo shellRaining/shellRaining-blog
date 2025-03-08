@@ -3,6 +3,9 @@ title: TypeScript 配置管理
 tag:
   - book
   - typescript
+series:
+  name: TypeScript 入门与实战阅读笔记
+  part: 5
 date: 2024-07-04
 ---
 

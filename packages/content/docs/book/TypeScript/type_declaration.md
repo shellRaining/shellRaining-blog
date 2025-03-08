@@ -3,6 +3,9 @@ title: TypeScript 类型声明杂记
 tag:
   - book
   - typescript
+series:
+  name: TypeScript 入门与实战阅读笔记
+  part: 4
 date: 2025-02-26
 ---
 

@@ -3,6 +3,9 @@ title: TypeScript 高级类型
 tag:
   - book
   - typescript
+series:
+  name: TypeScript 入门与实战阅读笔记
+  part: 2
 date: 2024-07-05
 ---
 
