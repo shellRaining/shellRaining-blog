@@ -17,3 +17,4 @@ TODOs.md
 docs/private
 public/font
 *.woff2
+.markdownlint.yaml

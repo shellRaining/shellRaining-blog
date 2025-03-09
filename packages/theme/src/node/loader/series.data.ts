@@ -35,6 +35,14 @@ export default createContentLoader("docs/**/*.md", {
       collections[name].sort((a, b) => {
         return a.part - b.part;
       });
+
+      collections[name].forEach((item, idx) => {
+        if (idx !== item.part - 1) {
+          throw new Error(
+            `系列文章 ${name} 的序号不连续，期望是 ${idx + 1}，实际是 ${item.part}`,
+          );
+        }
+      });
     });
 
     return collections;
