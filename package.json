@@ -4,9 +4,9 @@
   "description": "",
   "type": "module",
   "scripts": {
-    "dev": "bun run -F '@shellraining-blog/content' dev",
-    "build": "bun run -F '@shellraining-blog/content' build",
-    "preview": "bun run -F '@shellraining-blog/content' preview"
+    "dev": "pnpm run -F '@shellraining-blog/content' dev",
+    "build": "pnpm run -F '@shellraining-blog/theme' build && pnpm run -F '@shellraining-blog/content' build",
+    "preview": "pnpm run -F '@shellraining-blog/content' preview"
   },
   "keywords": [],
   "author": "",
