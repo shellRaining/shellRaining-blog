@@ -1,0 +1,57 @@
+{
+  "name": "@shellraining/theme",
+  "version": "1.0.1",
+  "author": "shellRaining",
+  "main": "./src/index.ts",
+  "dependencies": {
+    "@vueuse/core": "^10.11.1",
+    "dayjs": "^1.11.13",
+    "markdown-it-mark": "^4.0.0",
+    "markdown-it-mathjax3": "^4.3.2",
+    "markdown-it-sub": "^2.0.0",
+    "markdown-it-sup": "^2.0.0",
+    "markdown-it-task-lists": "^2.1.1",
+    "subset-font": "^2.4.0",
+    "viewerjs": "^1.11.7",
+    "vue": "^3.5.13"
+  },
+  "peerDependencies": {
+    "vitepress": "^v2.0.0-alpha.3"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./config": "./dist/node/config.js"
+  },
+  "description": "shellRaining's blog theme",
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "tsconfig.json"
+  ],
+  "keywords": [
+    "vitepress",
+    "theme",
+    "blog"
+  ],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "rm -rf ./dist/ && rolldown -c ./rolldown.config.ts",
+    "build:watch": "rolldown -c ./rolldown.config.ts -w",
+    "test": "vitest"
+  },
+  "type": "module",
+  "types": "./dist/node/config.d.ts",
+  "devDependencies": {
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^12.1.2",
+    "@types/node": "^22.13.10",
+    "@types/subset-font": "^2.3.0",
+    "rolldown": "^1.0.0-beta.3",
+    "vite": "^6.2.1",
+    "vitest": "^3.0.8"
+  }
+}
