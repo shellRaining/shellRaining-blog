@@ -16,7 +16,7 @@ cfb: true
 2. 渲染函数调用产生 vnode
 3. 挂载 vnode，生成相应的 DOM 树
 
-编译模板这个事情这章节不讨论了，要涉及到一些编译原理的知识，主要看二三步。我们依次讲解 vnode，渲染函数，挂载这三个概念
+编译模板这个事情这章节不讨论了，要涉及到一些编译原理的知识，主要看二三步。我们依次讲解
 
 ## vnode
 
@@ -36,9 +36,9 @@ const vnode = {
 };
 ```
 
-这个 vnode 就对应着 `<div class="btn" style="width: 100px; height: 50px">hello</div>` 这个 DOM 节点。通过调用挂载函数就可以将他变成实际的 DOM 节点。
+这个 vnode 就对应着 `<div class="btn" style="width: 100px; height: 50px">hello</div>` 这个 DOM 节点。通过调用挂载函数就可以将他变成实际的 DOM 节点。但实际上一个 vnode 有更多更复杂的属性，更详细的字段信息，可以看 [vue 有关 vnode 的源码](https://github.com/vuejs/core/blob/fdbd02658301dd794fe0c84f0018d080a07fca9f/packages/runtime-core/src/vnode.ts#L160-L256)。
 
-但实际上一个 vnode 有更多更复杂的属性，更详细的字段信息，可以看 [vue 有关 vnode 的源码](https://github.com/vuejs/core/blob/fdbd02658301dd794fe0c84f0018d080a07fca9f/packages/runtime-core/src/vnode.ts#L160-L256)。这是因为 vnode 除了可以表示一个普通元素，还可以描述一个组件，比如下面这个 vnode，就对应着 `<custom-component msg="test" />` 这个组件
+除了可以表示一个普通元素，vnode 还可以描述组件，比如下面这个 vnode，就对应着 `<custom-component msg="test" />` 这个组件。除了**普通节点**和**组件节点**以外，还有其他一些节点类型，比方说文本节点，注释节点，更详细的节点类型可以看 [Vue 节点 type 类型注释](https://github.com/vuejs/core/blob/fdbd02658301dd794fe0c84f0018d080a07fca9f/packages/runtime-core/src/vnode.ts#L73-L84)
 
 ```javascript
 const CustomComponent = {};
@@ -50,13 +50,14 @@ const vnode = {
 };
 ```
 
-事实上除了**普通节点**和**组件节点**以外，还有其他一些节点类型，比方说文本节点，注释节点，更详细的节点类型可以看 [Vue 源码](https://github.com/vuejs/core/blob/fdbd02658301dd794fe0c84f0018d080a07fca9f/packages/runtime-core/src/vnode.ts#L73-L84)
-
 通过 vnode，可以将渲染过程抽象，从而更好的实现跨平台的特性。同时通过批量操作，还可以尽可能的减少 DOM 相关操作的耗时
+
+> [!tip]
+> 这里虽然提到了可以减少相关操作耗时，但是声明式的范式操作速度终究比不上命令式操作范式，这个霍春阳老师在他的书中有讲过
 
 ## 创建 vnode
 
-因为 vnode 大致可以分为普通节点和组件，因此相应的创建函数也有两个 `createBaseVNode` 和 `createVNode`，前者创建一个普通节点的 vnode，后者创建组件的 vnode
+因为 vnode 大致可以分为普通节点和组件，因此相应的创建函数也有两个 `createBaseVNode` 和 `createVNode`，前者创建一个普通节点的 vnode，后者创建组件或其他类型的 vnode
 
 ### createBaseVNode
 
@@ -154,7 +155,7 @@ function createBaseVNode(
 
 2. 通过一个 elif 分支来对子节点做一些标准化或者标记的操作（shapeFlag）
 
-   > [!tip]
+   > [!note]
    >
    > `shapeFlag` 是一个位标志（bitmap），同时编码了两种关键信息：
    >
@@ -396,6 +397,7 @@ const setupRenderEffect: SetupRenderEffectFn = (
       initialVNode.el = subTree.el;
       instance.isMounted = true;
     } else {
+      // 触发更新组件逻辑
     }
   };
 
@@ -533,72 +535,89 @@ patch 函数和 `setupRenderEffect` 一样，也有两个功能，当传入 n1 �
 #### 普通节点
 
 ```typescript
-const processElement = (
-  n1: VNode | null,
-  n2: VNode,
-  container: RendererElement,
-  anchor: RendererNode | null,
-  parentComponent: ComponentInternalInstance | null,
-  parentSuspense: SuspenseBoundary | null,
-  namespace: ElementNamespace,
-  slotScopeIds: string[] | null,
-  optimized: boolean,
-) => {
-  if (n1 == null) {
-    mountElement(...args);
-  } else {
-    patchElement(...args);
-  }
-};
+function baseCreateRenderer(options: RendererOptions) {
+  const {
+    insert: hostInsert,
+    remove: hostRemove,
+    patchProp: hostPatchProp,
+    createElement: hostCreateElement,
+    createText: hostCreateText,
+    createComment: hostCreateComment,
+    setText: hostSetText,
+    setElementText: hostSetElementText,
+    parentNode: hostParentNode,
+    nextSibling: hostNextSibling,
+    setScopeId: hostSetScopeId = NOOP,
+    insertStaticContent: hostInsertStaticContent,
+  } = options;
 
-const mountElement = (
-  vnode: VNode,
-  container: RendererElement,
-  anchor: RendererNode | null,
-  parentComponent: ComponentInternalInstance | null,
-  parentSuspense: SuspenseBoundary | null,
-  namespace: ElementNamespace,
-  slotScopeIds: string[] | null,
-  optimized: boolean,
-) => {
-  let el: RendererElement;
-  const { props, shapeFlag, transition, dirs } = vnode;
+  const processElement = (
+    n1: VNode | null,
+    n2: VNode,
+    container: RendererElement,
+    anchor: RendererNode | null,
+    parentComponent: ComponentInternalInstance | null,
+    parentSuspense: SuspenseBoundary | null,
+    namespace: ElementNamespace,
+    slotScopeIds: string[] | null,
+    optimized: boolean,
+  ) => {
+    if (n1 == null) {
+      mountElement(...args);
+    } else {
+      patchElement(...args);
+    }
+  };
 
-  el = vnode.el = hostCreateElement(
-    vnode.type as string,
-    namespace,
-    props && props.is,
-    props,
-  );
+  const mountElement = (
+    vnode: VNode,
+    container: RendererElement,
+    anchor: RendererNode | null,
+    parentComponent: ComponentInternalInstance | null,
+    parentSuspense: SuspenseBoundary | null,
+    namespace: ElementNamespace,
+    slotScopeIds: string[] | null,
+    optimized: boolean,
+  ) => {
+    let el: RendererElement;
+    const { props, shapeFlag, transition, dirs } = vnode;
 
-  // mount children first, since some props may rely on child content
-  // being already rendered, e.g. `<select value>`
-  if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
-    hostSetElementText(el, vnode.children as string);
-  } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
-    mountChildren(
-      vnode.children as VNodeArrayChildren,
-      el,
-      null,
-      parentComponent,
-      parentSuspense,
-      resolveChildrenNamespace(vnode, namespace),
-      slotScopeIds,
-      optimized,
+    el = vnode.el = hostCreateElement(
+      vnode.type as string,
+      namespace,
+      props && props.is,
+      props,
     );
-  }
 
-  // props
-  if (props) {
-    for (const key in props) {
-      if (key !== "value" && !isReservedProp(key)) {
-        hostPatchProp(el, key, null, props[key], namespace, parentComponent);
+    // mount children first, since some props may rely on child content
+    // being already rendered, e.g. `<select value>`
+    if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
+      hostSetElementText(el, vnode.children as string);
+    } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+      mountChildren(
+        vnode.children as VNodeArrayChildren,
+        el,
+        null,
+        parentComponent,
+        parentSuspense,
+        resolveChildrenNamespace(vnode, namespace),
+        slotScopeIds,
+        optimized,
+      );
+    }
+
+    // props
+    if (props) {
+      for (const key in props) {
+        if (key !== "value" && !isReservedProp(key)) {
+          hostPatchProp(el, key, null, props[key], namespace, parentComponent);
+        }
       }
     }
-  }
 
-  hostInsert(el, container, anchor);
-};
+    hostInsert(el, container, anchor);
+  };
+}
 ```
 
 普通节点通过 `processElement` -> `mountElement` 这个流程进行挂载，主要还是在 `mountElement` 中进行的，主要做了如下几件事
@@ -664,7 +683,66 @@ export const nodeOps: Omit<RendererOptions<Node, Element>, "patchProp"> = {
 };
 ```
 
-第二步代码中可以看到针对不同的 children 类型，采用不同的策略，文本节点使用 `hostSetElementText`，数组节点使用 `mountChildren`，这个函数会递归调用 `patch` 函数，来挂载子节点，之所以不使用 `mountElement`，是因为 subTree 的 children 也有可能是一个组件或者其他节点类型，如果使用 `mountElement` 就无法处理这部分流程
+第二步代码中可以看到针对不同的 children 类型，采用不同的策略，文本节点使用 `hostSetElementText`，数组节点使用 `mountChildren`，这个函数会递归调用 `patch` 函数，来挂载子节点，之所以不使用 `mountElement`，是因为 subTree 的 children 也有可能是一个组件或者其他节点类型，如果使用 `mountElement` 就无法处理这部分流程。这里构成了 DFS，并且可以看到，递归是在创建元素之后，挂载元素之前进行的，假设我们将组件或者元素想成一棵树，根节点的层级最高，那么我们会从高到低创建节点，然后从低到高将这些创建的节点插入到传入的容器中
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+  <rect width="800" height="400" fill="#f8f9fa" rx="10" ry="10"/>
+  <g stroke="#333" stroke-width="2" fill="none">
+    <path d="M400,80 L300,150" />
+    <path d="M400,80 L500,150" />
+    <path d="M300,150 L200,220" />
+    <path d="M300,150 L350,220" />
+    <path d="M500,150 L450,220" />
+    <path d="M500,150 L600,220" />
+    <path d="M200,220 L150,290" />
+    <path d="M200,220 L250,290" />
+    <path d="M600,220 L650,290" />
+  </g>
+  
+  <!-- 节点 -->
+  <g font-family="Arial, sans-serif" text-anchor="middle">
+    <circle cx="400" cy="80" r="30" fill="#42b883" />
+    <text x="400" y="85" fill="white" font-weight="bold">Root</text>
+    <text x="400" y="55" fill="#333" font-size="10">创建顺序: 1</text>
+    <text x="400" y="120" fill="#333" font-size="10">挂载顺序: 9</text>
+    <circle cx="300" cy="150" r="30" fill="#64b5f6" />
+    <text x="300" y="155" fill="white" font-weight="bold">Div A</text>
+    <text x="300" y="125" fill="#333" font-size="10">创建顺序: 2</text>
+    <text x="300" y="190" fill="#333" font-size="10">挂载顺序: 8</text>
+    <circle cx="500" cy="150" r="30" fill="#64b5f6" />
+    <text x="500" y="155" fill="white" font-weight="bold">Div B</text>
+    <text x="500" y="125" fill="#333" font-size="10">创建顺序: 6</text>
+    <text x="500" y="190" fill="#333" font-size="10">挂载顺序: 4</text>
+    <circle cx="200" cy="220" r="30" fill="#9575cd" />
+    <text x="200" y="225" fill="white" font-weight="bold">Comp</text>
+    <text x="200" y="195" fill="#333" font-size="10">创建顺序: 3</text>
+    <text x="200" y="260" fill="#333" font-size="10">挂载顺序: 7</text>
+    <circle cx="350" cy="220" r="30" fill="#9575cd" />
+    <text x="350" y="225" fill="white" font-weight="bold">Text</text>
+    <text x="350" y="195" fill="#333" font-size="10">创建顺序: 5</text>
+    <text x="350" y="260" fill="#333" font-size="10">挂载顺序: 6</text>
+    <circle cx="450" cy="220" r="30" fill="#9575cd" />
+    <text x="450" y="225" fill="white" font-weight="bold">Text</text>
+    <text x="450" y="195" fill="#333" font-size="10">创建顺序: 7</text>
+    <text x="450" y="260" fill="#333" font-size="10">挂载顺序: 3</text>
+    <circle cx="600" cy="220" r="30" fill="#9575cd" />
+    <text x="600" y="225" fill="white" font-weight="bold">Comp</text>
+    <text x="600" y="195" fill="#333" font-size="10">创建顺序: 8</text>
+    <text x="600" y="260" fill="#333" font-size="10">挂载顺序: 2</text>
+    <circle cx="150" cy="290" r="30" fill="#ef5350" />
+    <text x="150" y="295" fill="white" font-weight="bold">Span</text>
+    <text x="150" y="265" fill="#333" font-size="10">创建顺序: 4</text>
+    <text x="150" y="330" fill="#333" font-size="10">挂载顺序: 5</text>
+    <circle cx="250" cy="290" r="30" fill="#ef5350" />
+    <text x="250" y="295" fill="white" font-weight="bold">P</text>
+    <text x="250" y="265" fill="#333" font-size="10">创建顺序: 5</text>
+    <text x="250" y="330" fill="#333" font-size="10">挂载顺序: 4</text>
+    <circle cx="650" cy="290" r="30" fill="#ef5350" />
+    <text x="650" y="295" fill="white" font-weight="bold">Div</text>
+    <text x="650" y="265" fill="#333" font-size="10">创建顺序: 9</text>
+    <text x="650" y="330" fill="#333" font-size="10">挂载顺序: 1</text>
+  </g>
+</svg>
 
 ```typescript
 const mountChildren: MountChildrenFn = (
