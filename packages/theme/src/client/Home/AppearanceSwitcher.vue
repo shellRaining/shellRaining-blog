@@ -3,7 +3,6 @@ import { useDark, useToggle } from "@vueuse/core";
 import { nextTick } from "vue";
 
 const isDark = useDark({
-  storageKey: "shellRaining-blog-theme",
   initialValue: "dark",
 });
 const toggleDark = useToggle(isDark);

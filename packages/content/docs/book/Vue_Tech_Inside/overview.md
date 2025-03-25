@@ -9,7 +9,7 @@ series:
 date: 2025-03-13
 ---
 
-这个系列记录了我阅读《Vue 技术内幕》这本书的笔记，由于是 2022 年的版本，可能有部分内容过时，因此我会更多的结合最新的 Vue 版本（`v3.5.13`）代码一起阅读和实践
+这个系列记录了我阅读《Vue 技术内幕》这本书的笔记，由于该书是 2022 年发行，可能有部分内容过时，因此我会更多的结合最新的 Vue 版本（`v3.5.13`）代码一起阅读和实践
 
 ## Vue3 的优化
 
@@ -129,7 +129,8 @@ Vue 还引入了 [RFC](https://github.com/vuejs/rfcs) 机制来更好的把控�
 - esm-bundler：需要配合打包工具使用，这也是我们最常用的方式，一般通过包管理器下载到 `node_modules`，这种方式更适合 tree-shaking
 - cjs：表示该产物用来做服务端渲染，遵循 CommonJS 规范，可以通过 require 方式引入
 
-> [!tip] > `vue.esm-bundler.js` 和 `vue.runtime.esm-bundler.js` 二者之间差别可能很难理解，为什么后者在生产环境更常用呢？如果不携带模板编译器为什么能够将我们编写的 Vue sfc 编译成模板函数呢？
+> [!tip]
+> `vue.esm-bundler.js` 和 `vue.runtime.esm-bundler.js` 二者之间差别可能很难理解，为什么后者在生产环境更常用呢？如果不携带模板编译器为什么能够将我们编写的 Vue sfc 编译成模板函数呢？
 > 这是因为如果选用 bundler 的版本，我们通常会搭配 webpack 或者 vite 来进行预构建，这些工具通过利用编译器插件（如 `vue-loader`）来将 sfc 编译成渲染函数，不再需要在运行时编译模板，因此我们不需要在生产环境携带编译器
 
 ### 构建流程
@@ -296,7 +297,7 @@ export default {
 
 #### 输入输出配置
 
-Vue 的 `rollup.config.js` 并没有按照上述结构返回配置对象，而是类似于下面这样
+Vue 的 `rollup.config.js` 并没有直接按照上述结构返回配置对象，而是类似于下面这样，通过一个函数构造出配置对象
 
 ```javascript
 const packageConfigs = createConfig(format, outputConfigs[format]);
@@ -320,6 +321,7 @@ function createConfig(format, output, plugins = []) {
 这是极度精简后的代码，我们可以看到输入文件是根据 `format` 的值来决定的，如果编译的 format 要求不包含模板编译器，那么就使用 `src/runtime.ts`，否则使用 `src/index.ts`。输出文件的配置我这里省略了，但是其实没有什么大影响，因为都是一些针对 `sourceMap` 之类的配置，他的核心在这个函数传入的参数 output（即 `outputConfigs[format]`）
 
 ```javascript
+// 前面还有通过 package.json 获取 name 的代码，这里省略了
 const outputConfigs = {
   "esm-bundler": {
     file: resolve(`dist/${name}.esm-bundler.js`),

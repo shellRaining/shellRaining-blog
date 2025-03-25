@@ -53,7 +53,7 @@ const vnode = {
 通过 vnode，可以将渲染过程抽象，从而更好的实现跨平台的特性。同时通过批量操作，还可以尽可能的减少 DOM 相关操作的耗时
 
 > [!tip]
-> 这里虽然提到了可以减少相关操作耗时，但是声明式的范式操作速度终究比不上命令式操作范式，这个霍春阳老师在他的书中有讲过
+> 这里虽然提到了可以减少相关操作耗时，但是声明式的范式操作速度终究比不上命令式操作范式，霍春阳老师在他的书中有讲过
 
 ## 创建 vnode
 
@@ -335,6 +335,8 @@ export function render(_ctx, _cache, $props, $setup, $data, $options) {
 
 ## 组件的挂载
 
+这一小节的内容全都是 `runtime-core` 中的代码，准确来说都是 `runtime-core/src/renderer.ts` 中 `createBaseVNode` 函数的代码，主要用来创建一个 Vue 渲染器，并且我们前面提到，`runtime-core` 中的渲染器是与平台无关的，因此这里利用的都是抽象后的 DOM 操作函数
+
 ### 渲染组件为 subTree
 
 组件挂载的函数是 `mountComponent`，大致流程如下：
@@ -349,8 +351,11 @@ const mountComponent: MountComponentFn = (
   namespace: ElementNamespace,
   optimized,
 ) => {
-  const instance: ComponentInternalInstance = (initialVNode.component =
-    createComponentInstance(initialVNode, parentComponent, parentSuspense));
+  const instance = (initialVNode.component = createComponentInstance(
+    initialVNode,
+    parentComponent,
+    parentSuspense,
+  ));
   setupComponent(instance);
   setupRenderEffect(
     instance,
@@ -582,28 +587,14 @@ function baseCreateRenderer(options: RendererOptions) {
     let el: RendererElement;
     const { props, shapeFlag, transition, dirs } = vnode;
 
-    el = vnode.el = hostCreateElement(
-      vnode.type as string,
-      namespace,
-      props && props.is,
-      props,
-    );
+    el = vnode.el = hostCreateElement(...args);
 
     // mount children first, since some props may rely on child content
     // being already rendered, e.g. `<select value>`
     if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
       hostSetElementText(el, vnode.children as string);
     } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
-      mountChildren(
-        vnode.children as VNodeArrayChildren,
-        el,
-        null,
-        parentComponent,
-        parentSuspense,
-        resolveChildrenNamespace(vnode, namespace),
-        slotScopeIds,
-        optimized,
-      );
+      mountChildren(...args);
     }
 
     // props
@@ -685,64 +676,11 @@ export const nodeOps: Omit<RendererOptions<Node, Element>, "patchProp"> = {
 
 第二步代码中可以看到针对不同的 children 类型，采用不同的策略，文本节点使用 `hostSetElementText`，数组节点使用 `mountChildren`，这个函数会递归调用 `patch` 函数，来挂载子节点，之所以不使用 `mountElement`，是因为 subTree 的 children 也有可能是一个组件或者其他节点类型，如果使用 `mountElement` 就无法处理这部分流程。这里构成了 DFS，并且可以看到，递归是在创建元素之后，挂载元素之前进行的，假设我们将组件或者元素想成一棵树，根节点的层级最高，那么我们会从高到低创建节点，然后从低到高将这些创建的节点插入到传入的容器中
 
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
-  <rect width="800" height="400" fill="#f8f9fa" rx="10" ry="10"/>
-  <g stroke="#333" stroke-width="2" fill="none">
-    <path d="M400,80 L300,150" />
-    <path d="M400,80 L500,150" />
-    <path d="M300,150 L200,220" />
-    <path d="M300,150 L350,220" />
-    <path d="M500,150 L450,220" />
-    <path d="M500,150 L600,220" />
-    <path d="M200,220 L150,290" />
-    <path d="M200,220 L250,290" />
-    <path d="M600,220 L650,290" />
-  </g>
-  
-  <!-- 节点 -->
-  <g font-family="Arial, sans-serif" text-anchor="middle">
-    <circle cx="400" cy="80" r="30" fill="#42b883" />
-    <text x="400" y="85" fill="white" font-weight="bold">Root</text>
-    <text x="400" y="55" fill="#333" font-size="10">创建顺序: 1</text>
-    <text x="400" y="120" fill="#333" font-size="10">挂载顺序: 9</text>
-    <circle cx="300" cy="150" r="30" fill="#64b5f6" />
-    <text x="300" y="155" fill="white" font-weight="bold">Div A</text>
-    <text x="300" y="125" fill="#333" font-size="10">创建顺序: 2</text>
-    <text x="300" y="190" fill="#333" font-size="10">挂载顺序: 8</text>
-    <circle cx="500" cy="150" r="30" fill="#64b5f6" />
-    <text x="500" y="155" fill="white" font-weight="bold">Div B</text>
-    <text x="500" y="125" fill="#333" font-size="10">创建顺序: 6</text>
-    <text x="500" y="190" fill="#333" font-size="10">挂载顺序: 4</text>
-    <circle cx="200" cy="220" r="30" fill="#9575cd" />
-    <text x="200" y="225" fill="white" font-weight="bold">Comp</text>
-    <text x="200" y="195" fill="#333" font-size="10">创建顺序: 3</text>
-    <text x="200" y="260" fill="#333" font-size="10">挂载顺序: 7</text>
-    <circle cx="350" cy="220" r="30" fill="#9575cd" />
-    <text x="350" y="225" fill="white" font-weight="bold">Text</text>
-    <text x="350" y="195" fill="#333" font-size="10">创建顺序: 5</text>
-    <text x="350" y="260" fill="#333" font-size="10">挂载顺序: 6</text>
-    <circle cx="450" cy="220" r="30" fill="#9575cd" />
-    <text x="450" y="225" fill="white" font-weight="bold">Text</text>
-    <text x="450" y="195" fill="#333" font-size="10">创建顺序: 7</text>
-    <text x="450" y="260" fill="#333" font-size="10">挂载顺序: 3</text>
-    <circle cx="600" cy="220" r="30" fill="#9575cd" />
-    <text x="600" y="225" fill="white" font-weight="bold">Comp</text>
-    <text x="600" y="195" fill="#333" font-size="10">创建顺序: 8</text>
-    <text x="600" y="260" fill="#333" font-size="10">挂载顺序: 2</text>
-    <circle cx="150" cy="290" r="30" fill="#ef5350" />
-    <text x="150" y="295" fill="white" font-weight="bold">Span</text>
-    <text x="150" y="265" fill="#333" font-size="10">创建顺序: 4</text>
-    <text x="150" y="330" fill="#333" font-size="10">挂载顺序: 5</text>
-    <circle cx="250" cy="290" r="30" fill="#ef5350" />
-    <text x="250" y="295" fill="white" font-weight="bold">P</text>
-    <text x="250" y="265" fill="#333" font-size="10">创建顺序: 5</text>
-    <text x="250" y="330" fill="#333" font-size="10">挂载顺序: 4</text>
-    <circle cx="650" cy="290" r="30" fill="#ef5350" />
-    <text x="650" y="295" fill="white" font-weight="bold">Div</text>
-    <text x="650" y="265" fill="#333" font-size="10">创建顺序: 9</text>
-    <text x="650" y="330" fill="#333" font-size="10">挂载顺序: 1</text>
-  </g>
-</svg>
+<script setup>
+import MountOrder from "./MountOrder.vue";
+</script>
+
+<MountOrder />
 
 ```typescript
 const mountChildren: MountChildrenFn = (
@@ -766,6 +704,18 @@ const mountChildren: MountChildrenFn = (
 ```
 
 第三步和第四步都与前面有些重复，因此这里不做讲解
+
+综上所述，普通节点挂载代码可以精简成下面的样子
+
+```typescript
+function mountElement(vnode, container) {
+  const el = hostCreateElement(vnode.type);
+  for (const childEl of vnode.children) {
+    mountElement(childEl, el);
+  }
+  hostInsert(el, container);
+}
+```
 
 #### 组件节点
 
@@ -882,7 +832,7 @@ export function createAppAPI<HostElement>(
 }
 ```
 
-我们在调用 `createApp(App).mount("#app")` 的时候，就会最终调用这个 `createAppAPI` 的返回值，这里通过闭包等操作，简化了用户的输入参数（只需要挂载的位置即可），不需要传入包括 render 函数，组件对象，组件 props 等参数
+我们在调用 `createApp(App).mount("#app")` 的时候，就会最终调用这个 `createAppAPI` 的返回值的 `mount` 方法，这里通过闭包等操作，简化了用户的输入参数（只需要挂载的位置即可），不需要传入包括 render 函数，组件对象，组件 props 等参数
 
 ### 重写 mount
 
