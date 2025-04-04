@@ -5,15 +5,28 @@ tag:
 date: 2024-08-02
 ---
 
+## 过渡动画的本质
+
+过渡动画的本质是：在一段有限的时间内，快速而连续的播放一系列图片，通过人眼视觉暂留特点，形成动画效果，view transition API 还有其他一系列和动画相关的 API，都是基于这个本质开展工作的。同时注意前面提到的一系列图片，并不是随机选取的，而是由很多因素共同决定的，比如动画起始状态和终点状态，动画策略等，这里暂不赘述。
+
+下面有一个动画实现的示例，如果你缓慢的拖动进度条，你看到的是一张张静止的动画快照，如果快速拖动，那么这些快照就会组合形成动画
+
+<script setup>
+import Animation from "./Animation.vue"
+</script>
+<Animation></Animation>
+
+因此要想实现动画效果，需要先获取初始状态和终点状态的快照，然后根据不同的动画策略插值生成中间的状态，因此一个很自然的想法是，当我们试图通过 JavaScript 修改了 DOM 时，先给原先的页面拍一个快照，然后执行修改 DOM 的操作，再拍一个快照，然后根据这两个快照进行插值计算，得到中间态的快照，依次展示形成动画
+
 ## view transition 的生命周期
 
-1. 在 SPA 的情况下，给 `document.startViewTransition()` 传入一个更改 DOM 的回调函数会触发 view transition。
+1. 触发 viewtransition：给 `document.startViewTransition()` 传入一个更改 DOM 的回调函数会触发 view transition。
    一个活动的 view transition 会与一个 ViewTransition 实例相关联，这个实例就是上面提到的 `startViewTransition` 函数的返回值。该实例包含很多 promise，可以用来在一个 view transition 的不同阶段执行不同的钩子函数。我们命名这个实例为 `vt`（后续的讲解会用到）
-2. 捕获旧快照：浏览器会捕获**所有**声明了 `view-transition-name` 这个 css 属性的 DOM 元素，并且为他们分别设置一个快照。
+2. 捕获旧快照：浏览器会捕获**所有**声明了 `view-transition-name` 这个 css 属性的 DOM 元素，并且为他们分别设置一个快照（快照类似于图片，而不是实际的 DOM 元素）。
 3. 用户界面渲染暂停
 4. 被传入 `startViewTransition` 的回调函数被调用，用来更改 DOM
 5. 在回调函数执行成功后，`vt.updateCallbackDone` 这个 promise 会被兑现
-6. 在新的页面上，API 会捕获一个新快照
+6. 在新的页面上捕获一个新快照
 7. view transition 相关的伪元素被创建（后面会讲到，和动画执行相关）
 8. 用户界面解冻，展示伪元素
 9. `vt.ready` 这个 promise 被兑现，允许我们执行自定义的动画效果，而不是默认的渐入渐出效果。
@@ -26,7 +39,7 @@ date: 2024-08-02
 11. 前面创建的伪元素被移除
 12. 动画结束：结束后会兑现 `vt.finished` 这个 promise
 
-整个生命周期可以用一个动画来方便理解，详情可以看链接 [https://www.w3.org/TR/css-view-transitions-1/#lifecycle](https://www.w3.org/TR/css-view-transitions-1/#lifecycle)
+整个生命周期可以用一个动画来方便理解，详情可以看 [https://www.w3.org/TR/css-view-transitions-1/#lifecycle](https://www.w3.org/TR/css-view-transitions-1/#lifecycle)
 
 > 如果 page visibility 为 `hidden`，那么将不会执行动画效果
 >
