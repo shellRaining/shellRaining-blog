@@ -54,7 +54,7 @@ date: 2024-09-02
 
 ## 切换到远程分支
 
-有时候想要切换到远程的分支，并且在本地创建同名分支来跟踪该远程分支，可以输入以下命令
+有时候想要切换到远程的分支，并且在本地创建同名分支来跟踪该远程分支，可以输入以下任一命令
 
 - `git checkout --track origin/branch-name`：这个命令会自动创建一个与远程分支同名的本地分支，并设置好跟踪关系
 - `git switch branch-name`：如果远程分支存在而本地不存在，Git 会自动创建并跟踪远程分支
@@ -158,7 +158,7 @@ date: 2024-09-02
 
 ## 工作区忽略特定文件
 
-有时候我们想要更改一些文件，但不希望这些文件一直处于工作区，导致我们无法执行一些可能会清理工作区的指令，可以使用 Git 的 `assume-unchanged` 功能来解决
+有时候我们想要更改一些文件，但不希望这些文件一直处于工作区，导致我们无法执行一些可能会清理工作区的指令（比如 pull），可以使用 Git 的 `assume-unchanged` 功能来解决
 
 ```bash
 git update-index --assume-unchanged 文件名
@@ -175,6 +175,8 @@ git update-index --no-assume-unchanged 文件名
 ```bash
 git ls-files -v | grep '^h'
 ```
+
+想象这样一个场景，你对文件 A 做了 `assume-unchanged` 操作，假设远端有人修改了 A 的内容，pull 以后就会自动合并远端内容，如果不想让其合并，可以使用 `git update-index --skip-worktree filename` 来彻底忽略这个文件的更改，并且其他人的改动也不会被合并或者更新。如果要取消这个设置，可以使用 `git update-index --no-skip-worktree filename`
 
 ## 时间旅行
 
@@ -205,11 +207,3 @@ git commit -m "配置 Git LFS 追踪字体文件"
 git lfs install
 git lfs pull
 ```
-
-## 忽略目录下某些未跟踪的文件
-
-比方说我写博客的时候，经常有一些比较隐私的文章不想上传，同时又不希望使用 `.gitignore` 来手动忽略，可以使用 `.git/info/exclude` 文件来实现，他的语法和 `.gitignore` 是一样的
-
-如果这个文件已经跟踪，同时经常有一些不必要（或者不可避免触发）的文件更改，可以使用 `git update-index --skip-worktree filename` 来忽略这个文件的更改，他会完全忽略这个文件，并且其他人的改动也不会被合并或者更新。如果要取消这个设置，可以使用 `git update-index --no-skip-worktree filename`
-
-如果希望自己本地的改动不被合并，但是其他人的改动可以被合并，可以使用 `git update-index --assume-unchanged filename` 来实现，如果要取消这个设置，可以使用 `git update-index --no-assume-unchanged filename`
