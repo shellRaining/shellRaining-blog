@@ -1,28 +1,40 @@
 import typescript from "@rollup/plugin-typescript";
 import terser from "@rollup/plugin-terser";
 import { defineConfig, type RolldownOptions } from "rolldown";
+import pkg from "./package.json";
+import fs from "fs";
+import path from "path";
 
 // Define external dependencies
 const external = [
   "fs",
   "path",
   "child_process",
-  "vitepress",
-  "subset-font",
-  "dayjs",
-  "markdown-it-mark",
-  "markdown-it-sup",
-  "markdown-it-sub",
-  "markdown-it-task-lists",
+  ...Object.keys(pkg.dependencies || {}),
+  ...Object.keys(pkg.peerDependencies || {}),
 ];
+
+// Environment detection
+const isDev = process.env.NODE_ENV === "development";
 
 // Common plugins
 const plugins = [
   typescript({
     tsconfig: "./src/node/tsconfig.json",
   }),
-  terser({ format: { comments: false } }),
+  ...(!isDev ? [terser({ format: { comments: false } })] : []),
 ];
+
+// Auto-discover plugins
+const pluginsDir = "src/node/plugins";
+const pluginInputs = fs
+  .readdirSync(pluginsDir)
+  .filter((file) => file.endsWith(".ts"))
+  .reduce((acc, file) => {
+    const name = path.basename(file, ".ts");
+    acc[`plugins/${name}`] = `./${path.join(pluginsDir, file)}`;
+    return acc;
+  }, {} as Record<string, string>);
 
 // Build configuration for the main modules
 const mainConfig = {
@@ -31,10 +43,7 @@ const mainConfig = {
     fontmin: "./src/node/fontmin.ts",
     injectVersion: "./src/node/injectVersion.ts",
 
-    // Plugin modules
-    "plugins/font": "./src/node/plugins/font.ts",
-    "plugins/head": "./src/node/plugins/head.ts",
-    "plugins/markdown": "./src/node/plugins/markdown.ts",
+    ...pluginInputs,
 
     // Main config
     config: "./src/node/config.ts",

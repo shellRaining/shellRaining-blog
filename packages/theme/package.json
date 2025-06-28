@@ -6,6 +6,8 @@
   "dependencies": {
     "@vueuse/core": "^10.11.1",
     "dayjs": "^1.11.13",
+    "feed": "^5.1.0",
+    "gray-matter": "^4.0.3",
     "markdown-it-mark": "^4.0.0",
     "markdown-it-mathjax3": "^4.3.2",
     "markdown-it-sub": "^2.0.0",
@@ -13,6 +15,7 @@
     "markdown-it-task-lists": "^2.1.1",
     "subset-font": "^2.4.0",
     "viewerjs": "^1.11.7",
+    "vitepress-plugin-rss": "^0.3.1",
     "vue": "^3.5.13"
   },
   "peerDependencies": {
@@ -39,8 +42,9 @@
     "access": "public"
   },
   "scripts": {
-    "build": "rm -rf ./dist/ && rolldown -c ./rolldown.config.ts",
+    "build": "rm -rf ./dist/ && NODE_ENV=production rolldown -c ./rolldown.config.ts",
     "build:watch": "rolldown -c ./rolldown.config.ts -w",
+    "dev": "NODE_ENV=development rolldown -c ./rolldown.config.ts -w",
     "test": "vitest"
   },
   "type": "module",
