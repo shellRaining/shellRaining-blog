@@ -47,4 +47,4 @@ export default createContentLoader("docs/**/*.md", {
 
     return collections;
   },
-});
+}) as any;

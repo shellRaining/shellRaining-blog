@@ -8,7 +8,6 @@ import { join } from "path";
 import { basename, dirname } from "path";
 import { unlinkSync } from "fs";
 import type { HeadConfig, SiteConfig } from "vitepress";
-import type { Plugin } from "vite";
 
 export const fontPlugin = {
   name: "vite-plugin-blog-fontmin",
@@ -23,7 +22,7 @@ export const fontPlugin = {
     const allChars = getAllChars(siteConfig.pages);
     const text = Array.from(allChars).join("");
 
-    const appendHeads: HeadConfig[] = []
+    const appendHeads: HeadConfig[] = [];
     for (const fontConfig of userFontConfig) {
       const src = fontConfig.src.replace(/^\/+/, ""); // 去掉开头的斜杠
       const dest = fontConfig.dest.replace(/^\/+/, "");
@@ -79,4 +78,4 @@ export const fontPlugin = {
       unlinkSync(copyedFontPath);
     }
   },
-} satisfies Plugin;
+} as any;
