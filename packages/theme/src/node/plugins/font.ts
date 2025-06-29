@@ -8,6 +8,7 @@ import { join } from "path";
 import { basename, dirname } from "path";
 import { unlinkSync } from "fs";
 import type { HeadConfig, SiteConfig } from "vitepress";
+import type { PluginOption } from "vite";
 
 export const fontPlugin = {
   name: "vite-plugin-blog-fontmin",
@@ -78,4 +79,4 @@ export const fontPlugin = {
       unlinkSync(copyedFontPath);
     }
   },
-} as any;
+} satisfies PluginOption as any;

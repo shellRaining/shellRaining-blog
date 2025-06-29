@@ -2,7 +2,7 @@ import type { HeadConfig } from "vitepress";
 
 const APPEARANCE_KEY = "shellRaining-blog-theme";
 
-export const headPlugin: HeadConfig[] = [
+export const headConf: HeadConfig[] = [
   [
     "link",
     {

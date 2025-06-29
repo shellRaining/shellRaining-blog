@@ -2,8 +2,8 @@ import type { DefaultTheme, UserConfig } from "vitepress";
 import type { FontConfig } from "./fontmin";
 import { getVersions } from "./injectVersion";
 import { fontPlugin } from "./plugins/font";
-import { headPlugin } from "./plugins/head";
-import { markdownPlugin } from "./plugins/markdown";
+import { headConf } from "./conf/head";
+import { markdownConf } from "./conf/markdown";
 import { RssPlugin } from "./plugins/rss";
 
 export type ShellRainingBlogThemeConfig = DefaultTheme.Config & {
@@ -26,7 +26,7 @@ export const shellRainingBlogConfig: UserConfig<ShellRainingBlogThemeConfig> = {
     },
     plugins: [fontPlugin, RssPlugin(RSS)],
   },
-  head: headPlugin,
+  head: headConf,
   themeConfig: {
     socialLinks: [],
     sidebar: [
@@ -39,7 +39,7 @@ export const shellRainingBlogConfig: UserConfig<ShellRainingBlogThemeConfig> = {
   sitemap: {
     hostname: baseUrl,
   },
-  markdown: markdownPlugin,
+  markdown: markdownConf,
   async transformPageData(pageData, ctx) {
     const versions = await getVersions(pageData, ctx);
     pageData.versions = versions;

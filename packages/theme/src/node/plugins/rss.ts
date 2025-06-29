@@ -170,7 +170,7 @@ export async function genFeed(config: SiteConfig, rssOptions: RSSOptions) {
   const RSSFilename = filename || "feed.rss";
   const RSSFilepath = path.join(config.outDir, RSSFilename);
   await fs.promises.writeFile(RSSFilepath, feed.rss2());
-  console.log("🎉 RSS generated", RSSFilename);
+  console.log("\n🎉 RSS generated", RSSFilename);
 }
 
 // Logic from index.ts
@@ -183,7 +183,7 @@ export function RssPlugin(rssOptions: RSSOptions): PluginOption {
       config = resolvedConfig;
     },
     async buildEnd() {
-      if (config?.vitepress) {
+      if (config?.vitepress && config.build.ssr) {
         await genFeed(config.vitepress, rssOptions);
       }
     },

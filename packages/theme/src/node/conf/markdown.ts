@@ -4,7 +4,7 @@ import markdownItSub from "markdown-it-sub";
 import markdownItTaskLists from "markdown-it-task-lists";
 import type { MarkdownOptions } from "vitepress";
 
-export const markdownPlugin: MarkdownOptions = {
+export const markdownConf: MarkdownOptions = {
   math: true,
   config(md) {
     md.use(markdownItMark);
