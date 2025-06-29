@@ -1,8 +1,8 @@
-import { defineConfigWithTheme } from "vitepress";
+import { defineConfig } from "vitepress";
 import { shellRainingBlogConfig } from "@shellraining/theme/config";
 import type { ShellRainingBlogThemeConfig } from "@shellraining/theme/config";
 
-export default defineConfigWithTheme<ShellRainingBlogThemeConfig>({
+export default defineConfig<ShellRainingBlogThemeConfig>({
   extends: shellRainingBlogConfig,
   lang: "zh-cn",
   title: "shellRaining's blog",

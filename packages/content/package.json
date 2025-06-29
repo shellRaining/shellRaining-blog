@@ -12,11 +12,6 @@
   "author": "shellRaining",
   "license": "ISC",
   "dependencies": {
-    "@shellraining/theme": "workspace:*",
-    "@vueuse/core": "^10.11.1",
-    "vue": "^3.5.17"
-  },
-  "peerDependencies": {
-    "vitepress": "^v2.0.0-alpha.3"
+    "@shellraining/theme": "workspace:*"
   }
 }

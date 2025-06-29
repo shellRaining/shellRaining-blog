@@ -4,7 +4,6 @@
   "author": "shellRaining",
   "main": "./src/index.ts",
   "dependencies": {
-    "@vueuse/core": "^10.11.1",
     "dayjs": "^1.11.13",
     "feed": "^5.1.0",
     "gray-matter": "^4.0.3",
@@ -14,12 +13,12 @@
     "markdown-it-sup": "^2.0.0",
     "markdown-it-task-lists": "^2.1.1",
     "subset-font": "^2.4.0",
-    "viewerjs": "^1.11.7",
-    "vitepress-plugin-rss": "^0.3.1",
-    "vue": "^3.5.13"
+    "viewerjs": "^1.11.7"
   },
   "peerDependencies": {
-    "vitepress": "^v2.0.0-alpha.3"
+    "vue": "^3.0.0",
+    "vitepress": "^2.0.0-alpha.3",
+    "@vueuse/core": "^10.0.0"
   },
   "exports": {
     ".": "./src/index.ts",
@@ -51,11 +50,11 @@
   "types": "./dist/node/config.d.ts",
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.4",
-    "@rollup/plugin-typescript": "^12.1.2",
-    "@types/node": "^22.13.10",
+    "@rollup/plugin-typescript": "^12.1.4",
+    "@types/node": "^22.15.34",
     "@types/subset-font": "^2.3.0",
-    "rolldown": "^1.0.0-beta.3",
-    "vite": "^6.2.1",
-    "vitest": "^3.0.8"
+    "rolldown": "1.0.0-beta.21",
+    "vite": "^6.3.5",
+    "vitest": "^3.2.4"
   }
 }
