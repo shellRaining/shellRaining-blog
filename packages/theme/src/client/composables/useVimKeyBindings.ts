@@ -156,7 +156,12 @@ export function useVimKeyBindings() {
       '[rel="next"]',
     ) as HTMLAnchorElement;
 
-    return { prevLink, nextLink };
+    return {
+      prevLink,
+      nextLink,
+      hasPrev: !!prevLink,
+      hasNext: !!nextLink,
+    };
   };
 
   // Navigation handlers
@@ -227,21 +232,27 @@ export function useVimKeyBindings() {
   };
 
   const navigateNextSeries = () => {
-    if (pageType.value !== "article") return;
+    if (pageType.value !== "article") return false;
 
     const seriesInfo = getSeriesInfo();
-    if (seriesInfo?.nextLink) {
+    if (seriesInfo?.hasNext && seriesInfo.nextLink) {
+      // Use location.href for proper navigation
       window.location.href = seriesInfo.nextLink.href;
+      return true;
     }
+    return false;
   };
 
   const navigatePrevSeries = () => {
-    if (pageType.value !== "article") return;
+    if (pageType.value !== "article") return false;
 
     const seriesInfo = getSeriesInfo();
-    if (seriesInfo?.prevLink) {
+    if (seriesInfo?.hasPrev && seriesInfo.prevLink) {
+      // Use location.href for proper navigation
       window.location.href = seriesInfo.prevLink.href;
+      return true;
     }
+    return false;
   };
 
   // Scrolling handlers for articles
@@ -473,7 +484,7 @@ export function useVimKeyBindings() {
 
     // Handle context-specific key bindings using config
     if (pageType.value === "home") {
-      // Homepage navigation
+      // Homepage navigation - use j/k for article navigation
       if (KeyUtils.matchesBinding(event, config.value.navigation.down)) {
         event.preventDefault();
         navigateDown();
@@ -485,7 +496,7 @@ export function useVimKeyBindings() {
         return;
       }
     } else if (pageType.value === "article") {
-      // Article scrolling
+      // Article scrolling - use j/k for line scrolling
       if (KeyUtils.matchesBinding(event, config.value.scrolling.lineDown)) {
         event.preventDefault();
         scrollLineDown();
@@ -494,6 +505,26 @@ export function useVimKeyBindings() {
       if (KeyUtils.matchesBinding(event, config.value.scrolling.lineUp)) {
         event.preventDefault();
         scrollLineUp();
+        return;
+      }
+
+      // Series navigation - use n/p for next/prev article in series
+      if (KeyUtils.matchesBinding(event, config.value.navigation.nextSeries)) {
+        event.preventDefault();
+        const result = navigateNextSeries();
+        if (!result) {
+          // Optional: Provide visual feedback when no next article exists
+          console.log("No next article in series");
+        }
+        return;
+      }
+      if (KeyUtils.matchesBinding(event, config.value.navigation.prevSeries)) {
+        event.preventDefault();
+        const result = navigatePrevSeries();
+        if (!result) {
+          // Optional: Provide visual feedback when no previous article exists
+          console.log("No previous article in series");
+        }
         return;
       }
     }
@@ -508,18 +539,6 @@ export function useVimKeyBindings() {
     if (KeyUtils.matchesBinding(event, config.value.navigation.back)) {
       event.preventDefault();
       goBack();
-      return;
-    }
-
-    if (KeyUtils.matchesBinding(event, config.value.navigation.nextSeries)) {
-      event.preventDefault();
-      navigateNextSeries();
-      return;
-    }
-
-    if (KeyUtils.matchesBinding(event, config.value.navigation.prevSeries)) {
-      event.preventDefault();
-      navigatePrevSeries();
       return;
     }
 

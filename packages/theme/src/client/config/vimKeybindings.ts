@@ -38,8 +38,8 @@ export const DEFAULT_VIM_CONFIG: VimKeyBindingsConfig = {
     prevSeries: "p",
   },
   scrolling: {
-    lineUp: "k",
-    lineDown: "j",
+    lineUp: "k", // Same as navigation up, but context-dependent
+    lineDown: "j", // Same as navigation down, but context-dependent
     top: "gg",
     bottom: "G",
     halfPageUp: "ctrl+u",

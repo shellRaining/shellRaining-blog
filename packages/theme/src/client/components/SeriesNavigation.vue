@@ -15,8 +15,20 @@ const currentSeries = computed(() => {
 const currentIndex = computed(() => {
   if (!currentSeries.value) return -1;
 
-  const currentUrl = page.value.relativePath.replace(/\.md$/, ".html");
-  return currentSeries.value.findIndex((item) => item.url === currentUrl);
+  // Create a comprehensive URL matcher that handles VitePress URL variations
+  const matchUrl = (itemUrl: string, currentPath: string): boolean => {
+    // Normalize both URLs for comparison
+    const normalize = (url: string) => url.replace(/^\/+/, '').replace(/\.html$/, '').replace(/\.md$/, '');
+    
+    const normalizedItem = normalize(itemUrl);
+    const normalizedCurrent = normalize(currentPath);
+    
+    return normalizedItem === normalizedCurrent;
+  };
+
+  const currentPath = page.value.relativePath;
+  
+  return currentSeries.value.findIndex((item) => matchUrl(item.url, currentPath));
 });
 
 const prevArticle = computed(() => {
@@ -50,11 +62,12 @@ const nextArticle = computed(() => {
         :href="withBase(prevArticle.url)"
         class="series-btn prev"
         rel="prev"
-        :title="`Previous: ${prevArticle.title}`"
+        :title="`Previous: ${prevArticle.title} (vim: p)`"
+        :aria-label="`Navigate to previous article: ${prevArticle.title}`"
       >
         <span class="btn-icon">←</span>
         <div class="btn-content">
-          <span class="btn-label">Previous</span>
+          <span class="btn-label">Previous <kbd>p</kbd></span>
           <span class="btn-title">{{ prevArticle.title }}</span>
         </div>
       </a>
@@ -64,10 +77,11 @@ const nextArticle = computed(() => {
         :href="withBase(nextArticle.url)"
         class="series-btn next"
         rel="next"
-        :title="`Next: ${nextArticle.title}`"
+        :title="`Next: ${nextArticle.title} (vim: n)`"
+        :aria-label="`Navigate to next article: ${nextArticle.title}`"
       >
         <div class="btn-content">
-          <span class="btn-label">Next</span>
+          <span class="btn-label">Next <kbd>n</kbd></span>
           <span class="btn-title">{{ nextArticle.title }}</span>
         </div>
         <span class="btn-icon">→</span>
@@ -165,6 +179,18 @@ const nextArticle = computed(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+kbd {
+  display: inline-block;
+  padding: 0.1rem 0.3rem;
+  font-size: 0.6rem;
+  font-family: var(--vp-font-family-mono);
+  background: var(--vp-c-bg-mute);
+  border: 1px solid var(--vp-c-border);
+  border-radius: 3px;
+  margin-left: 0.25rem;
+  color: var(--vp-c-text-2);
 }
 
 @media (max-width: 640px) {
