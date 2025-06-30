@@ -150,7 +150,7 @@ export function useVimKeyBindings() {
 
   const goBack = () => {
     if (pageType.value === "article") {
-      window.history.back();
+      window.location.href = "/";
     }
   };
 
@@ -364,7 +364,7 @@ export function useVimKeyBindings() {
           return;
         }
       }
-      
+
       if (event.key === "G") {
         event.preventDefault();
         scrollToBottom();
