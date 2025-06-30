@@ -19,7 +19,8 @@ export function useVimKeyBindings() {
 
   // State
   const isActive = ref(true);
-  const selectedIndex = ref(0);
+  const selectedIndex = ref(-1); // Start with no selection
+  const isSelectionActive = ref(false); // Track if user has activated selection
   const showHelp = ref(false);
   const config = ref<VimKeyBindingsConfig>(loadVimConfig());
   const lastKeyPressed = ref("");
@@ -41,6 +42,67 @@ export function useVimKeyBindings() {
   const getSelectableElements = (): HTMLElement[] => {
     const postItems = document.querySelectorAll(".post-title");
     return Array.from(postItems) as HTMLElement[];
+  };
+
+  // Find the most suitable article within viewport
+  const findBestArticleInViewport = (direction: "up" | "down"): number => {
+    const elements = getSelectableElements();
+    if (elements.length === 0) return -1;
+
+    const viewportTop = window.scrollY;
+    const viewportBottom = viewportTop + window.innerHeight;
+    const viewportCenter = viewportTop + window.innerHeight / 2;
+
+    // Find articles that are at least partially visible
+    const visibleArticles = elements
+      .map((element, index) => {
+        const rect = element.getBoundingClientRect();
+        const elementTop = rect.top + window.scrollY;
+        const elementBottom = elementTop + rect.height;
+        
+        // Check if element is at least partially visible
+        const isVisible = elementBottom > viewportTop && elementTop < viewportBottom;
+        
+        if (!isVisible) return null;
+
+        // Calculate how much of the element is in viewport
+        const visibleTop = Math.max(elementTop, viewportTop);
+        const visibleBottom = Math.min(elementBottom, viewportBottom);
+        const visibleHeight = visibleBottom - visibleTop;
+        const visibilityRatio = visibleHeight / rect.height;
+
+        // Calculate distance from viewport center
+        const elementCenter = elementTop + rect.height / 2;
+        const distanceFromCenter = Math.abs(elementCenter - viewportCenter);
+
+        return {
+          index,
+          element,
+          elementTop,
+          elementBottom,
+          visibilityRatio,
+          distanceFromCenter,
+          elementCenter,
+        };
+      })
+      .filter(item => item !== null);
+
+    if (visibleArticles.length === 0) {
+      // No articles in viewport, return first or last based on direction
+      return direction === "down" ? 0 : elements.length - 1;
+    }
+
+    // Sort by visibility ratio (more visible = better) and distance from center (closer = better)
+    visibleArticles.sort((a, b) => {
+      // Prioritize articles that are more visible
+      if (Math.abs(a.visibilityRatio - b.visibilityRatio) > 0.1) {
+        return b.visibilityRatio - a.visibilityRatio;
+      }
+      // If visibility is similar, prefer the one closer to center
+      return a.distanceFromCenter - b.distanceFromCenter;
+    });
+
+    return visibleArticles[0].index;
   };
 
   // Get series navigation info
@@ -65,7 +127,15 @@ export function useVimKeyBindings() {
     const elements = getSelectableElements();
     if (elements.length === 0) return;
 
-    selectedIndex.value = Math.max(0, selectedIndex.value - 1);
+    // If selection is not active, find best article in viewport
+    if (!isSelectionActive.value) {
+      selectedIndex.value = findBestArticleInViewport("up");
+      isSelectionActive.value = true;
+    } else {
+      // Normal navigation
+      selectedIndex.value = Math.max(0, selectedIndex.value - 1);
+    }
+    
     highlightSelected();
   };
 
@@ -75,10 +145,18 @@ export function useVimKeyBindings() {
     const elements = getSelectableElements();
     if (elements.length === 0) return;
 
-    selectedIndex.value = Math.min(
-      elements.length - 1,
-      selectedIndex.value + 1,
-    );
+    // If selection is not active, find best article in viewport
+    if (!isSelectionActive.value) {
+      selectedIndex.value = findBestArticleInViewport("down");
+      isSelectionActive.value = true;
+    } else {
+      // Normal navigation
+      selectedIndex.value = Math.min(
+        elements.length - 1,
+        selectedIndex.value + 1,
+      );
+    }
+    
     highlightSelected();
   };
 
@@ -86,8 +164,16 @@ export function useVimKeyBindings() {
     if (pageType.value !== "home") return;
 
     const elements = getSelectableElements();
-    const currentElement = elements[selectedIndex.value];
+    
+    // If no selection is active, activate selection first
+    if (!isSelectionActive.value) {
+      selectedIndex.value = findBestArticleInViewport("down");
+      isSelectionActive.value = true;
+      highlightSelected();
+      return;
+    }
 
+    const currentElement = elements[selectedIndex.value];
     if (currentElement) {
       currentElement.click();
     }
@@ -166,11 +252,13 @@ export function useVimKeyBindings() {
     // Remove previous highlights
     elements.forEach((el) => el.classList.remove("vim-selected"));
 
-    // Add highlight to current selection
-    const currentElement = elements[selectedIndex.value];
-    if (currentElement) {
-      currentElement.classList.add("vim-selected");
-      currentElement.scrollIntoView({ behavior: "smooth", block: "center" });
+    // Add highlight to current selection if selection is active and valid
+    if (isSelectionActive.value && selectedIndex.value >= 0) {
+      const currentElement = elements[selectedIndex.value];
+      if (currentElement) {
+        currentElement.classList.add("vim-selected");
+        currentElement.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
     }
   };
 
@@ -402,8 +490,12 @@ export function useVimKeyBindings() {
   // Initialize selection on route change
   const initializeSelection = () => {
     if (pageType.value === "home") {
-      selectedIndex.value = 0;
-      highlightSelected();
+      // Reset selection state - no initial selection
+      selectedIndex.value = -1;
+      isSelectionActive.value = false;
+      // Clear any existing highlights
+      const elements = getSelectableElements();
+      elements.forEach((el) => el.classList.remove("vim-selected"));
     }
   };
 
@@ -424,6 +516,7 @@ export function useVimKeyBindings() {
     // State
     isActive,
     selectedIndex,
+    isSelectionActive,
     showHelp,
     config,
     pageType,
