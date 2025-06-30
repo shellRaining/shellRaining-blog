@@ -272,6 +272,15 @@ export function useVimKeyBindings() {
       return;
     }
 
+    // When help modal is open, only allow help toggle key
+    if (showHelp.value) {
+      if (KeyUtils.matchesBinding(event, config.value.panels.help)) {
+        event.preventDefault();
+        toggleHelp();
+      }
+      return;
+    }
+
     // Handle Ctrl combinations using config
     if (event.ctrlKey) {
       if (KeyUtils.matchesBinding(event, config.value.scrolling.halfPageUp)) {

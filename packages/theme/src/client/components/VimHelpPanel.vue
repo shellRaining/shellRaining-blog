@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import type { VimKeyBinding } from "../composables/useVimKeyBindings";
 
 const props = defineProps<{
@@ -10,6 +10,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   close: [];
 }>();
+
+const overlayRef = ref<HTMLElement>();
 
 const groupedBindings = computed(() => {
   const groups = {
@@ -33,11 +35,37 @@ const groupedBindings = computed(() => {
   return groups;
 });
 
-const handleEscape = (event: KeyboardEvent) => {
+const handleKeyDown = (event: KeyboardEvent) => {
+  // Prevent all key events from propagating when modal is open
+  event.stopPropagation();
+  
   if (event.key === "Escape") {
+    event.preventDefault();
     emit("close");
   }
 };
+
+// Focus management
+const focusModal = async () => {
+  await nextTick();
+  if (overlayRef.value) {
+    overlayRef.value.focus();
+  }
+};
+
+// Watch for visibility changes
+watch(() => props.visible, (newVisible) => {
+  if (newVisible) {
+    document.addEventListener("keydown", handleKeyDown, true);
+    focusModal();
+  } else {
+    document.removeEventListener("keydown", handleKeyDown, true);
+  }
+});
+
+onUnmounted(() => {
+  document.removeEventListener("keydown", handleKeyDown, true);
+});
 </script>
 
 <template>
@@ -45,9 +73,9 @@ const handleEscape = (event: KeyboardEvent) => {
     <Transition name="modal">
       <div
         v-if="visible"
+        ref="overlayRef"
         class="vim-help-overlay"
         @click="$emit('close')"
-        @keydown="handleEscape"
         tabindex="0"
       >
         <div class="vim-help-panel" @click.stop>

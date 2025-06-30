@@ -2,7 +2,6 @@
 import type { ContentData } from "vitepress";
 import { data } from "../../node/loader/posts.data";
 import GroupedPostsCard from "./GroupedPostsCard.vue";
-import VimHelpPanel from "../components/VimHelpPanel.vue";
 import VimIndicator from "../components/VimIndicator.vue";
 import { useVimKeyBindings } from "../composables/useVimKeyBindings";
 import dayjs from "dayjs";
@@ -59,13 +58,6 @@ watch(
         <GroupedPostsCard :date="date" :posts="posts"></GroupedPostsCard>
       </li>
     </ul>
-
-    <!-- Vim panels -->
-    <VimHelpPanel
-      :visible="vimBindings.showHelp.value"
-      :key-bindings="vimBindings.keyBindings.value"
-      @close="vimBindings.showHelp.value = false"
-    />
 
     <!-- Vim indicator for homepage -->
     <VimIndicator page-type="home" />
