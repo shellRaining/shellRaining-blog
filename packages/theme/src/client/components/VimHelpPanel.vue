@@ -38,7 +38,7 @@ const groupedBindings = computed(() => {
 const handleKeyDown = (event: KeyboardEvent) => {
   // Prevent all key events from propagating when modal is open
   event.stopPropagation();
-  
+
   if (event.key === "Escape") {
     event.preventDefault();
     emit("close");
@@ -54,14 +54,17 @@ const focusModal = async () => {
 };
 
 // Watch for visibility changes
-watch(() => props.visible, (newVisible) => {
-  if (newVisible) {
-    document.addEventListener("keydown", handleKeyDown, true);
-    focusModal();
-  } else {
-    document.removeEventListener("keydown", handleKeyDown, true);
-  }
-});
+watch(
+  () => props.visible,
+  (newVisible) => {
+    if (newVisible) {
+      document.addEventListener("keydown", handleKeyDown, true);
+      focusModal();
+    } else {
+      document.removeEventListener("keydown", handleKeyDown, true);
+    }
+  },
+);
 
 onUnmounted(() => {
   document.removeEventListener("keydown", handleKeyDown, true);

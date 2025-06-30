@@ -26,6 +26,44 @@ export function useVimKeyBindings() {
   const lastKeyPressed = ref("");
   const keyPressTimeout = ref<number | null>(null);
 
+  // State persistence keys
+  const HOMEPAGE_STATE_KEY = "vim-homepage-state";
+
+  // Save homepage state to sessionStorage
+  const saveHomepageState = () => {
+    if (pageType.value === "home") {
+      const state = {
+        scrollTop: window.scrollY,
+        selectedIndex: selectedIndex.value,
+        isSelectionActive: isSelectionActive.value,
+        timestamp: Date.now(),
+      };
+      sessionStorage.setItem(HOMEPAGE_STATE_KEY, JSON.stringify(state));
+    }
+  };
+
+  // Load homepage state from sessionStorage
+  const loadHomepageState = () => {
+    try {
+      const saved = sessionStorage.getItem(HOMEPAGE_STATE_KEY);
+      if (saved) {
+        const state = JSON.parse(saved);
+        // Only restore if saved recently (within 5 minutes)
+        if (Date.now() - state.timestamp < 300000) {
+          return state;
+        }
+      }
+    } catch (error) {
+      console.warn("Failed to load homepage state:", error);
+    }
+    return null;
+  };
+
+  // Clear homepage state
+  const clearHomepageState = () => {
+    sessionStorage.removeItem(HOMEPAGE_STATE_KEY);
+  };
+
   // Update config and save to localStorage
   const updateConfig = (newConfig: Partial<VimKeyBindingsConfig>) => {
     config.value = saveVimConfig(newConfig);
@@ -59,10 +97,11 @@ export function useVimKeyBindings() {
         const rect = element.getBoundingClientRect();
         const elementTop = rect.top + window.scrollY;
         const elementBottom = elementTop + rect.height;
-        
+
         // Check if element is at least partially visible
-        const isVisible = elementBottom > viewportTop && elementTop < viewportBottom;
-        
+        const isVisible =
+          elementBottom > viewportTop && elementTop < viewportBottom;
+
         if (!isVisible) return null;
 
         // Calculate how much of the element is in viewport
@@ -85,7 +124,7 @@ export function useVimKeyBindings() {
           elementCenter,
         };
       })
-      .filter(item => item !== null);
+      .filter((item) => item !== null);
 
     if (visibleArticles.length === 0) {
       // No articles in viewport, return first or last based on direction
@@ -135,7 +174,7 @@ export function useVimKeyBindings() {
       // Normal navigation
       selectedIndex.value = Math.max(0, selectedIndex.value - 1);
     }
-    
+
     highlightSelected();
   };
 
@@ -156,7 +195,7 @@ export function useVimKeyBindings() {
         selectedIndex.value + 1,
       );
     }
-    
+
     highlightSelected();
   };
 
@@ -164,7 +203,7 @@ export function useVimKeyBindings() {
     if (pageType.value !== "home") return;
 
     const elements = getSelectableElements();
-    
+
     // If no selection is active, activate selection first
     if (!isSelectionActive.value) {
       selectedIndex.value = findBestArticleInViewport("down");
@@ -181,6 +220,8 @@ export function useVimKeyBindings() {
 
   const goBack = () => {
     if (pageType.value === "article") {
+      // Save current homepage state before navigating
+      saveHomepageState();
       window.location.href = "/";
     }
   };
@@ -246,7 +287,7 @@ export function useVimKeyBindings() {
   };
 
   // Visual feedback
-  const highlightSelected = () => {
+  const highlightSelected = (smooth = true) => {
     const elements = getSelectableElements();
 
     // Remove previous highlights
@@ -257,8 +298,19 @@ export function useVimKeyBindings() {
       const currentElement = elements[selectedIndex.value];
       if (currentElement) {
         currentElement.classList.add("vim-selected");
-        currentElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        // Only scroll into view if smooth navigation is requested
+        if (smooth) {
+          currentElement.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }
       }
+    }
+
+    // Save state after highlighting changes
+    if (pageType.value === "home") {
+      setTimeout(() => saveHomepageState(), 100);
     }
   };
 
@@ -490,25 +542,70 @@ export function useVimKeyBindings() {
   // Initialize selection on route change
   const initializeSelection = () => {
     if (pageType.value === "home") {
-      // Reset selection state - no initial selection
-      selectedIndex.value = -1;
-      isSelectionActive.value = false;
-      // Clear any existing highlights
-      const elements = getSelectableElements();
-      elements.forEach((el) => el.classList.remove("vim-selected"));
+      // Try to restore previous state
+      const savedState = loadHomepageState();
+
+      if (savedState) {
+        // Restore state smoothly
+        selectedIndex.value = savedState.selectedIndex;
+        isSelectionActive.value = savedState.isSelectionActive;
+
+        // Restore scroll position after DOM updates
+        setTimeout(() => {
+          window.scrollTo({
+            top: savedState.scrollTop,
+            behavior: "instant", // No animation to prevent flickering
+          });
+
+          // Restore selection highlight if active
+          if (isSelectionActive.value && selectedIndex.value >= 0) {
+            highlightSelected(false); // No smooth scrolling to prevent double scroll
+          }
+        }, 0);
+      } else {
+        // Reset selection state - no initial selection
+        selectedIndex.value = -1;
+        isSelectionActive.value = false;
+        // Clear any existing highlights
+        const elements = getSelectableElements();
+        elements.forEach((el) => el.classList.remove("vim-selected"));
+      }
+    } else {
+      // Clear homepage state when navigating away
+      clearHomepageState();
+    }
+  };
+
+  // Handle scroll events to save state
+  const handleScroll = () => {
+    if (pageType.value === "home") {
+      // Debounce scroll state saving
+      clearTimeout(keyPressTimeout.value);
+      keyPressTimeout.value = window.setTimeout(() => {
+        saveHomepageState();
+      }, 150);
     }
   };
 
   // Lifecycle
   onMounted(() => {
     document.addEventListener("keydown", handleKeyDown);
-    initializeSelection();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    // Initialize with a slight delay to ensure DOM is ready
+    setTimeout(() => {
+      initializeSelection();
+    }, 50);
   });
 
   onUnmounted(() => {
     document.removeEventListener("keydown", handleKeyDown);
+    window.removeEventListener("scroll", handleScroll);
     if (keyPressTimeout.value) {
       clearTimeout(keyPressTimeout.value);
+    }
+    // Save state before unmounting if on homepage
+    if (pageType.value === "home") {
+      saveHomepageState();
     }
   });
 
