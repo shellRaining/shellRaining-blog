@@ -59,7 +59,7 @@ export function generateFontFaceCSS(fonts: FontConfig[]): string {
   for (const [id, fontConfigs] of Object.entries(fontGroups)) {
     for (const font of fontConfigs) {
       // 使用 dest 路径的文件名作为引用
-    cssContent += `@font-face{font-family:"${id}";src:url("${font.dest}") format("woff2");font-weight:${font.weight};font-display: swap;}`;
+      cssContent += `@font-face{font-family:"${id}";src:url("${font.dest}") format("woff2");font-weight:${font.weight};font-display: swap;}`;
     }
   }
 

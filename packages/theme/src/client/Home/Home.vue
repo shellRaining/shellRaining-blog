@@ -2,7 +2,16 @@
 import type { ContentData } from "vitepress";
 import { data } from "../../node/loader/posts.data";
 import GroupedPostsCard from "./GroupedPostsCard.vue";
+import VimHelpPanel from "../components/VimHelpPanel.vue";
+import VimSearchPanel from "../components/VimSearchPanel.vue";
+import VimIndicator from "../components/VimIndicator.vue";
+import { useVimKeyBindings } from "../composables/useVimKeyBindings";
 import dayjs from "dayjs";
+import { onMounted, watch } from "vue";
+import { useData } from "vitepress";
+
+const { page } = useData();
+const vimBindings = useVimKeyBindings();
 
 const posts = data.filter(({ frontmatter }) => {
   return Object.keys(frontmatter).length !== 0;
@@ -21,6 +30,21 @@ const groupedPosts = posts.reduce(
   },
   {} as Record<string, ContentData[]>,
 );
+
+// Initialize vim bindings when component mounts
+onMounted(() => {
+  vimBindings.initializeSelection();
+});
+
+// Re-initialize selection when route changes to home
+watch(
+  () => page.value.relativePath,
+  (newPath) => {
+    if (newPath === "index.md") {
+      vimBindings.initializeSelection();
+    }
+  },
+);
 </script>
 
 <template>
@@ -36,6 +60,21 @@ const groupedPosts = posts.reduce(
         <GroupedPostsCard :date="date" :posts="posts"></GroupedPostsCard>
       </li>
     </ul>
+
+    <!-- Vim panels -->
+    <VimHelpPanel
+      :visible="vimBindings.showHelp.value"
+      :key-bindings="vimBindings.keyBindings.value"
+      @close="vimBindings.showHelp.value = false"
+    />
+
+    <VimSearchPanel
+      :visible="vimBindings.showSearch.value"
+      @close="vimBindings.showSearch.value = false"
+    />
+
+    <!-- Vim indicator for homepage -->
+    <VimIndicator page-type="home" />
   </article>
 </template>
 

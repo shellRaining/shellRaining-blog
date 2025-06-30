@@ -39,5 +39,5 @@ export async function getVersions(
     })
     .filter((item) => !!item);
 
-  return versions
+  return versions;
 }

@@ -30,11 +30,14 @@ const pluginsDir = "src/node/plugins";
 const pluginInputs = fs
   .readdirSync(pluginsDir)
   .filter((file) => file.endsWith(".ts"))
-  .reduce((acc, file) => {
-    const name = path.basename(file, ".ts");
-    acc[`plugins/${name}`] = `./${path.join(pluginsDir, file)}`;
-    return acc;
-  }, {} as Record<string, string>);
+  .reduce(
+    (acc, file) => {
+      const name = path.basename(file, ".ts");
+      acc[`plugins/${name}`] = `./${path.join(pluginsDir, file)}`;
+      return acc;
+    },
+    {} as Record<string, string>,
+  );
 
 // Build configuration for the main modules
 const mainConfig = {

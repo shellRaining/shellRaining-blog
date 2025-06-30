@@ -5,8 +5,14 @@ import Viewer from "./Viewer/Viewer.vue";
 import Home from "./Home/Home.vue";
 import AppearanceSwitcher from "./Home/AppearanceSwitcher.vue";
 import Sidebar from "./Sidebar/Sidebar.vue";
+import SeriesNavigation from "./components/SeriesNavigation.vue";
+import VimHelpPanel from "./components/VimHelpPanel.vue";
+import VimSearchPanel from "./components/VimSearchPanel.vue";
+import VimIndicator from "./components/VimIndicator.vue";
+import { useVimKeyBindings } from "./composables/useVimKeyBindings";
 
 const { Layout } = DefaultTheme;
+const vimBindings = useVimKeyBindings();
 </script>
 
 <template>
@@ -21,8 +27,27 @@ const { Layout } = DefaultTheme;
       <ClientOnly><Viewer /></ClientOnly>
     </template>
 
+    <template #doc-after>
+      <SeriesNavigation />
+    </template>
+
     <template #home-features-after>
       <Home />
     </template>
   </Layout>
+
+  <!-- Global Vim panels for article pages -->
+  <VimHelpPanel
+    :visible="vimBindings.showHelp.value"
+    :key-bindings="vimBindings.keyBindings.value"
+    @close="vimBindings.showHelp.value = false"
+  />
+
+  <VimSearchPanel
+    :visible="vimBindings.showSearch.value"
+    @close="vimBindings.showSearch.value = false"
+  />
+
+  <!-- Vim indicator for article pages -->
+  <VimIndicator :page-type="vimBindings.pageType.value" />
 </template>

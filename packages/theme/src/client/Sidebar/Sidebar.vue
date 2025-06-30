@@ -19,7 +19,6 @@ const getItemStatus = (index: number) => {
   if (index < currentIndex.value) return "read";
   return "unread";
 };
-
 </script>
 
 <template>
