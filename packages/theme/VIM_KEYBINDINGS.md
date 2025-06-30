@@ -14,7 +14,7 @@ This blog theme includes comprehensive Vim-style key bindings for enhanced navig
 
 - **j/k**: Scroll up and down line by line
 - **gg**: Jump to top of article
-- **G**: Jump to bottom of article  
+- **G**: Jump to bottom of article
 - **Ctrl+u**: Scroll up half page
 - **Ctrl+d**: Scroll down half page
 - **Escape**: Go back to previous page
@@ -36,10 +36,17 @@ This blog theme includes comprehensive Vim-style key bindings for enhanced navig
 
 ### Key Binding Configuration
 
-Users can customize key bindings by modifying their configuration in browser storage:
+The theme now uses a centralized configuration system for all key bindings. Users can customize key bindings by modifying their configuration in browser storage:
 
 ```javascript
-// Access the vim bindings configuration
+// Import configuration utilities (if using in a module)
+import {
+  saveVimConfig,
+  loadVimConfig,
+  resetVimConfig,
+} from "./src/client/config/vimKeybindings";
+
+// Or directly modify localStorage
 const vimConfig = {
   navigation: {
     up: "k", // Navigate up on homepage
@@ -52,7 +59,7 @@ const vimConfig = {
   scrolling: {
     lineUp: "k", // Scroll up one line in articles
     lineDown: "j", // Scroll down one line in articles
-    top: "gg", // Jump to top
+    top: "gg", // Jump to top (multi-key sequence)
     bottom: "G", // Jump to bottom
     halfPageUp: "ctrl+u", // Scroll up half page
     halfPageDown: "ctrl+d", // Scroll down half page
@@ -60,11 +67,33 @@ const vimConfig = {
   panels: {
     help: "?", // Toggle help
   },
+  // Special key combinations and sequences
+  combinations: {
+    ctrlU: "u", // Ctrl+u key
+    ctrlD: "d", // Ctrl+d key
+  },
+  sequences: {
+    doubleG: "g", // Double-g sequence key
+  },
 };
 
 // Save to localStorage
 localStorage.setItem("vim-keybindings", JSON.stringify(vimConfig));
+
+// Or use the utility functions for better error handling
+// saveVimConfig(vimConfig);
+// const currentConfig = loadVimConfig();
+// resetVimConfig(); // Reset to defaults
 ```
+
+#### Configuration Features
+
+- **Centralized Management**: All key bindings are now managed through a single configuration system
+- **Type Safety**: Full TypeScript support with proper interfaces
+- **Deep Merging**: Partial updates merge with existing configuration
+- **Error Handling**: Graceful fallback to defaults if configuration is corrupted
+- **Utility Functions**: Helper functions for key matching and formatting
+- **Backward Compatibility**: Existing localStorage configurations are automatically migrated
 
 ### CSS Customization
 

@@ -1,29 +1,59 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { loadVimConfig, KeyUtils } from "../config/vimKeybindings";
 
 const props = defineProps<{
   pageType: "home" | "article" | "other";
 }>();
 
+const config = loadVimConfig();
+
 const indicators = computed(() => {
   switch (props.pageType) {
     case "home":
       return [
-        { key: "j/k", action: "navigate" },
-        { key: "Enter", action: "select" },
-        { key: "?", action: "help" },
+        {
+          key: `${KeyUtils.formatForDisplay(config.navigation.down)}/${KeyUtils.formatForDisplay(config.navigation.up)}`,
+          action: "navigate",
+        },
+        {
+          key: KeyUtils.formatForDisplay(config.navigation.enter),
+          action: "select",
+        },
+        {
+          key: KeyUtils.formatForDisplay(config.panels.help),
+          action: "help",
+        },
       ];
     case "article":
       return [
-        { key: "j/k", action: "scroll" },
-        { key: "gg/G", action: "top/bottom" },
-        { key: "Ctrl+u/d", action: "page" },
-        { key: "Esc", action: "back" },
-        { key: "?", action: "help" },
+        {
+          key: `${KeyUtils.formatForDisplay(config.scrolling.lineDown)}/${KeyUtils.formatForDisplay(config.scrolling.lineUp)}`,
+          action: "scroll",
+        },
+        {
+          key: `${config.scrolling.top}/${KeyUtils.formatForDisplay(config.scrolling.bottom)}`,
+          action: "top/bottom",
+        },
+        {
+          key: `${KeyUtils.formatForDisplay(config.scrolling.halfPageUp)}/${KeyUtils.formatForDisplay(config.scrolling.halfPageDown)}`,
+          action: "page",
+        },
+        {
+          key: KeyUtils.formatForDisplay(config.navigation.back),
+          action: "back",
+        },
+        {
+          key: KeyUtils.formatForDisplay(config.panels.help),
+          action: "help",
+        },
       ];
     default:
       return [
-        { key: "?", action: "help" },
+        {
+          key: KeyUtils.formatForDisplay(config.panels.help),
+          action: "help",
+        },
       ];
   }
 });

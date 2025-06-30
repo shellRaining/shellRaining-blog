@@ -1,5 +1,11 @@
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useData } from "vitepress";
+import {
+  type VimKeyBindingsConfig,
+  loadVimConfig,
+  saveVimConfig,
+  KeyUtils,
+} from "../config/vimKeybindings";
 
 export interface VimKeyBinding {
   key: string;
@@ -8,50 +14,6 @@ export interface VimKeyBinding {
   handler: () => void;
 }
 
-export interface VimKeyBindingsConfig {
-  navigation: {
-    up: string;
-    down: string;
-    enter: string;
-    back: string;
-    nextSeries: string;
-    prevSeries: string;
-  };
-  scrolling: {
-    lineUp: string;
-    lineDown: string;
-    top: string;
-    bottom: string;
-    halfPageUp: string;
-    halfPageDown: string;
-  };
-  panels: {
-    help: string;
-  };
-}
-
-const defaultConfig: VimKeyBindingsConfig = {
-  navigation: {
-    up: "k",
-    down: "j",
-    enter: "Enter",
-    back: "Escape",
-    nextSeries: "n",
-    prevSeries: "p",
-  },
-  scrolling: {
-    lineUp: "k",
-    lineDown: "j",
-    top: "gg",
-    bottom: "G",
-    halfPageUp: "ctrl+u",
-    halfPageDown: "ctrl+d",
-  },
-  panels: {
-    help: "?",
-  },
-};
-
 export function useVimKeyBindings() {
   const { page } = useData();
 
@@ -59,30 +21,13 @@ export function useVimKeyBindings() {
   const isActive = ref(true);
   const selectedIndex = ref(0);
   const showHelp = ref(false);
-  const config = ref<VimKeyBindingsConfig>(defaultConfig);
+  const config = ref<VimKeyBindingsConfig>(loadVimConfig());
   const lastKeyPressed = ref("");
   const keyPressTimeout = ref<number | null>(null);
 
-  // Load custom config from localStorage
-  const loadConfig = () => {
-    try {
-      const savedConfig = localStorage.getItem("vim-keybindings");
-      if (savedConfig) {
-        config.value = { ...defaultConfig, ...JSON.parse(savedConfig) };
-      }
-    } catch (error) {
-      console.warn("Failed to load vim keybindings config:", error);
-    }
-  };
-
-  // Save config to localStorage
-  const saveConfig = (newConfig: Partial<VimKeyBindingsConfig>) => {
-    try {
-      config.value = { ...config.value, ...newConfig };
-      localStorage.setItem("vim-keybindings", JSON.stringify(config.value));
-    } catch (error) {
-      console.warn("Failed to save vim keybindings config:", error);
-    }
+  // Update config and save to localStorage
+  const updateConfig = (newConfig: Partial<VimKeyBindingsConfig>) => {
+    config.value = saveVimConfig(newConfig);
   };
 
   // Get current page type
@@ -327,45 +272,42 @@ export function useVimKeyBindings() {
       return;
     }
 
-    // Handle Ctrl combinations
+    // Handle Ctrl combinations using config
     if (event.ctrlKey) {
-      if (event.key === "u") {
+      if (KeyUtils.matchesBinding(event, config.value.scrolling.halfPageUp)) {
         event.preventDefault();
         scrollHalfPageUp();
         return;
       }
-      if (event.key === "d") {
+      if (KeyUtils.matchesBinding(event, config.value.scrolling.halfPageDown)) {
         event.preventDefault();
         scrollHalfPageDown();
         return;
       }
     }
 
-    // Handle multi-key sequences (gg and G)
+    // Handle multi-key sequences (gg) using config
     if (pageType.value === "article") {
-      if (event.key === "g") {
-        if (lastKeyPressed.value === "g") {
-          // Double g - go to top
+      const sequenceKey = config.value.sequences.doubleG;
+      if (KeyUtils.isSequenceStart(event, sequenceKey)) {
+        if (lastKeyPressed.value === sequenceKey) {
+          // Double sequence - go to top
           event.preventDefault();
           scrollToTop();
-          lastKeyPressed.value = "";
-          if (keyPressTimeout.value) {
-            clearTimeout(keyPressTimeout.value);
-            keyPressTimeout.value = null;
-          }
+          clearSequenceTimeout();
           return;
         } else {
-          // First g
-          lastKeyPressed.value = "g";
+          // First key in sequence
+          lastKeyPressed.value = sequenceKey;
           keyPressTimeout.value = window.setTimeout(() => {
-            lastKeyPressed.value = "";
-            keyPressTimeout.value = null;
+            clearSequenceTimeout();
           }, 1000);
           return;
         }
       }
 
-      if (event.key === "G") {
+      // Handle single G for bottom using config
+      if (KeyUtils.matchesBinding(event, config.value.scrolling.bottom)) {
         event.preventDefault();
         scrollToBottom();
         return;
@@ -373,52 +315,78 @@ export function useVimKeyBindings() {
     }
 
     // Clear multi-key sequence if different key pressed
-    if (lastKeyPressed.value && event.key !== "g") {
-      lastKeyPressed.value = "";
-      if (keyPressTimeout.value) {
-        clearTimeout(keyPressTimeout.value);
-        keyPressTimeout.value = null;
-      }
+    if (
+      lastKeyPressed.value &&
+      !KeyUtils.isSequenceStart(event, config.value.sequences.doubleG)
+    ) {
+      clearSequenceTimeout();
     }
 
-    // Handle context-specific key bindings
+    // Handle context-specific key bindings using config
     if (pageType.value === "home") {
       // Homepage navigation
-      if (event.key === "j") {
+      if (KeyUtils.matchesBinding(event, config.value.navigation.down)) {
         event.preventDefault();
         navigateDown();
         return;
       }
-      if (event.key === "k") {
+      if (KeyUtils.matchesBinding(event, config.value.navigation.up)) {
         event.preventDefault();
         navigateUp();
         return;
       }
     } else if (pageType.value === "article") {
       // Article scrolling
-      if (event.key === "j") {
+      if (KeyUtils.matchesBinding(event, config.value.scrolling.lineDown)) {
         event.preventDefault();
         scrollLineDown();
         return;
       }
-      if (event.key === "k") {
+      if (KeyUtils.matchesBinding(event, config.value.scrolling.lineUp)) {
         event.preventDefault();
         scrollLineUp();
         return;
       }
     }
 
-    // Handle common key bindings
-    const binding = keyBindings.value.find(
-      (b) =>
-        b.key === event.key ||
-        (b.key === "Enter" && event.key === "Enter") ||
-        (b.key === "Escape" && event.key === "Escape"),
-    );
-
-    if (binding) {
+    // Handle common key bindings using config
+    if (KeyUtils.matchesBinding(event, config.value.navigation.enter)) {
       event.preventDefault();
-      binding.handler();
+      selectCurrent();
+      return;
+    }
+
+    if (KeyUtils.matchesBinding(event, config.value.navigation.back)) {
+      event.preventDefault();
+      goBack();
+      return;
+    }
+
+    if (KeyUtils.matchesBinding(event, config.value.navigation.nextSeries)) {
+      event.preventDefault();
+      navigateNextSeries();
+      return;
+    }
+
+    if (KeyUtils.matchesBinding(event, config.value.navigation.prevSeries)) {
+      event.preventDefault();
+      navigatePrevSeries();
+      return;
+    }
+
+    if (KeyUtils.matchesBinding(event, config.value.panels.help)) {
+      event.preventDefault();
+      toggleHelp();
+      return;
+    }
+  };
+
+  // Helper function to clear sequence timeout
+  const clearSequenceTimeout = () => {
+    lastKeyPressed.value = "";
+    if (keyPressTimeout.value) {
+      clearTimeout(keyPressTimeout.value);
+      keyPressTimeout.value = null;
     }
   };
 
@@ -432,7 +400,6 @@ export function useVimKeyBindings() {
 
   // Lifecycle
   onMounted(() => {
-    loadConfig();
     document.addEventListener("keydown", handleKeyDown);
     initializeSelection();
   });
@@ -454,7 +421,7 @@ export function useVimKeyBindings() {
     keyBindings,
 
     // Methods
-    saveConfig,
+    updateConfig,
     initializeSelection,
 
     // Handlers
