@@ -3,7 +3,6 @@ import type { ContentData } from "vitepress";
 import { data } from "../../node/loader/posts.data";
 import GroupedPostsCard from "./GroupedPostsCard.vue";
 import VimHelpPanel from "../components/VimHelpPanel.vue";
-import VimSearchPanel from "../components/VimSearchPanel.vue";
 import VimIndicator from "../components/VimIndicator.vue";
 import { useVimKeyBindings } from "../composables/useVimKeyBindings";
 import dayjs from "dayjs";
@@ -66,11 +65,6 @@ watch(
       :visible="vimBindings.showHelp.value"
       :key-bindings="vimBindings.keyBindings.value"
       @close="vimBindings.showHelp.value = false"
-    />
-
-    <VimSearchPanel
-      :visible="vimBindings.showSearch.value"
-      @close="vimBindings.showSearch.value = false"
     />
 
     <!-- Vim indicator for homepage -->

@@ -18,7 +18,6 @@ export interface VimKeyBindingsConfig {
     prevSeries: string;
   };
   panels: {
-    search: string;
     help: string;
   };
 }
@@ -33,7 +32,6 @@ const defaultConfig: VimKeyBindingsConfig = {
     prevSeries: "p",
   },
   panels: {
-    search: "/",
     help: "?",
   },
 };
@@ -45,7 +43,6 @@ export function useVimKeyBindings() {
   const isActive = ref(true);
   const selectedIndex = ref(0);
   const showHelp = ref(false);
-  const showSearch = ref(false);
   const config = ref<VimKeyBindingsConfig>(defaultConfig);
 
   // Load custom config from localStorage
@@ -158,10 +155,6 @@ export function useVimKeyBindings() {
   };
 
   // Panel handlers
-  const toggleSearch = () => {
-    showSearch.value = !showSearch.value;
-  };
-
   const toggleHelp = () => {
     showHelp.value = !showHelp.value;
   };
@@ -220,12 +213,6 @@ export function useVimKeyBindings() {
       handler: navigatePrevSeries,
     },
     {
-      key: config.value.panels.search,
-      action: "toggle-search",
-      description: "Toggle search panel",
-      handler: toggleSearch,
-    },
-    {
       key: config.value.panels.help,
       action: "toggle-help",
       description: "Toggle help panel",
@@ -282,7 +269,6 @@ export function useVimKeyBindings() {
     isActive,
     selectedIndex,
     showHelp,
-    showSearch,
     config,
     pageType,
     keyBindings,
@@ -298,7 +284,6 @@ export function useVimKeyBindings() {
     goBack,
     navigateNextSeries,
     navigatePrevSeries,
-    toggleSearch,
     toggleHelp,
   };
 }

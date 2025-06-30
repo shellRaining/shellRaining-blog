@@ -83,7 +83,6 @@ The Vim key bindings are implemented using:
 - **Composable**: `useVimKeyBindings.ts` - Core logic and state management
 - **Components**:
   - `VimHelpPanel.vue` - Help panel with key binding reference
-  - `VimSearchPanel.vue` - Search interface with keyboard navigation
   - `VimIndicator.vue` - Context-sensitive hint display
   - `SeriesNavigation.vue` - Series article navigation
 

@@ -7,7 +7,6 @@ import AppearanceSwitcher from "./Home/AppearanceSwitcher.vue";
 import Sidebar from "./Sidebar/Sidebar.vue";
 import SeriesNavigation from "./components/SeriesNavigation.vue";
 import VimHelpPanel from "./components/VimHelpPanel.vue";
-import VimSearchPanel from "./components/VimSearchPanel.vue";
 import VimIndicator from "./components/VimIndicator.vue";
 import { useVimKeyBindings } from "./composables/useVimKeyBindings";
 
@@ -41,11 +40,6 @@ const vimBindings = useVimKeyBindings();
     :visible="vimBindings.showHelp.value"
     :key-bindings="vimBindings.keyBindings.value"
     @close="vimBindings.showHelp.value = false"
-  />
-
-  <VimSearchPanel
-    :visible="vimBindings.showSearch.value"
-    @close="vimBindings.showSearch.value = false"
   />
 
   <!-- Vim indicator for article pages -->
