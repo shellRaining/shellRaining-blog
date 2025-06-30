@@ -10,15 +10,19 @@ This blog theme includes comprehensive Vim-style key bindings for enhanced navig
 - **Enter**: Open selected article
 - **Visual feedback**: Selected articles are highlighted with a border
 
-### 📖 Article Navigation
+### 📖 Article Navigation & Scrolling
 
+- **j/k**: Scroll up and down line by line
+- **gg**: Jump to top of article
+- **G**: Jump to bottom of article  
+- **Ctrl+u**: Scroll up half page
+- **Ctrl+d**: Scroll down half page
 - **Escape**: Go back to previous page
 - **n**: Next article in series (if available)
 - **p**: Previous article in series (if available)
 
-### 🔍 Search & Help
+### 🔍 Help
 
-- **/**: Open search panel
 - **?**: Toggle help panel showing all key bindings
 - **Escape**: Close any open panel
 
@@ -38,15 +42,22 @@ Users can customize key bindings by modifying their configuration in browser sto
 // Access the vim bindings configuration
 const vimConfig = {
   navigation: {
-    up: "k", // Navigate up
-    down: "j", // Navigate down
+    up: "k", // Navigate up on homepage
+    down: "j", // Navigate down on homepage
     enter: "Enter", // Select/open
     back: "Escape", // Go back
     nextSeries: "n", // Next in series
     prevSeries: "p", // Previous in series
   },
+  scrolling: {
+    lineUp: "k", // Scroll up one line in articles
+    lineDown: "j", // Scroll down one line in articles
+    top: "gg", // Jump to top
+    bottom: "G", // Jump to bottom
+    halfPageUp: "ctrl+u", // Scroll up half page
+    halfPageDown: "ctrl+d", // Scroll down half page
+  },
   panels: {
-    search: "/", // Open search
     help: "?", // Toggle help
   },
 };
@@ -97,9 +108,9 @@ The Vim key bindings are implemented using:
 ### Integration Points
 
 - **Homepage**: Integrated into `Home.vue` for article selection
-- **Articles**: Available globally through `Layout.vue`
+- **Articles**: Available globally through `Layout.vue` with full scrolling support
 - **Series**: Automatic detection and navigation for series articles
-- **Search**: Live search through all blog posts with keyboard navigation
+- **Scrolling**: Smooth scrolling with Vim-style navigation keys
 
 ## Browser Support
 

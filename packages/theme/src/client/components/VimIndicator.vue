@@ -15,13 +15,14 @@ const indicators = computed(() => {
       ];
     case "article":
       return [
+        { key: "j/k", action: "scroll" },
+        { key: "gg/G", action: "top/bottom" },
+        { key: "Ctrl+u/d", action: "page" },
         { key: "Esc", action: "back" },
-        { key: "n/p", action: "series" },
         { key: "?", action: "help" },
       ];
     default:
       return [
-        { key: "/", action: "search" },
         { key: "?", action: "help" },
       ];
   }

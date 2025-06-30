@@ -17,6 +17,14 @@ export interface VimKeyBindingsConfig {
     nextSeries: string;
     prevSeries: string;
   };
+  scrolling: {
+    lineUp: string;
+    lineDown: string;
+    top: string;
+    bottom: string;
+    halfPageUp: string;
+    halfPageDown: string;
+  };
   panels: {
     help: string;
   };
@@ -31,6 +39,14 @@ const defaultConfig: VimKeyBindingsConfig = {
     nextSeries: "n",
     prevSeries: "p",
   },
+  scrolling: {
+    lineUp: "k",
+    lineDown: "j",
+    top: "gg",
+    bottom: "G",
+    halfPageUp: "ctrl+u",
+    halfPageDown: "ctrl+d",
+  },
   panels: {
     help: "?",
   },
@@ -44,6 +60,8 @@ export function useVimKeyBindings() {
   const selectedIndex = ref(0);
   const showHelp = ref(false);
   const config = ref<VimKeyBindingsConfig>(defaultConfig);
+  const lastKeyPressed = ref("");
+  const keyPressTimeout = ref<number | null>(null);
 
   // Load custom config from localStorage
   const loadConfig = () => {
@@ -154,6 +172,43 @@ export function useVimKeyBindings() {
     }
   };
 
+  // Scrolling handlers for articles
+  const scrollLineUp = () => {
+    if (pageType.value === "article") {
+      window.scrollBy({ top: -40, behavior: "smooth" });
+    }
+  };
+
+  const scrollLineDown = () => {
+    if (pageType.value === "article") {
+      window.scrollBy({ top: 40, behavior: "smooth" });
+    }
+  };
+
+  const scrollToTop = () => {
+    if (pageType.value === "article") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const scrollToBottom = () => {
+    if (pageType.value === "article") {
+      window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+    }
+  };
+
+  const scrollHalfPageUp = () => {
+    if (pageType.value === "article") {
+      window.scrollBy({ top: -window.innerHeight / 2, behavior: "smooth" });
+    }
+  };
+
+  const scrollHalfPageDown = () => {
+    if (pageType.value === "article") {
+      window.scrollBy({ top: window.innerHeight / 2, behavior: "smooth" });
+    }
+  };
+
   // Panel handlers
   const toggleHelp = () => {
     showHelp.value = !showHelp.value;
@@ -176,6 +231,7 @@ export function useVimKeyBindings() {
 
   // Key binding definitions
   const keyBindings = computed<VimKeyBinding[]>(() => [
+    // Homepage navigation
     {
       key: config.value.navigation.up,
       action: "navigate-up",
@@ -194,6 +250,44 @@ export function useVimKeyBindings() {
       description: "Enter selected article",
       handler: selectCurrent,
     },
+    // Article scrolling
+    {
+      key: config.value.scrolling.lineUp,
+      action: "scroll-line-up",
+      description: "Scroll up one line",
+      handler: scrollLineUp,
+    },
+    {
+      key: config.value.scrolling.lineDown,
+      action: "scroll-line-down",
+      description: "Scroll down one line",
+      handler: scrollLineDown,
+    },
+    {
+      key: config.value.scrolling.top,
+      action: "scroll-to-top",
+      description: "Jump to top of page",
+      handler: scrollToTop,
+    },
+    {
+      key: config.value.scrolling.bottom,
+      action: "scroll-to-bottom",
+      description: "Jump to bottom of page",
+      handler: scrollToBottom,
+    },
+    {
+      key: config.value.scrolling.halfPageUp,
+      action: "scroll-half-page-up",
+      description: "Scroll up half page",
+      handler: scrollHalfPageUp,
+    },
+    {
+      key: config.value.scrolling.halfPageDown,
+      action: "scroll-half-page-down",
+      description: "Scroll down half page",
+      handler: scrollHalfPageDown,
+    },
+    // Navigation
     {
       key: config.value.navigation.back,
       action: "go-back",
@@ -212,6 +306,7 @@ export function useVimKeyBindings() {
       description: "Go to previous article in series",
       handler: navigatePrevSeries,
     },
+    // Panels
     {
       key: config.value.panels.help,
       action: "toggle-help",
@@ -232,6 +327,88 @@ export function useVimKeyBindings() {
       return;
     }
 
+    // Handle Ctrl combinations
+    if (event.ctrlKey) {
+      if (event.key === "u") {
+        event.preventDefault();
+        scrollHalfPageUp();
+        return;
+      }
+      if (event.key === "d") {
+        event.preventDefault();
+        scrollHalfPageDown();
+        return;
+      }
+    }
+
+    // Handle multi-key sequences (gg and G)
+    if (pageType.value === "article") {
+      if (event.key === "g") {
+        if (lastKeyPressed.value === "g") {
+          // Double g - go to top
+          event.preventDefault();
+          scrollToTop();
+          lastKeyPressed.value = "";
+          if (keyPressTimeout.value) {
+            clearTimeout(keyPressTimeout.value);
+            keyPressTimeout.value = null;
+          }
+          return;
+        } else {
+          // First g
+          lastKeyPressed.value = "g";
+          keyPressTimeout.value = window.setTimeout(() => {
+            lastKeyPressed.value = "";
+            keyPressTimeout.value = null;
+          }, 1000);
+          return;
+        }
+      }
+      
+      if (event.key === "G") {
+        event.preventDefault();
+        scrollToBottom();
+        return;
+      }
+    }
+
+    // Clear multi-key sequence if different key pressed
+    if (lastKeyPressed.value && event.key !== "g") {
+      lastKeyPressed.value = "";
+      if (keyPressTimeout.value) {
+        clearTimeout(keyPressTimeout.value);
+        keyPressTimeout.value = null;
+      }
+    }
+
+    // Handle context-specific key bindings
+    if (pageType.value === "home") {
+      // Homepage navigation
+      if (event.key === "j") {
+        event.preventDefault();
+        navigateDown();
+        return;
+      }
+      if (event.key === "k") {
+        event.preventDefault();
+        navigateUp();
+        return;
+      }
+    } else if (pageType.value === "article") {
+      // Article scrolling
+      if (event.key === "j") {
+        event.preventDefault();
+        scrollLineDown();
+        return;
+      }
+      if (event.key === "k") {
+        event.preventDefault();
+        scrollLineUp();
+        return;
+      }
+    }
+
+    // Handle common key bindings
     const binding = keyBindings.value.find(
       (b) =>
         b.key === event.key ||
@@ -262,6 +439,9 @@ export function useVimKeyBindings() {
 
   onUnmounted(() => {
     document.removeEventListener("keydown", handleKeyDown);
+    if (keyPressTimeout.value) {
+      clearTimeout(keyPressTimeout.value);
+    }
   });
 
   return {
@@ -284,6 +464,12 @@ export function useVimKeyBindings() {
     goBack,
     navigateNextSeries,
     navigatePrevSeries,
+    scrollLineUp,
+    scrollLineDown,
+    scrollToTop,
+    scrollToBottom,
+    scrollHalfPageUp,
+    scrollHalfPageDown,
     toggleHelp,
   };
 }
