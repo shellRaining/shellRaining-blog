@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import type { VimKeyBinding } from "../composables/useVimKeyBindings";
+import { ACTION_GROUPS } from "../config/vimConstants";
 
 const props = defineProps<{
   visible: boolean;
@@ -14,25 +15,34 @@ const emit = defineEmits<{
 const overlayRef = ref<HTMLElement>();
 
 const groupedBindings = computed(() => {
-  const groups = {
-    Navigation: [] as VimKeyBinding[],
-    Panels: [] as VimKeyBinding[],
+  const groups: Record<string, VimKeyBinding[]> = {
+    [ACTION_GROUPS.NAVIGATION]: [],
+    [ACTION_GROUPS.SCROLLING]: [],
+    [ACTION_GROUPS.SERIES]: [],
+    [ACTION_GROUPS.PANELS]: [],
   };
 
   props.keyBindings.forEach((binding) => {
+    // Group by action type patterns
     if (
       binding.action.includes("navigate") ||
       binding.action.includes("select") ||
-      binding.action.includes("back") ||
-      binding.action.includes("series")
+      binding.action.includes("back")
     ) {
-      groups.Navigation.push(binding);
+      groups[ACTION_GROUPS.NAVIGATION].push(binding);
+    } else if (binding.action.includes("scroll")) {
+      groups[ACTION_GROUPS.SCROLLING].push(binding);
+    } else if (binding.action.includes("series")) {
+      groups[ACTION_GROUPS.SERIES].push(binding);
     } else {
-      groups.Panels.push(binding);
+      groups[ACTION_GROUPS.PANELS].push(binding);
     }
   });
 
-  return groups;
+  // Filter out empty groups
+  return Object.fromEntries(
+    Object.entries(groups).filter(([_, bindings]) => bindings.length > 0),
+  );
 });
 
 const handleKeyDown = (event: KeyboardEvent) => {

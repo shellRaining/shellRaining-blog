@@ -18,17 +18,23 @@ const currentIndex = computed(() => {
   // Create a comprehensive URL matcher that handles VitePress URL variations
   const matchUrl = (itemUrl: string, currentPath: string): boolean => {
     // Normalize both URLs for comparison
-    const normalize = (url: string) => url.replace(/^\/+/, '').replace(/\.html$/, '').replace(/\.md$/, '');
-    
+    const normalize = (url: string) =>
+      url
+        .replace(/^\/+/, "")
+        .replace(/\.html$/, "")
+        .replace(/\.md$/, "");
+
     const normalizedItem = normalize(itemUrl);
     const normalizedCurrent = normalize(currentPath);
-    
+
     return normalizedItem === normalizedCurrent;
   };
 
   const currentPath = page.value.relativePath;
-  
-  return currentSeries.value.findIndex((item) => matchUrl(item.url, currentPath));
+
+  return currentSeries.value.findIndex((item) =>
+    matchUrl(item.url, currentPath),
+  );
 });
 
 const prevArticle = computed(() => {
