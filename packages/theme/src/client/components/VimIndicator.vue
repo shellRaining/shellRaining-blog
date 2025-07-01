@@ -85,11 +85,12 @@ const indicators = computed(() => {
   font-size: 0.75rem;
   color: var(--vp-c-text-2);
   z-index: 999;
-  opacity: 0.8;
-  transition: opacity 0.2s ease;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  user-select: none;
 }
 
 .vim-indicator:hover {
