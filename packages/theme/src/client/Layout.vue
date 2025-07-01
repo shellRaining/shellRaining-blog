@@ -9,9 +9,11 @@ import SeriesNavigation from "./components/SeriesNavigation.vue";
 import VimHelpPanel from "./components/VimHelpPanel.vue";
 import VimIndicator from "./components/VimIndicator.vue";
 import { useVimKeyBindings } from "./composables/useVimKeyBindings";
+import { useMobile } from "./composables/useMobile";
 
 const { Layout } = DefaultTheme;
 const vimBindings = useVimKeyBindings();
+const { isMobile } = useMobile();
 </script>
 
 <template>
@@ -37,11 +39,12 @@ const vimBindings = useVimKeyBindings();
 
   <!-- Global Vim panels for article pages -->
   <VimHelpPanel
+    v-if="!isMobile"
     :visible="vimBindings.showHelp.value"
     :key-bindings="vimBindings.keyBindings.value"
     @close="vimBindings.showHelp.value = false"
   />
 
   <!-- Vim indicator for article pages -->
-  <VimIndicator :page-type="vimBindings.pageType.value" />
+  <VimIndicator v-if="!isMobile" :page-type="vimBindings.pageType.value" />
 </template>
