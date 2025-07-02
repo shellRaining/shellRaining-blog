@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { loadVimConfig, KeyUtils } from "../config/vimKeybindings";
+import { PAGE_TYPES } from "../config/vimConstants";
 
 const props = defineProps<{
   pageType: "home" | "article" | "other";
@@ -10,7 +11,7 @@ const config = loadVimConfig();
 
 const indicators = computed(() => {
   switch (props.pageType) {
-    case "home":
+    case PAGE_TYPES.HOME:
       return [
         {
           key: `${KeyUtils.formatForDisplay(config.navigation.down)}/${KeyUtils.formatForDisplay(config.navigation.up)}`,
@@ -25,7 +26,7 @@ const indicators = computed(() => {
           action: "help",
         },
       ];
-    case "article":
+    case PAGE_TYPES.ARTICLE:
       return [
         {
           key: `${KeyUtils.formatForDisplay(config.scrolling.lineDown)}/${KeyUtils.formatForDisplay(config.scrolling.lineUp)}`,
@@ -85,11 +86,12 @@ const indicators = computed(() => {
   font-size: 0.75rem;
   color: var(--vp-c-text-2);
   z-index: 999;
-  opacity: 0.8;
-  transition: opacity 0.2s ease;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  user-select: none;
 }
 
 .vim-indicator:hover {

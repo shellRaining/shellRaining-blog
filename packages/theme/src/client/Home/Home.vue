@@ -7,9 +7,11 @@ import { useVimKeyBindings } from "../composables/useVimKeyBindings";
 import dayjs from "dayjs";
 import { onMounted, watch } from "vue";
 import { useData } from "vitepress";
+import { useMobile } from "../composables/useMobile";
 
 const { page } = useData();
 const vimBindings = useVimKeyBindings();
+const { isMobile } = useMobile();
 
 const posts = data.filter(({ frontmatter }) => {
   return Object.keys(frontmatter).length !== 0;
@@ -31,14 +33,16 @@ const groupedPosts = posts.reduce(
 
 // Initialize vim bindings when component mounts
 onMounted(() => {
-  vimBindings.initializeSelection();
+  if (!isMobile.value) {
+    vimBindings.initializeSelection();
+  }
 });
 
 // Re-initialize selection when route changes to home
 watch(
   () => page.value.relativePath,
   (newPath) => {
-    if (newPath === "index.md") {
+    if (newPath === "index.md" && !isMobile.value) {
       vimBindings.initializeSelection();
     }
   },
@@ -60,7 +64,7 @@ watch(
     </ul>
 
     <!-- Vim indicator for homepage -->
-    <VimIndicator page-type="home" />
+    <VimIndicator v-if="!isMobile" page-type="home" />
   </article>
 </template>
 

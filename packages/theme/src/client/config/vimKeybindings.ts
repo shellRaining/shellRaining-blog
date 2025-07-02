@@ -1,3 +1,10 @@
+import {
+  STORAGE_KEYS,
+  PAGE_TYPES,
+  ACTION_GROUPS,
+  ACTION_TYPES,
+} from "./vimConstants";
+
 export interface VimKeyBindingsConfig {
   navigation: {
     up: string;
@@ -26,6 +33,14 @@ export interface VimKeyBindingsConfig {
   sequences: {
     doubleG: string;
   };
+}
+
+export interface VimActionDefinition {
+  key: string;
+  action: string;
+  description: string;
+  contexts: string[];
+  group: string;
 }
 
 export const DEFAULT_VIM_CONFIG: VimKeyBindingsConfig = {
@@ -57,7 +72,112 @@ export const DEFAULT_VIM_CONFIG: VimKeyBindingsConfig = {
   },
 };
 
-export const VIM_CONFIG_STORAGE_KEY = "vim-keybindings";
+export const VIM_CONFIG_STORAGE_KEY = STORAGE_KEYS.VIM_CONFIG;
+
+/**
+ * Predefined action definitions with context information
+ */
+export function createActionDefinitions(
+  config: VimKeyBindingsConfig,
+): VimActionDefinition[] {
+  return [
+    // Navigation actions
+    {
+      key: config.navigation.up,
+      action: ACTION_TYPES.NAVIGATE_UP,
+      description: "Navigate up in article list",
+      contexts: [PAGE_TYPES.HOME],
+      group: ACTION_GROUPS.NAVIGATION,
+    },
+    {
+      key: config.navigation.down,
+      action: ACTION_TYPES.NAVIGATE_DOWN,
+      description: "Navigate down in article list",
+      contexts: [PAGE_TYPES.HOME],
+      group: ACTION_GROUPS.NAVIGATION,
+    },
+    {
+      key: config.navigation.enter,
+      action: ACTION_TYPES.SELECT_CURRENT,
+      description: "Enter selected article",
+      contexts: [PAGE_TYPES.HOME],
+      group: ACTION_GROUPS.NAVIGATION,
+    },
+    {
+      key: config.navigation.back,
+      action: ACTION_TYPES.GO_BACK,
+      description: "Go back to previous page",
+      contexts: [PAGE_TYPES.ARTICLE],
+      group: ACTION_GROUPS.NAVIGATION,
+    },
+    // Scrolling actions
+    {
+      key: config.scrolling.lineUp,
+      action: ACTION_TYPES.SCROLL_LINE_UP,
+      description: "Scroll up one line",
+      contexts: [PAGE_TYPES.ARTICLE],
+      group: ACTION_GROUPS.SCROLLING,
+    },
+    {
+      key: config.scrolling.lineDown,
+      action: ACTION_TYPES.SCROLL_LINE_DOWN,
+      description: "Scroll down one line",
+      contexts: [PAGE_TYPES.ARTICLE],
+      group: ACTION_GROUPS.SCROLLING,
+    },
+    {
+      key: config.scrolling.top,
+      action: ACTION_TYPES.SCROLL_TO_TOP,
+      description: "Jump to top of page",
+      contexts: [PAGE_TYPES.ARTICLE],
+      group: ACTION_GROUPS.SCROLLING,
+    },
+    {
+      key: config.scrolling.bottom,
+      action: ACTION_TYPES.SCROLL_TO_BOTTOM,
+      description: "Jump to bottom of page",
+      contexts: [PAGE_TYPES.ARTICLE],
+      group: ACTION_GROUPS.SCROLLING,
+    },
+    {
+      key: config.scrolling.halfPageUp,
+      action: ACTION_TYPES.SCROLL_HALF_PAGE_UP,
+      description: "Scroll up half page",
+      contexts: [PAGE_TYPES.ARTICLE],
+      group: ACTION_GROUPS.SCROLLING,
+    },
+    {
+      key: config.scrolling.halfPageDown,
+      action: ACTION_TYPES.SCROLL_HALF_PAGE_DOWN,
+      description: "Scroll down half page",
+      contexts: [PAGE_TYPES.ARTICLE],
+      group: ACTION_GROUPS.SCROLLING,
+    },
+    // Series navigation
+    {
+      key: config.navigation.nextSeries,
+      action: ACTION_TYPES.NEXT_SERIES,
+      description: "Go to next article in series",
+      contexts: [PAGE_TYPES.ARTICLE],
+      group: ACTION_GROUPS.SERIES,
+    },
+    {
+      key: config.navigation.prevSeries,
+      action: ACTION_TYPES.PREV_SERIES,
+      description: "Go to previous article in series",
+      contexts: [PAGE_TYPES.ARTICLE],
+      group: ACTION_GROUPS.SERIES,
+    },
+    // Panel actions
+    {
+      key: config.panels.help,
+      action: ACTION_TYPES.TOGGLE_HELP,
+      description: "Toggle help panel",
+      contexts: [PAGE_TYPES.HOME, PAGE_TYPES.ARTICLE, PAGE_TYPES.OTHER],
+      group: ACTION_GROUPS.PANELS,
+    },
+  ];
+}
 
 /**
  * Load vim configuration from localStorage with fallback to default

@@ -2,10 +2,26 @@ import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useData } from "vitepress";
 import {
   type VimKeyBindingsConfig,
+  type VimActionDefinition,
   loadVimConfig,
   saveVimConfig,
   KeyUtils,
+  createActionDefinitions,
 } from "../config/vimKeybindings";
+import {
+  DOMUtils,
+  ScrollUtils,
+  ViewportUtils,
+  StateUtils,
+  NavigationUtils,
+  SelectionUtils,
+} from "../utils/vimUtils";
+import {
+  STORAGE_KEYS,
+  UI_CONSTANTS,
+  PAGE_TYPES,
+  ACTION_TYPES,
+} from "../config/vimConstants";
 
 export interface VimKeyBinding {
   key: string;
@@ -26,42 +42,31 @@ export function useVimKeyBindings() {
   const lastKeyPressed = ref("");
   const keyPressTimeout = ref<number | null>(null);
 
-  // State persistence keys
-  const HOMEPAGE_STATE_KEY = "vim-homepage-state";
+  // State management with utilities
+  const debouncedSaveState = StateUtils.debounce(() => {
+    saveHomepageState();
+  }, UI_CONSTANTS.SCROLL_SAVE_DEBOUNCE);
 
   // Save homepage state to sessionStorage
   const saveHomepageState = () => {
-    if (pageType.value === "home") {
+    if (pageType.value === PAGE_TYPES.HOME) {
       const state = {
         scrollTop: window.scrollY,
         selectedIndex: selectedIndex.value,
         isSelectionActive: isSelectionActive.value,
-        timestamp: Date.now(),
       };
-      sessionStorage.setItem(HOMEPAGE_STATE_KEY, JSON.stringify(state));
+      StateUtils.saveStateWithExpiry(STORAGE_KEYS.HOMEPAGE_STATE, state);
     }
   };
 
   // Load homepage state from sessionStorage
   const loadHomepageState = () => {
-    try {
-      const saved = sessionStorage.getItem(HOMEPAGE_STATE_KEY);
-      if (saved) {
-        const state = JSON.parse(saved);
-        // Only restore if saved recently (within 5 minutes)
-        if (Date.now() - state.timestamp < 300000) {
-          return state;
-        }
-      }
-    } catch (error) {
-      console.warn("Failed to load homepage state:", error);
-    }
-    return null;
+    return StateUtils.loadStateWithExpiry(STORAGE_KEYS.HOMEPAGE_STATE);
   };
 
   // Clear homepage state
   const clearHomepageState = () => {
-    sessionStorage.removeItem(HOMEPAGE_STATE_KEY);
+    StateUtils.clearState(STORAGE_KEYS.HOMEPAGE_STATE);
   };
 
   // Update config and save to localStorage
@@ -71,102 +76,23 @@ export function useVimKeyBindings() {
 
   // Get current page type
   const pageType = computed(() => {
-    if (page.value.relativePath === "index.md") return "home";
-    if (page.value.relativePath.startsWith("docs/")) return "article";
-    return "other";
+    if (page.value.relativePath === "index.md") return PAGE_TYPES.HOME;
+    if (page.value.relativePath.startsWith("docs/")) return PAGE_TYPES.ARTICLE;
+    return PAGE_TYPES.OTHER;
   });
 
-  // Get selectable elements on homepage
-  const getSelectableElements = (): HTMLElement[] => {
-    const postItems = document.querySelectorAll(".post-title");
-    return Array.from(postItems) as HTMLElement[];
-  };
+  // Get selectable elements using utility
+  const getSelectableElements = DOMUtils.getSelectableElements;
 
-  // Find the most suitable article within viewport
-  const findBestArticleInViewport = (direction: "up" | "down"): number => {
-    const elements = getSelectableElements();
-    if (elements.length === 0) return -1;
+  // Find the most suitable article within viewport using utility
+  const findBestArticleInViewport = SelectionUtils.findBestArticleInViewport;
 
-    const viewportTop = window.scrollY;
-    const viewportBottom = viewportTop + window.innerHeight;
-    const viewportCenter = viewportTop + window.innerHeight / 2;
-
-    // Find articles that are at least partially visible
-    const visibleArticles = elements
-      .map((element, index) => {
-        const rect = element.getBoundingClientRect();
-        const elementTop = rect.top + window.scrollY;
-        const elementBottom = elementTop + rect.height;
-
-        // Check if element is at least partially visible
-        const isVisible =
-          elementBottom > viewportTop && elementTop < viewportBottom;
-
-        if (!isVisible) return null;
-
-        // Calculate how much of the element is in viewport
-        const visibleTop = Math.max(elementTop, viewportTop);
-        const visibleBottom = Math.min(elementBottom, viewportBottom);
-        const visibleHeight = visibleBottom - visibleTop;
-        const visibilityRatio = visibleHeight / rect.height;
-
-        // Calculate distance from viewport center
-        const elementCenter = elementTop + rect.height / 2;
-        const distanceFromCenter = Math.abs(elementCenter - viewportCenter);
-
-        return {
-          index,
-          element,
-          elementTop,
-          elementBottom,
-          visibilityRatio,
-          distanceFromCenter,
-          elementCenter,
-        };
-      })
-      .filter((item) => item !== null);
-
-    if (visibleArticles.length === 0) {
-      // No articles in viewport, return first or last based on direction
-      return direction === "down" ? 0 : elements.length - 1;
-    }
-
-    // Sort by visibility ratio (more visible = better) and distance from center (closer = better)
-    visibleArticles.sort((a, b) => {
-      // Prioritize articles that are more visible
-      if (Math.abs(a.visibilityRatio - b.visibilityRatio) > 0.1) {
-        return b.visibilityRatio - a.visibilityRatio;
-      }
-      // If visibility is similar, prefer the one closer to center
-      return a.distanceFromCenter - b.distanceFromCenter;
-    });
-
-    return visibleArticles[0].index;
-  };
-
-  // Get series navigation info
-  const getSeriesInfo = () => {
-    const seriesNav = document.querySelector("[data-series-nav]");
-    if (!seriesNav) return null;
-
-    const prevLink = seriesNav.querySelector(
-      '[rel="prev"]',
-    ) as HTMLAnchorElement;
-    const nextLink = seriesNav.querySelector(
-      '[rel="next"]',
-    ) as HTMLAnchorElement;
-
-    return {
-      prevLink,
-      nextLink,
-      hasPrev: !!prevLink,
-      hasNext: !!nextLink,
-    };
-  };
+  // Get series navigation info using utility
+  const getSeriesInfo = DOMUtils.getSeriesNavigation;
 
   // Navigation handlers
   const navigateUp = () => {
-    if (pageType.value !== "home") return;
+    if (pageType.value !== PAGE_TYPES.HOME) return;
 
     const elements = getSelectableElements();
     if (elements.length === 0) return;
@@ -176,15 +102,19 @@ export function useVimKeyBindings() {
       selectedIndex.value = findBestArticleInViewport("up");
       isSelectionActive.value = true;
     } else {
-      // Normal navigation
-      selectedIndex.value = Math.max(0, selectedIndex.value - 1);
+      // Normal navigation using utility
+      selectedIndex.value = SelectionUtils.navigateSelection(
+        selectedIndex.value,
+        "up",
+        elements.length,
+      );
     }
 
     highlightSelected();
   };
 
   const navigateDown = () => {
-    if (pageType.value !== "home") return;
+    if (pageType.value !== PAGE_TYPES.HOME) return;
 
     const elements = getSelectableElements();
     if (elements.length === 0) return;
@@ -194,10 +124,11 @@ export function useVimKeyBindings() {
       selectedIndex.value = findBestArticleInViewport("down");
       isSelectionActive.value = true;
     } else {
-      // Normal navigation
-      selectedIndex.value = Math.min(
-        elements.length - 1,
-        selectedIndex.value + 1,
+      // Normal navigation using utility
+      selectedIndex.value = SelectionUtils.navigateSelection(
+        selectedIndex.value,
+        "down",
+        elements.length,
       );
     }
 
@@ -205,7 +136,7 @@ export function useVimKeyBindings() {
   };
 
   const selectCurrent = () => {
-    if (pageType.value !== "home") return;
+    if (pageType.value !== PAGE_TYPES.HOME) return;
 
     const elements = getSelectableElements();
 
@@ -224,71 +155,69 @@ export function useVimKeyBindings() {
   };
 
   const goBack = () => {
-    if (pageType.value === "article") {
+    if (pageType.value === PAGE_TYPES.ARTICLE) {
       // Save current homepage state before navigating
       saveHomepageState();
-      window.location.href = "/";
+      NavigationUtils.navigateToHome();
     }
   };
 
   const navigateNextSeries = () => {
-    if (pageType.value !== "article") return false;
+    if (pageType.value !== PAGE_TYPES.ARTICLE) return false;
 
     const seriesInfo = getSeriesInfo();
     if (seriesInfo?.hasNext && seriesInfo.nextLink) {
-      // Use location.href for proper navigation
-      window.location.href = seriesInfo.nextLink.href;
+      NavigationUtils.navigateTo(seriesInfo.nextLink.href);
       return true;
     }
     return false;
   };
 
   const navigatePrevSeries = () => {
-    if (pageType.value !== "article") return false;
+    if (pageType.value !== PAGE_TYPES.ARTICLE) return false;
 
     const seriesInfo = getSeriesInfo();
     if (seriesInfo?.hasPrev && seriesInfo.prevLink) {
-      // Use location.href for proper navigation
-      window.location.href = seriesInfo.prevLink.href;
+      NavigationUtils.navigateTo(seriesInfo.prevLink.href);
       return true;
     }
     return false;
   };
 
-  // Scrolling handlers for articles
+  // Scrolling handlers for articles using utilities
   const scrollLineUp = () => {
-    if (pageType.value === "article") {
-      window.scrollBy({ top: -40, behavior: "smooth" });
+    if (pageType.value === PAGE_TYPES.ARTICLE) {
+      ScrollUtils.scrollLineUp();
     }
   };
 
   const scrollLineDown = () => {
-    if (pageType.value === "article") {
-      window.scrollBy({ top: 40, behavior: "smooth" });
+    if (pageType.value === PAGE_TYPES.ARTICLE) {
+      ScrollUtils.scrollLineDown();
     }
   };
 
   const scrollToTop = () => {
-    if (pageType.value === "article") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+    if (pageType.value === PAGE_TYPES.ARTICLE) {
+      ScrollUtils.scrollToTop();
     }
   };
 
   const scrollToBottom = () => {
-    if (pageType.value === "article") {
-      window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+    if (pageType.value === PAGE_TYPES.ARTICLE) {
+      ScrollUtils.scrollToBottom();
     }
   };
 
   const scrollHalfPageUp = () => {
-    if (pageType.value === "article") {
-      window.scrollBy({ top: -window.innerHeight / 2, behavior: "smooth" });
+    if (pageType.value === PAGE_TYPES.ARTICLE) {
+      ScrollUtils.scrollHalfPageUp();
     }
   };
 
   const scrollHalfPageDown = () => {
-    if (pageType.value === "article") {
-      window.scrollBy({ top: window.innerHeight / 2, behavior: "smooth" });
+    if (pageType.value === PAGE_TYPES.ARTICLE) {
+      ScrollUtils.scrollHalfPageDown();
     }
   };
 
@@ -297,129 +226,62 @@ export function useVimKeyBindings() {
     showHelp.value = !showHelp.value;
   };
 
-  // Visual feedback
+  // Visual feedback using utilities
   const highlightSelected = (smooth = true) => {
     const elements = getSelectableElements();
 
-    // Remove previous highlights
-    elements.forEach((el) => el.classList.remove("vim-selected"));
+    // Update selection class using utility
+    const currentElement = DOMUtils.updateSelectionClass(
+      elements,
+      selectedIndex.value,
+      isSelectionActive.value,
+    );
 
-    // Add highlight to current selection if selection is active and valid
-    if (isSelectionActive.value && selectedIndex.value >= 0) {
-      const currentElement = elements[selectedIndex.value];
-      if (currentElement) {
-        currentElement.classList.add("vim-selected");
-        // Only scroll into view if smooth navigation is requested
-        if (smooth) {
-          currentElement.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          });
-        }
-      }
+    // Scroll into view if smooth navigation is requested
+    if (smooth && currentElement) {
+      ScrollUtils.scrollIntoView(currentElement);
     }
 
     // Save state after highlighting changes
-    if (pageType.value === "home") {
-      setTimeout(() => saveHomepageState(), 100);
+    if (pageType.value === PAGE_TYPES.HOME) {
+      setTimeout(() => saveHomepageState(), UI_CONSTANTS.STATE_SAVE_DELAY);
     }
   };
 
-  // Key binding definitions
-  const keyBindings = computed<VimKeyBinding[]>(() => [
-    // Homepage navigation
-    {
-      key: config.value.navigation.up,
-      action: "navigate-up",
-      description: "Navigate up in article list",
-      handler: navigateUp,
-    },
-    {
-      key: config.value.navigation.down,
-      action: "navigate-down",
-      description: "Navigate down in article list",
-      handler: navigateDown,
-    },
-    {
-      key: config.value.navigation.enter,
-      action: "select-current",
-      description: "Enter selected article",
-      handler: selectCurrent,
-    },
-    // Article scrolling
-    {
-      key: config.value.scrolling.lineUp,
-      action: "scroll-line-up",
-      description: "Scroll up one line",
-      handler: scrollLineUp,
-    },
-    {
-      key: config.value.scrolling.lineDown,
-      action: "scroll-line-down",
-      description: "Scroll down one line",
-      handler: scrollLineDown,
-    },
-    {
-      key: config.value.scrolling.top,
-      action: "scroll-to-top",
-      description: "Jump to top of page",
-      handler: scrollToTop,
-    },
-    {
-      key: config.value.scrolling.bottom,
-      action: "scroll-to-bottom",
-      description: "Jump to bottom of page",
-      handler: scrollToBottom,
-    },
-    {
-      key: config.value.scrolling.halfPageUp,
-      action: "scroll-half-page-up",
-      description: "Scroll up half page",
-      handler: scrollHalfPageUp,
-    },
-    {
-      key: config.value.scrolling.halfPageDown,
-      action: "scroll-half-page-down",
-      description: "Scroll down half page",
-      handler: scrollHalfPageDown,
-    },
-    // Navigation
-    {
-      key: config.value.navigation.back,
-      action: "go-back",
-      description: "Go back to previous page",
-      handler: goBack,
-    },
-    {
-      key: config.value.navigation.nextSeries,
-      action: "next-series",
-      description: "Go to next article in series",
-      handler: navigateNextSeries,
-    },
-    {
-      key: config.value.navigation.prevSeries,
-      action: "prev-series",
-      description: "Go to previous article in series",
-      handler: navigatePrevSeries,
-    },
-    // Panels
-    {
-      key: config.value.panels.help,
-      action: "toggle-help",
-      description: "Toggle help panel",
-      handler: toggleHelp,
-    },
-  ]);
+  // Handler mapping for actions
+  const handlerMap: Record<string, () => void | boolean> = {
+    [ACTION_TYPES.NAVIGATE_UP]: navigateUp,
+    [ACTION_TYPES.NAVIGATE_DOWN]: navigateDown,
+    [ACTION_TYPES.SELECT_CURRENT]: selectCurrent,
+    [ACTION_TYPES.SCROLL_LINE_UP]: scrollLineUp,
+    [ACTION_TYPES.SCROLL_LINE_DOWN]: scrollLineDown,
+    [ACTION_TYPES.SCROLL_TO_TOP]: scrollToTop,
+    [ACTION_TYPES.SCROLL_TO_BOTTOM]: scrollToBottom,
+    [ACTION_TYPES.SCROLL_HALF_PAGE_UP]: scrollHalfPageUp,
+    [ACTION_TYPES.SCROLL_HALF_PAGE_DOWN]: scrollHalfPageDown,
+    [ACTION_TYPES.GO_BACK]: goBack,
+    [ACTION_TYPES.NEXT_SERIES]: navigateNextSeries,
+    [ACTION_TYPES.PREV_SERIES]: navigatePrevSeries,
+    [ACTION_TYPES.TOGGLE_HELP]: toggleHelp,
+  };
+
+  // Key binding definitions using action definitions
+  const keyBindings = computed<VimKeyBinding[]>(() => {
+    const actionDefinitions = createActionDefinitions(config.value);
+    return actionDefinitions.map((def) => ({
+      key: def.key,
+      action: def.action,
+      description: def.description,
+      handler: handlerMap[def.action] || (() => {}),
+    }));
+  });
 
   // Keyboard event handler
   const handleKeyDown = (event: KeyboardEvent) => {
     if (!isActive.value) return;
 
-    // Don't interfere with input fields
-    if (
-      event.target instanceof HTMLInputElement ||
-      event.target instanceof HTMLTextAreaElement
-    ) {
+    // Don't interfere with input fields using utility
+    if (DOMUtils.isInputElement(event.target)) {
       return;
     }
 
@@ -483,7 +345,7 @@ export function useVimKeyBindings() {
     }
 
     // Handle context-specific key bindings using config
-    if (pageType.value === "home") {
+    if (pageType.value === PAGE_TYPES.HOME) {
       // Homepage navigation - use j/k for article navigation
       if (KeyUtils.matchesBinding(event, config.value.navigation.down)) {
         event.preventDefault();
@@ -495,7 +357,7 @@ export function useVimKeyBindings() {
         navigateUp();
         return;
       }
-    } else if (pageType.value === "article") {
+    } else if (pageType.value === PAGE_TYPES.ARTICLE) {
       // Article scrolling - use j/k for line scrolling
       if (KeyUtils.matchesBinding(event, config.value.scrolling.lineDown)) {
         event.preventDefault();
@@ -560,7 +422,7 @@ export function useVimKeyBindings() {
 
   // Initialize selection on route change
   const initializeSelection = () => {
-    if (pageType.value === "home") {
+    if (pageType.value === PAGE_TYPES.HOME) {
       // Try to restore previous state
       const savedState = loadHomepageState();
 
@@ -585,9 +447,9 @@ export function useVimKeyBindings() {
         // Reset selection state - no initial selection
         selectedIndex.value = -1;
         isSelectionActive.value = false;
-        // Clear any existing highlights
+        // Clear any existing highlights using utility
         const elements = getSelectableElements();
-        elements.forEach((el) => el.classList.remove("vim-selected"));
+        DOMUtils.updateSelectionClass(elements, -1, false);
       }
     } else {
       // Clear homepage state when navigating away
@@ -595,14 +457,10 @@ export function useVimKeyBindings() {
     }
   };
 
-  // Handle scroll events to save state
+  // Handle scroll events to save state using debounced utility
   const handleScroll = () => {
-    if (pageType.value === "home") {
-      // Debounce scroll state saving
-      clearTimeout(keyPressTimeout.value);
-      keyPressTimeout.value = window.setTimeout(() => {
-        saveHomepageState();
-      }, 150);
+    if (pageType.value === PAGE_TYPES.HOME) {
+      debouncedSaveState();
     }
   };
 
@@ -613,7 +471,7 @@ export function useVimKeyBindings() {
     // Initialize with a slight delay to ensure DOM is ready
     setTimeout(() => {
       initializeSelection();
-    }, 50);
+    }, UI_CONSTANTS.INITIALIZATION_DELAY);
   });
 
   onUnmounted(() => {
@@ -623,7 +481,7 @@ export function useVimKeyBindings() {
       clearTimeout(keyPressTimeout.value);
     }
     // Save state before unmounting if on homepage
-    if (pageType.value === "home") {
+    if (pageType.value === PAGE_TYPES.HOME) {
       saveHomepageState();
     }
   });
