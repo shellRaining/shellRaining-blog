@@ -1,9 +1,12 @@
 ---
-title: MCP client 和 server 通信时的生命周期
+title: MCP 生命周期
 tag:
   - MCP
-  - tech_blog
+  - book
 date: 2025-06-28
+series:
+  name: MCP 学习
+  part: 2
 ---
 
 
@@ -144,7 +147,7 @@ export class Client {
 
 ## shutdown
 
-关闭阶段由客户端发起，对于 stdio 通信模式，客户端首先关闭子进程（即服务器）的输入流，然后等待服务器退出，若在规定时间内没有退出，发送 `SIGTERM`，若还没有退出，发送 `SIGKILL`。对于 HTTP 通信方式，通信断开似乎由 HTTP 链接接管了
+关闭阶段任意一方发起都可以，对于 stdio 通信模式，客户端首先关闭子进程（即服务器）的输入流，然后等待服务器退出，若在规定时间内没有退出，发送 `SIGTERM`，若还没有退出，发送 `SIGKILL`。对于 HTTP 通信方式，通信断开似乎由 HTTP 链接接管了
 
 ## 感想
 
