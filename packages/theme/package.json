@@ -16,9 +16,9 @@
     "viewerjs": "^1.11.7"
   },
   "peerDependencies": {
-    "vue": "^3.0.0",
+    "@vueuse/core": "^10.0.0",
     "vitepress": "^2.0.0-alpha.3",
-    "@vueuse/core": "^10.0.0"
+    "vue": "^3.0.0"
   },
   "exports": {
     ".": "./src/index.ts",
@@ -51,7 +51,7 @@
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.1.4",
-    "@types/node": "^22.15.34",
+    "@types/node": "^22.16.5",
     "@types/subset-font": "^2.3.0",
     "rolldown": "1.0.0-beta.21",
     "vite": "^6.3.5",
