@@ -4,45 +4,46 @@ import { getVersions } from "./injectVersion";
 import { fontPlugin } from "./plugins/font";
 import { headConf } from "./conf/head";
 import { markdownConf } from "./conf/markdown";
-import { RssPlugin } from "./plugins/rss";
+import { RssPlugin, type RSSOptions } from "./plugins/rss";
 
-export type ShellRainingBlogThemeConfig = DefaultTheme.Config & {
+type themeOpts = {
+  baseUrl: string;
+  rss: RSSOptions;
+};
+export interface ShellRainingBlogThemeConfig extends DefaultTheme.Config {
   font?: FontConfig[];
-};
+}
 
-const baseUrl = "https://shellraining.xyz";
-
-const RSS = {
-  title: "shellRaining Blog",
+export function createConfig({
   baseUrl,
-  copyright: "Copyright (c) 2023-present, shellRaining",
-};
-
-export const shellRainingBlogConfig: UserConfig<ShellRainingBlogThemeConfig> = {
-  appearance: false,
-  vite: {
-    build: {
-      target: "esnext",
-    },
-    plugins: [fontPlugin, RssPlugin(RSS)],
-  },
-  head: headConf,
-  themeConfig: {
-    socialLinks: [],
-    sidebar: [
-      {
-        text: "",
-        items: [],
+  rss,
+}: themeOpts): UserConfig<ShellRainingBlogThemeConfig> {
+  return {
+    appearance: false,
+    vite: {
+      build: {
+        target: "esnext",
       },
-    ],
-  },
-  sitemap: {
-    hostname: baseUrl,
-  },
-  markdown: markdownConf,
-  async transformPageData(pageData, ctx) {
-    const versions = await getVersions(pageData, ctx);
-    pageData.versions = versions;
-    pageData.frontmatter.sidebar = !!pageData.frontmatter.series;
-  },
-};
+      plugins: [fontPlugin, RssPlugin(rss)],
+    },
+    head: headConf,
+    themeConfig: {
+      socialLinks: [],
+      sidebar: [
+        {
+          text: "",
+          items: [],
+        },
+      ],
+    },
+    sitemap: {
+      hostname: baseUrl,
+    },
+    markdown: markdownConf,
+    async transformPageData(pageData, ctx) {
+      const versions = await getVersions(pageData, ctx);
+      pageData.versions = versions;
+      pageData.frontmatter.sidebar = !!pageData.frontmatter.series;
+    },
+  };
+}

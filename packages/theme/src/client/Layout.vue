@@ -5,7 +5,6 @@ import Viewer from "./Viewer/Viewer.vue";
 import Home from "./Home/Home.vue";
 import AppearanceSwitcher from "./Home/AppearanceSwitcher.vue";
 import Sidebar from "./Sidebar/Sidebar.vue";
-import SeriesNavigation from "./components/SeriesNavigation.vue";
 import VimHelpPanel from "./components/VimHelpPanel.vue";
 import VimIndicator from "./components/VimIndicator.vue";
 import { useVimKeyBindings } from "./composables/useVimKeyBindings";
@@ -26,10 +25,6 @@ const { isMobile } = useMobile();
     <template #doc-before>
       <Title />
       <ClientOnly><Viewer /></ClientOnly>
-    </template>
-
-    <template #doc-after>
-      <SeriesNavigation />
     </template>
 
     <template #home-features-after>

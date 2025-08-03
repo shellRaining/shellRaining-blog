@@ -1,11 +1,22 @@
 import { defineConfig } from "vitepress";
-import { shellRainingBlogConfig } from "@shellraining/theme/config";
+import { createConfig } from "@shellraining/theme/config";
 import type { ShellRainingBlogThemeConfig } from "@shellraining/theme/config";
 
+const baseUrl = "shellraining.xyz";
+const title = "shellRaining's blog";
+const shellRainingBlogThemeConfigOpts = createConfig({
+  baseUrl,
+  rss: {
+    title,
+    baseUrl,
+    copyright: "Copyright (c) 2023-present, shellRaining",
+  },
+});
+
 export default defineConfig<ShellRainingBlogThemeConfig>({
-  extends: shellRainingBlogConfig,
+  extends: shellRainingBlogThemeConfigOpts,
   lang: "zh-cn",
-  title: "shellRaining's blog",
+  title,
   description: "A VitePress Site",
   themeConfig: {
     logo: { src: "/favicon.ico", width: 24, height: 24 },
