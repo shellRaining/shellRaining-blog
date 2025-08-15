@@ -184,11 +184,14 @@ export function createActionDefinitions(
  */
 export function loadVimConfig(): VimKeyBindingsConfig {
   try {
-    const savedConfig = localStorage.getItem(VIM_CONFIG_STORAGE_KEY);
-    if (savedConfig) {
-      const parsed = JSON.parse(savedConfig);
-      // Deep merge with default config to ensure all properties exist
-      return mergeConfigs(DEFAULT_VIM_CONFIG, parsed);
+    // Check if localStorage is available (browser environment)
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      const savedConfig = localStorage.getItem(VIM_CONFIG_STORAGE_KEY);
+      if (savedConfig) {
+        const parsed = JSON.parse(savedConfig);
+        // Deep merge with default config to ensure all properties exist
+        return mergeConfigs(DEFAULT_VIM_CONFIG, parsed);
+      }
     }
   } catch (error) {
     console.warn("Failed to load vim keybindings config:", error);
@@ -205,7 +208,10 @@ export function saveVimConfig(
   try {
     const currentConfig = loadVimConfig();
     const newConfig = mergeConfigs(currentConfig, config);
-    localStorage.setItem(VIM_CONFIG_STORAGE_KEY, JSON.stringify(newConfig));
+    // Check if localStorage is available (browser environment)
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      localStorage.setItem(VIM_CONFIG_STORAGE_KEY, JSON.stringify(newConfig));
+    }
     return newConfig;
   } catch (error) {
     console.warn("Failed to save vim keybindings config:", error);
@@ -246,7 +252,10 @@ function mergeConfigs(
  */
 export function resetVimConfig(): VimKeyBindingsConfig {
   try {
-    localStorage.removeItem(VIM_CONFIG_STORAGE_KEY);
+    // Check if localStorage is available (browser environment)
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      localStorage.removeItem(VIM_CONFIG_STORAGE_KEY);
+    }
   } catch (error) {
     console.warn("Failed to reset vim keybindings config:", error);
   }

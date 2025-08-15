@@ -1,58 +1,62 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import { loadVimConfig, KeyUtils } from "../config/vimKeybindings";
+import { computed, ref, onMounted } from "vue";
+import { loadVimConfig, KeyUtils, DEFAULT_VIM_CONFIG } from "../config/vimKeybindings";
 import { PAGE_TYPES } from "../config/vimConstants";
 
 const props = defineProps<{
   pageType: "home" | "article" | "other";
 }>();
 
-const config = loadVimConfig();
+const config = ref(DEFAULT_VIM_CONFIG);
+
+onMounted(() => {
+  config.value = loadVimConfig();
+});
 
 const indicators = computed(() => {
   switch (props.pageType) {
     case PAGE_TYPES.HOME:
       return [
         {
-          key: `${KeyUtils.formatForDisplay(config.navigation.down)}/${KeyUtils.formatForDisplay(config.navigation.up)}`,
+          key: `${KeyUtils.formatForDisplay(config.value.navigation.down)}/${KeyUtils.formatForDisplay(config.value.navigation.up)}`,
           action: "navigate",
         },
         {
-          key: KeyUtils.formatForDisplay(config.navigation.enter),
+          key: KeyUtils.formatForDisplay(config.value.navigation.enter),
           action: "select",
         },
         {
-          key: KeyUtils.formatForDisplay(config.panels.help),
+          key: KeyUtils.formatForDisplay(config.value.panels.help),
           action: "help",
         },
       ];
     case PAGE_TYPES.ARTICLE:
       return [
         {
-          key: `${KeyUtils.formatForDisplay(config.scrolling.lineDown)}/${KeyUtils.formatForDisplay(config.scrolling.lineUp)}`,
+          key: `${KeyUtils.formatForDisplay(config.value.scrolling.lineDown)}/${KeyUtils.formatForDisplay(config.value.scrolling.lineUp)}`,
           action: "scroll",
         },
         {
-          key: `${config.scrolling.top}/${KeyUtils.formatForDisplay(config.scrolling.bottom)}`,
+          key: `${config.value.scrolling.top}/${KeyUtils.formatForDisplay(config.value.scrolling.bottom)}`,
           action: "top/bottom",
         },
         {
-          key: `${KeyUtils.formatForDisplay(config.scrolling.halfPageUp)}/${KeyUtils.formatForDisplay(config.scrolling.halfPageDown)}`,
+          key: `${KeyUtils.formatForDisplay(config.value.scrolling.halfPageUp)}/${KeyUtils.formatForDisplay(config.value.scrolling.halfPageDown)}`,
           action: "page",
         },
         {
-          key: KeyUtils.formatForDisplay(config.navigation.back),
+          key: KeyUtils.formatForDisplay(config.value.navigation.back),
           action: "back",
         },
         {
-          key: KeyUtils.formatForDisplay(config.panels.help),
+          key: KeyUtils.formatForDisplay(config.value.panels.help),
           action: "help",
         },
       ];
     default:
       return [
         {
-          key: KeyUtils.formatForDisplay(config.panels.help),
+          key: KeyUtils.formatForDisplay(config.value.panels.help),
           action: "help",
         },
       ];

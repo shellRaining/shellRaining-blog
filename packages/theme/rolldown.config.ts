@@ -10,6 +10,9 @@ const external = [
   "fs",
   "path",
   "child_process",
+  "node:fs",
+  "node:path",
+  "node:child_process",
   ...Object.keys(pkg.dependencies || {}),
   ...Object.keys(pkg.peerDependencies || {}),
 ];
