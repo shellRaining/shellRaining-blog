@@ -3,8 +3,6 @@ import {
   UI_CONSTANTS,
   SCROLL_BEHAVIOR,
   SCROLL_POSITION,
-  SPECIAL_KEYS,
-  STORAGE_KEYS,
 } from "../config/vimConstants";
 
 /**
@@ -330,8 +328,6 @@ export const SelectionUtils = {
   findBestArticleInViewport(direction: "up" | "down" = "down"): number {
     const elements = DOMUtils.getSelectableElements();
     if (elements.length === 0) return -1;
-
-    const viewport = ViewportUtils.getViewportInfo();
 
     // Find articles that are at least partially visible
     const visibleArticles = elements

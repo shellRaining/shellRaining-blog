@@ -2,7 +2,6 @@ import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useData } from "vitepress";
 import {
   type VimKeyBindingsConfig,
-  type VimActionDefinition,
   loadVimConfig,
   saveVimConfig,
   KeyUtils,
@@ -11,7 +10,6 @@ import {
 import {
   DOMUtils,
   ScrollUtils,
-  ViewportUtils,
   StateUtils,
   NavigationUtils,
   SelectionUtils,

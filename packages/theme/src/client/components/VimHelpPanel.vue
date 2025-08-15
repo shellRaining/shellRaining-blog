@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, nextTick, onUnmounted, ref, watch } from "vue";
 import type { VimKeyBinding } from "../composables/useVimKeyBindings";
 import { ACTION_GROUPS } from "../config/vimConstants";
 
