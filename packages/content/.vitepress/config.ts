@@ -2,7 +2,7 @@ import { defineConfig } from "vitepress";
 import { createConfig } from "@shellraining/theme/config";
 import type { ShellRainingBlogThemeConfig } from "@shellraining/theme/config";
 
-const baseUrl = "shellraining.xyz";
+const baseUrl = "https://shellraining.xyz";
 const title = "shellRaining's blog";
 const shellRainingBlogThemeConfigOpts = createConfig({
   baseUrl,
