@@ -41,10 +41,6 @@ const indicators = computed(() => {
           action: "top/bottom",
         },
         {
-          key: `${KeyUtils.formatForDisplay(config.value.scrolling.halfPageUp)}/${KeyUtils.formatForDisplay(config.value.scrolling.halfPageDown)}`,
-          action: "page",
-        },
-        {
           key: KeyUtils.formatForDisplay(config.value.navigation.back),
           action: "back",
         },

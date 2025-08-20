@@ -119,15 +119,16 @@ export const ScrollUtils = {
   },
 
   /**
-   * Scroll by half page
+   * Fast line scrolling for responsive navigation
    */
-  scrollHalfPageUp(behavior: ScrollBehavior = SCROLL_BEHAVIOR.SMOOTH) {
-    this.scrollBy(-window.innerHeight / 2, behavior);
+  fastScrollLineUp() {
+    this.scrollBy(-UI_CONSTANTS.SCROLL_LINE_AMOUNT, SCROLL_BEHAVIOR.INSTANT);
   },
 
-  scrollHalfPageDown(behavior: ScrollBehavior = SCROLL_BEHAVIOR.SMOOTH) {
-    this.scrollBy(window.innerHeight / 2, behavior);
+  fastScrollLineDown() {
+    this.scrollBy(UI_CONSTANTS.SCROLL_LINE_AMOUNT, SCROLL_BEHAVIOR.INSTANT);
   },
+
 
   /**
    * Scroll element into view
@@ -138,6 +139,46 @@ export const ScrollUtils = {
     block: ScrollLogicalPosition = SCROLL_POSITION.CENTER,
   ) {
     element.scrollIntoView({ behavior, block });
+  },
+
+  /**
+   * Smart scroll element into view - only scrolls if element is not visible
+   */
+  smartScrollIntoView(
+    element: HTMLElement,
+    behavior: ScrollBehavior = SCROLL_BEHAVIOR.INSTANT,
+    block: ScrollLogicalPosition = SCROLL_POSITION.CENTER,
+  ) {
+    // Check if element is already fully visible
+    if (ViewportUtils.isElementVisible(element, 50)) {
+      return; // Don't scroll if element is already visible with some padding
+    }
+    
+    // Use instant scrolling for better responsiveness during rapid navigation
+    element.scrollIntoView({ behavior, block });
+  },
+
+  /**
+   * Force element to stay in viewport center - always scrolls for perfect centering
+   */
+  forceElementToCenter(
+    element: HTMLElement,
+    behavior: ScrollBehavior = SCROLL_BEHAVIOR.INSTANT,
+  ) {
+    const rect = element.getBoundingClientRect();
+    const elementCenter = rect.top + window.scrollY + rect.height / 2;
+    const viewportCenter = window.scrollY + window.innerHeight / 2;
+    
+    // Calculate the scroll distance needed to center the element
+    const scrollDistance = elementCenter - viewportCenter;
+    
+    // Only scroll if the element is not already perfectly centered (with small tolerance)
+    if (Math.abs(scrollDistance) > 5) {
+      window.scrollBy({ 
+        top: scrollDistance, 
+        behavior 
+      });
+    }
   },
 };
 

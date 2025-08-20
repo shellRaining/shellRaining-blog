@@ -10,7 +10,7 @@ export const STORAGE_KEYS = {
 
 // UI Constants
 export const UI_CONSTANTS = {
-  SCROLL_LINE_AMOUNT: 40,
+  SCROLL_LINE_AMOUNT: 60,
   SEQUENCE_TIMEOUT: 1000,
   SCROLL_SAVE_DEBOUNCE: 150,
   INITIALIZATION_DELAY: 50,
@@ -43,8 +43,6 @@ export const ACTION_TYPES = {
   SCROLL_LINE_DOWN: "scroll-line-down",
   SCROLL_TO_TOP: "scroll-to-top",
   SCROLL_TO_BOTTOM: "scroll-to-bottom",
-  SCROLL_HALF_PAGE_UP: "scroll-half-page-up",
-  SCROLL_HALF_PAGE_DOWN: "scroll-half-page-down",
   GO_BACK: "go-back",
   NEXT_SERIES: "next-series",
   PREV_SERIES: "prev-series",

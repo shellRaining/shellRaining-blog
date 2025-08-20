@@ -45,6 +45,8 @@ export function useVimKeyBindings() {
     saveHomepageState();
   }, UI_CONSTANTS.SCROLL_SAVE_DEBOUNCE);
 
+  // No debouncing for immediate response during rapid navigation
+
   // Save homepage state to sessionStorage
   const saveHomepageState = () => {
     if (pageType.value === PAGE_TYPES.HOME) {
@@ -182,16 +184,16 @@ export function useVimKeyBindings() {
     return false;
   };
 
-  // Scrolling handlers for articles using utilities
+  // Scrolling handlers for articles using utilities - fast scrolling for better UX
   const scrollLineUp = () => {
     if (pageType.value === PAGE_TYPES.ARTICLE) {
-      ScrollUtils.scrollLineUp();
+      ScrollUtils.fastScrollLineUp();
     }
   };
 
   const scrollLineDown = () => {
     if (pageType.value === PAGE_TYPES.ARTICLE) {
-      ScrollUtils.scrollLineDown();
+      ScrollUtils.fastScrollLineDown();
     }
   };
 
@@ -207,17 +209,6 @@ export function useVimKeyBindings() {
     }
   };
 
-  const scrollHalfPageUp = () => {
-    if (pageType.value === PAGE_TYPES.ARTICLE) {
-      ScrollUtils.scrollHalfPageUp();
-    }
-  };
-
-  const scrollHalfPageDown = () => {
-    if (pageType.value === PAGE_TYPES.ARTICLE) {
-      ScrollUtils.scrollHalfPageDown();
-    }
-  };
 
   // Panel handlers
   const toggleHelp = () => {
@@ -225,7 +216,7 @@ export function useVimKeyBindings() {
   };
 
   // Visual feedback using utilities
-  const highlightSelected = (smooth = true) => {
+  const highlightSelected = (enableScroll = true) => {
     const elements = getSelectableElements();
 
     // Update selection class using utility
@@ -235,9 +226,9 @@ export function useVimKeyBindings() {
       isSelectionActive.value,
     );
 
-    // Scroll into view if smooth navigation is requested
-    if (smooth && currentElement) {
-      ScrollUtils.scrollIntoView(currentElement);
+    // Force selected element to stay in viewport center for best UX
+    if (enableScroll && currentElement) {
+      ScrollUtils.forceElementToCenter(currentElement);
     }
 
     // Save state after highlighting changes
@@ -255,8 +246,6 @@ export function useVimKeyBindings() {
     [ACTION_TYPES.SCROLL_LINE_DOWN]: scrollLineDown,
     [ACTION_TYPES.SCROLL_TO_TOP]: scrollToTop,
     [ACTION_TYPES.SCROLL_TO_BOTTOM]: scrollToBottom,
-    [ACTION_TYPES.SCROLL_HALF_PAGE_UP]: scrollHalfPageUp,
-    [ACTION_TYPES.SCROLL_HALF_PAGE_DOWN]: scrollHalfPageDown,
     [ACTION_TYPES.GO_BACK]: goBack,
     [ACTION_TYPES.NEXT_SERIES]: navigateNextSeries,
     [ACTION_TYPES.PREV_SERIES]: navigatePrevSeries,
@@ -292,19 +281,6 @@ export function useVimKeyBindings() {
       return;
     }
 
-    // Handle Ctrl combinations using config
-    if (event.ctrlKey) {
-      if (KeyUtils.matchesBinding(event, config.value.scrolling.halfPageUp)) {
-        event.preventDefault();
-        scrollHalfPageUp();
-        return;
-      }
-      if (KeyUtils.matchesBinding(event, config.value.scrolling.halfPageDown)) {
-        event.preventDefault();
-        scrollHalfPageDown();
-        return;
-      }
-    }
 
     // Handle multi-key sequences (gg) using config
     if (pageType.value === "article") {
@@ -438,7 +414,7 @@ export function useVimKeyBindings() {
 
           // Restore selection highlight if active
           if (isSelectionActive.value && selectedIndex.value >= 0) {
-            highlightSelected(false); // No smooth scrolling to prevent double scroll
+            highlightSelected(false); // No scrolling to prevent double scroll
           }
         }, 0);
       } else {
@@ -478,6 +454,8 @@ export function useVimKeyBindings() {
     if (keyPressTimeout.value) {
       clearTimeout(keyPressTimeout.value);
     }
+    // Cancel debounced functions
+    debouncedSaveState.cancel();
     // Save state before unmounting if on homepage
     if (pageType.value === PAGE_TYPES.HOME) {
       saveHomepageState();
@@ -509,8 +487,6 @@ export function useVimKeyBindings() {
     scrollLineDown,
     scrollToTop,
     scrollToBottom,
-    scrollHalfPageUp,
-    scrollHalfPageDown,
     toggleHelp,
   };
 }

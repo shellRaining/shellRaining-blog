@@ -19,17 +19,11 @@ export interface VimKeyBindingsConfig {
     lineDown: string;
     top: string;
     bottom: string;
-    halfPageUp: string;
-    halfPageDown: string;
   };
   panels: {
     help: string;
   };
-  // Special key combinations and sequences
-  combinations: {
-    ctrlU: string;
-    ctrlD: string;
-  };
+  // Special key sequences
   sequences: {
     doubleG: string;
   };
@@ -57,15 +51,9 @@ export const DEFAULT_VIM_CONFIG: VimKeyBindingsConfig = {
     lineDown: "j", // Same as navigation down, but context-dependent
     top: "gg",
     bottom: "G",
-    halfPageUp: "ctrl+u",
-    halfPageDown: "ctrl+d",
   },
   panels: {
     help: "?",
-  },
-  combinations: {
-    ctrlU: "u",
-    ctrlD: "d",
   },
   sequences: {
     doubleG: "g",
@@ -136,20 +124,6 @@ export function createActionDefinitions(
       key: config.scrolling.bottom,
       action: ACTION_TYPES.SCROLL_TO_BOTTOM,
       description: "Jump to bottom of page",
-      contexts: [PAGE_TYPES.ARTICLE],
-      group: ACTION_GROUPS.SCROLLING,
-    },
-    {
-      key: config.scrolling.halfPageUp,
-      action: ACTION_TYPES.SCROLL_HALF_PAGE_UP,
-      description: "Scroll up half page",
-      contexts: [PAGE_TYPES.ARTICLE],
-      group: ACTION_GROUPS.SCROLLING,
-    },
-    {
-      key: config.scrolling.halfPageDown,
-      action: ACTION_TYPES.SCROLL_HALF_PAGE_DOWN,
-      description: "Scroll down half page",
       contexts: [PAGE_TYPES.ARTICLE],
       group: ACTION_GROUPS.SCROLLING,
     },
