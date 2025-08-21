@@ -19,3 +19,4 @@ public/font
 *.woff2
 .markdownlint.yaml
 .env
+.obsidian

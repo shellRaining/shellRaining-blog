@@ -9,7 +9,6 @@ series:
   part: 2
 ---
 
-
 MCP 为 client 和 server 通信定义了严谨的时序，一个完整的生命周期可以分为三部分，初始化阶段（initialization），运行阶段（operation），结束阶段（shutdown）
 
 ## initialization
@@ -88,7 +87,7 @@ MCP 为 client 和 server 通信定义了严谨的时序，一个完整的生命
 }
 ```
 
-比方说上面的情况，可以看到客户端支持的是 `2024-11-05` 版本协议，而服务端支持的是 `2025-06-18` 协议，按照规范此时就会结束此次连接，并且如果你使用的是 MCP 提供的官方 SDK，这个行为是不能被修改的，相关代码如下：
+比方说上面的情况，可以看到客户端支持的是 `2024-11-05` 版本协议，而服务端支持的是 `2025-06-18` 协议，按照规范此时就会统一采用客户端的老版本，并且如果你使用的是 MCP 提供的官方 SDK，这个行为是不能被修改的，相关代码如下：
 
 ```typescript
 export const SUPPORTED_PROTOCOL_VERSIONS = [
@@ -99,7 +98,10 @@ export const SUPPORTED_PROTOCOL_VERSIONS = [
 ];
 
 export class Client {
-	override async connect(transport: Transport, options?: RequestOptions): Promise<void> {
+  override async connect(
+    transport: Transport,
+    options?: RequestOptions,
+  ): Promise<void> {
     try {
       if (!SUPPORTED_PROTOCOL_VERSIONS.includes(result.protocolVersion)) {
         throw new Error(
@@ -123,23 +125,23 @@ export class Client {
 
 完整的客户端能力如下：
 
-| Category | Capability     | Description                                                  |
-| -------- | -------------- | ------------------------------------------------------------ |
-| Client   | `roots`        | Ability to provide filesystem [roots](https://modelcontextprotocol.io/specification/2025-06-18/client/roots) |
-| Client   | `sampling`     | Support for LLM [sampling](https://modelcontextprotocol.io/specification/2025-06-18/client/sampling) requests |
+| Category | Capability     | Description                                                                                                            |
+| -------- | -------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Client   | `roots`        | Ability to provide filesystem [roots](https://modelcontextprotocol.io/specification/2025-06-18/client/roots)           |
+| Client   | `sampling`     | Support for LLM [sampling](https://modelcontextprotocol.io/specification/2025-06-18/client/sampling) requests          |
 | Client   | `elicitation`  | Support for server [elicitation](https://modelcontextprotocol.io/specification/2025-06-18/client/elicitation) requests |
-| Client   | `experimental` | Describes support for non-standard experimental features     |
+| Client   | `experimental` | Describes support for non-standard experimental features                                                               |
 
 完整的服务端能力如下：
 
-| Category | Capability     | Description                                                  |
-| -------- | -------------- | ------------------------------------------------------------ |
-| Server   | `prompts`      | Offers [prompt templates](https://modelcontextprotocol.io/specification/2025-06-18/server/prompts) |
-| Server   | `resources`    | Provides readable [resources](https://modelcontextprotocol.io/specification/2025-06-18/server/resources) |
-| Server   | `tools`        | Exposes callable [tools](https://modelcontextprotocol.io/specification/2025-06-18/server/tools) |
-| Server   | `logging`      | Emits structured [log messages](https://modelcontextprotocol.io/specification/2025-06-18/server/utilities/logging) |
+| Category | Capability     | Description                                                                                                              |
+| -------- | -------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Server   | `prompts`      | Offers [prompt templates](https://modelcontextprotocol.io/specification/2025-06-18/server/prompts)                       |
+| Server   | `resources`    | Provides readable [resources](https://modelcontextprotocol.io/specification/2025-06-18/server/resources)                 |
+| Server   | `tools`        | Exposes callable [tools](https://modelcontextprotocol.io/specification/2025-06-18/server/tools)                          |
+| Server   | `logging`      | Emits structured [log messages](https://modelcontextprotocol.io/specification/2025-06-18/server/utilities/logging)       |
 | Server   | `completions`  | Supports argument [autocompletion](https://modelcontextprotocol.io/specification/2025-06-18/server/utilities/completion) |
-| Server   | `experimental` | Describes support for non-standard experimental features     |
+| Server   | `experimental` | Describes support for non-standard experimental features                                                                 |
 
 ## operation
 
