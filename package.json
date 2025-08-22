@@ -23,6 +23,7 @@
     "vue": "^3.5.18"
   },
   "devDependencies": {
-    "lerna": "^8.2.3"
+    "lerna": "^8.2.3",
+    "prettier": "^3.6.2"
   }
 }

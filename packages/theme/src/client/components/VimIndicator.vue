@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from "vue";
-import { loadVimConfig, KeyUtils, DEFAULT_VIM_CONFIG } from "../config/vimKeybindings";
+import {
+  loadVimConfig,
+  KeyUtils,
+  DEFAULT_VIM_CONFIG,
+} from "../config/vimKeybindings";
 import { PAGE_TYPES } from "../config/vimConstants";
 
 const props = defineProps<{

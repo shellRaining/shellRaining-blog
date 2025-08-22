@@ -477,7 +477,6 @@ function createConfig(format, output, plugins = []) {
    > 最近 TypeScript 官方都不支持写带有 enum 的代码了，就不要学习相关的知识了！而且确实不好用……
 
 4. 替换插件：用来在代码中替换字符串 pattern，比如：
-
    - 替换环境变量和特性标志（如 `__DEV__`, `__BROWSER__`, `__FEATURE_SUSPENSE__`）
    - 在生产构建中添加 `/*@__PURE__*/` 注释，帮助压缩工具执行更好的 tree-shaking
    - 根据构建目标（浏览器或 Node.js）替换平台特定代码

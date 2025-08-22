@@ -152,8 +152,8 @@ DOM 型 XSS 跟前两种 XSS 的区别：DOM 型 XSS 攻击中，取出和执行
 
 1. 同样 jwt 也可以缓解 CSRF 攻击，因为 jwt 并不是随着浏览器的请求自动发送的，而是需要手动设置在请求头中
 
-    > [!tip]
-    > `SameSite` 是用来防御 CSRF 攻击的，而 `HttpOnly` 是用来防御 XSS 攻击的。
+   > [!tip]
+   > `SameSite` 是用来防御 CSRF 攻击的，而 `HttpOnly` 是用来防御 XSS 攻击的。
 
 ## 参考
 

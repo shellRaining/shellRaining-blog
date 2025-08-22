@@ -159,7 +159,7 @@ export function createActionDefinitions(
 export function loadVimConfig(): VimKeyBindingsConfig {
   try {
     // Check if localStorage is available (browser environment)
-    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+    if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
       const savedConfig = localStorage.getItem(VIM_CONFIG_STORAGE_KEY);
       if (savedConfig) {
         const parsed = JSON.parse(savedConfig);
@@ -183,7 +183,7 @@ export function saveVimConfig(
     const currentConfig = loadVimConfig();
     const newConfig = mergeConfigs(currentConfig, config);
     // Check if localStorage is available (browser environment)
-    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+    if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
       localStorage.setItem(VIM_CONFIG_STORAGE_KEY, JSON.stringify(newConfig));
     }
     return newConfig;
@@ -227,7 +227,7 @@ function mergeConfigs(
 export function resetVimConfig(): VimKeyBindingsConfig {
   try {
     // Check if localStorage is available (browser environment)
-    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+    if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
       localStorage.removeItem(VIM_CONFIG_STORAGE_KEY);
     }
   } catch (error) {

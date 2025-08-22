@@ -129,7 +129,6 @@ export const ScrollUtils = {
     this.scrollBy(UI_CONSTANTS.SCROLL_LINE_AMOUNT, SCROLL_BEHAVIOR.INSTANT);
   },
 
-
   /**
    * Scroll element into view
    */
@@ -153,7 +152,7 @@ export const ScrollUtils = {
     if (ViewportUtils.isElementVisible(element, 50)) {
       return; // Don't scroll if element is already visible with some padding
     }
-    
+
     // Use instant scrolling for better responsiveness during rapid navigation
     element.scrollIntoView({ behavior, block });
   },
@@ -168,15 +167,15 @@ export const ScrollUtils = {
     const rect = element.getBoundingClientRect();
     const elementCenter = rect.top + window.scrollY + rect.height / 2;
     const viewportCenter = window.scrollY + window.innerHeight / 2;
-    
+
     // Calculate the scroll distance needed to center the element
     const scrollDistance = elementCenter - viewportCenter;
-    
+
     // Only scroll if the element is not already perfectly centered (with small tolerance)
     if (Math.abs(scrollDistance) > 5) {
-      window.scrollBy({ 
-        top: scrollDistance, 
-        behavior 
+      window.scrollBy({
+        top: scrollDistance,
+        behavior,
       });
     }
   },

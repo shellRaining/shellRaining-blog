@@ -44,7 +44,8 @@
     "build": "rm -rf ./dist/ && NODE_ENV=production rolldown -c ./rolldown.config.ts",
     "build:watch": "rolldown -c ./rolldown.config.ts -w",
     "dev": "NODE_ENV=development rolldown -c ./rolldown.config.ts -w",
-    "test": "vitest"
+    "test": "vitest",
+    "format": "prettier --write \"src/**/*.{ts,vue,js,json}\""
   },
   "type": "module",
   "types": "./dist/node/config.d.ts",

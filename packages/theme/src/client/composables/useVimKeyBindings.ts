@@ -209,7 +209,6 @@ export function useVimKeyBindings() {
     }
   };
 
-
   // Panel handlers
   const toggleHelp = () => {
     showHelp.value = !showHelp.value;
@@ -280,7 +279,6 @@ export function useVimKeyBindings() {
       }
       return;
     }
-
 
     // Handle multi-key sequences (gg) using config
     if (pageType.value === "article") {

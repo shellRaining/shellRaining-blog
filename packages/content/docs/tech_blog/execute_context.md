@@ -57,7 +57,6 @@ console.log(global.Function); // 输出: [Function: Function]
    1. 找到当前块 let 和 const 和 class 声明
    1. 找到块中的函数声明
 3. 进行重复变量名字的处理，
-
    1. 如果同时有一个变量和函数都叫做 foo，那么函数会覆盖掉变量，你可以理解为函数是后解析的，导致了覆盖
    2. 如果是 let const 之类的变量命名重复，就会报错
    3. 如果是 let var 变量名重复，也会报错

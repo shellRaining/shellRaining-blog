@@ -14,6 +14,7 @@ date: 2024-08-02
 <script setup>
 import Animation from "./Animation.vue"
 </script>
+
 <Animation></Animation>
 
 因此要想实现动画效果，需要先获取初始状态和终点状态的快照，然后根据不同的动画策略插值生成中间的状态，因此一个很自然的想法是，当我们试图通过 JavaScript 修改了 DOM 时，先给原先的页面拍一个快照，然后执行修改 DOM 的操作，再拍一个快照，然后根据这两个快照进行插值计算，得到中间态的快照，依次展示形成动画
@@ -31,7 +32,6 @@ import Animation from "./Animation.vue"
 8. 用户界面解冻，展示伪元素
 9. `vt.ready` 这个 promise 被兑现，允许我们执行自定义的动画效果，而不是默认的渐入渐出效果。
 10. 老的页面执行 `out` 动画，新的页面执行 `in` 动画，默认情况下 `out` 动画是透明度（opacity）逐渐从 1 变为 0，`in` 动画反之，实现一个交叉过渡的效果。除了默认的交叉过渡效果，还有一些属性可以进行插值动画，具体可以看谷歌的[这篇文章](https://developer.chrome.com/docs/web-platform/view-transitions/same-document#transition_multiple_elements)，对应着[仓库](https://github.com/shellRaining/google-view-transtion-example)的第四和第五章节代码
-
     - Position and transform (using a `transform`)
     - Width
     - Height
