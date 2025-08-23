@@ -42,6 +42,7 @@
 项目使用 Lerna v8 进行 monorepo 管理，提供简化的开发命令：
 
 ### 可用命令
+
 - `npm run dev` - 启动开发服务器（content 包）
 - `npm run build` - 按顺序构建所有包（theme → content）
 - `npm run preview` - 预览构建结果
@@ -50,9 +51,29 @@
 - `npm run clean` - 清理构建产物和缓存
 
 ### 包依赖关系
+
 - `@shellraining/content` 依赖 `@shellraining/theme`
 - 使用 `workspace:*` 协议管理内部包依赖
 - 项目采用独立版本控制（independent versioning）
+
+## Git Worktree 管理
+
+项目配置了多个 git worktree 用于并行开发
+
+- **main** - 主工作区（当前）
+  - 路径：`/Users/shellraining/Documents/shellraining-blog-workspace/main`
+  - 分支：`main`
+- **camellia** - 山茶花工作区 🌺
+  - 路径：`../camellia`
+  - 分支：`camellia`
+- **rose** - 玫瑰工作区 🌹
+  - 路径：`../rose`
+  - 分支：`rose`
+- **violet** - 紫罗兰工作区 🌸
+  - 路径：`../violet`
+  - 分支：`violet`
+
+每个 worktree 都配置了独立的 Claude Code 设置（`.claude/settings.local.json`），具有个性化的任务完成声音提示，便于在多工作区环境下快速识别任务状态。
 
 ## AI 修改准则
 
