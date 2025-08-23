@@ -52,6 +52,7 @@
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.1.4",
+    "@types/markdown-it": "^14.1.2",
     "@types/node": "^22.16.5",
     "@types/subset-font": "^2.3.0",
     "rolldown": "1.0.0-beta.21",

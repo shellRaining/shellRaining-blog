@@ -10,9 +10,13 @@ const external = [
   "fs",
   "path",
   "child_process",
+  "crypto",
+  "url",
   "node:fs",
   "node:path",
   "node:child_process",
+  "node:crypto",
+  "node:url",
   ...Object.keys(pkg.dependencies || {}),
   ...Object.keys(pkg.peerDependencies || {}),
 ];

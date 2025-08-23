@@ -5,6 +5,7 @@ import { fontPlugin } from "./plugins/font";
 import { headConf } from "./conf/head";
 import { markdownConf } from "./conf/markdown";
 import { RssPlugin, type RSSOptions } from "./plugins/rss";
+import { linkCardPreloadPlugin } from "./plugins/link-card-preload";
 
 type themeOpts = {
   baseUrl: string;
@@ -24,7 +25,15 @@ export function createConfig({
       build: {
         target: "esnext",
       },
-      plugins: [fontPlugin, RssPlugin(rss)],
+      plugins: [
+        fontPlugin,
+        RssPlugin(rss),
+        linkCardPreloadPlugin({
+          enabled: true,
+          excludeDomains: [],
+          includeDomains: [],
+        }),
+      ],
     },
     head: headConf,
     themeConfig: {
