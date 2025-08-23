@@ -46,7 +46,6 @@
   border-radius: 4px;
   outline: 2px solid var(--vp-c-brand);
   outline-offset: 2px;
-  transition: all 0.2s ease;
 }
 
 /* Vim indicators */
