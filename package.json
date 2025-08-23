@@ -4,8 +4,12 @@
   "description": "",
   "type": "module",
   "scripts": {
-    "dev": "lerna run dev --scope @shellraining/content",
+    "dev": "lerna run build --scope @shellraining/theme && lerna run dev --scope @shellraining/content",
+    "dev:theme": "lerna run dev --scope @shellraining/theme",
+    "dev:content": "lerna run dev --scope @shellraining/content",
     "build": "lerna run build --scope @shellraining/theme && lerna run build --scope @shellraining/content",
+    "build:theme": "lerna run build --scope @shellraining/theme",
+    "build:content": "lerna run build --scope @shellraining/content",
     "preview": "lerna run preview --scope @shellraining/content",
     "test": "lerna run test --scope @shellraining/theme",
     "format": "lerna run format",
