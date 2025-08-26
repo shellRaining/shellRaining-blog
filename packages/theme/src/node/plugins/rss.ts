@@ -169,7 +169,20 @@ export async function genFeed(config: SiteConfig, rssOptions: RSSOptions) {
   }
   const RSSFilename = filename || "feed.rss";
   const RSSFilepath = path.join(config.outDir, RSSFilename);
-  await fs.promises.writeFile(RSSFilepath, feed.rss2());
+
+  // 确保RSS内容以正确的UTF-8编码生成
+  const rssContent = feed
+    .rss2()
+    .replace(
+      '<?xml version="1.0" encoding="utf-8"?>',
+      '<?xml version="1.0" encoding="UTF-8"?>',
+    );
+
+  // 添加UTF-8 BOM以确保浏览器正确识别编码
+  const utf8BOM = "\uFEFF";
+  const finalContent = utf8BOM + rssContent;
+
+  await fs.promises.writeFile(RSSFilepath, finalContent, { encoding: "utf8" });
   console.log("\n🎉 RSS generated", RSSFilename);
 }
 
