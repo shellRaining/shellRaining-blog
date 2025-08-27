@@ -17,7 +17,7 @@
   },
   "peerDependencies": {
     "@vueuse/core": "^10.0.0",
-    "vitepress": "^2.0.0-alpha.3",
+    "vitepress": "^2.0.0-alpha.12",
     "vue": "^3.0.0"
   },
   "exports": {
