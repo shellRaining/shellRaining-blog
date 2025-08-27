@@ -9,6 +9,7 @@ const shellRainingBlogThemeConfigOpts = createConfig({
   rss: {
     title,
     baseUrl,
+    description: "feedId:161810250393119744+userId:84194849099223040",
     copyright: "Copyright (c) 2023-present, shellRaining",
   },
 });
