@@ -36,6 +36,7 @@ export function createConfig({
       ],
     },
     head: headConf,
+    ignoreDeadLinks: 'localhostLinks',
     themeConfig: {
       socialLinks: [],
       sidebar: [
