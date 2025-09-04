@@ -43,12 +43,12 @@
 
 ### 可用命令
 
-- `npm run dev` - 启动开发服务器（content 包）
-- `npm run build` - 按顺序构建所有包（theme → content）
-- `npm run preview` - 预览构建结果
-- `npm run test` - 运行测试（仅 theme 包有测试）
-- `npm run format` - 代码格式化（需要各包配置格式化工具）
-- `npm run clean` - 清理构建产物和缓存
+- `pnpm run dev` - 启动开发服务器（content 包）
+- `pnpm run build` - 按顺序构建所有包（theme → content）
+- `pnpm run preview` - 预览构建结果
+- `pnpm run test` - 运行测试（仅 theme 包有测试）
+- `pnpm run format` - 代码格式化（需要各包配置格式化工具）
+- `pnpm run clean` - 清理构建产物和缓存
 
 ### 包依赖关系
 
@@ -73,8 +73,33 @@
   - 路径：`../violet`
   - 分支：`violet`
 
-每个 worktree 都配置了独立的 Claude Code 设置（`.claude/settings.local.json`），具有个性化的任务完成声音提示，便于在多工作区环境下快速识别任务状态。
+每个 worktree 都配置了独立的 Claude Code 设置（`.claude/settings.local.json`），具有个性化的任务完成声音提示，便于在多工作区环境下快速识别任务状态。三个用来开发的子仓库（camellia、rose、violet）在调试时约定好了他们使用的端口（执行 `pnpm run dev`），分别是 5173、5174、5175 端口
+
+### Worktree 整合脚本
+
+- `scripts/rebase-worktrees-into-main.sh`（严格模式）
+  - 用途：为每个非 `main` 分支自动提交未保存更改（可关闭），将其 `rebase` 到 `main`，最后在 `main` 上按顺序 `--ff-only` 合入；遇到冲突会中断并提示继续步骤。
+  - 常用：
+    - 预演：`bash scripts/rebase-worktrees-into-main.sh -n -v`
+    - 默认：`bash scripts/rebase-worktrees-into-main.sh`
+    - 指定顺序：`bash scripts/rebase-worktrees-into-main.sh --order camellia,rose,violet`
+    - 自定义提交信息：`bash scripts/rebase-worktrees-into-main.sh -m "feat(content): sync BRANCH"`
+    - 合入后推送：`bash scripts/rebase-worktrees-into-main.sh -p`
+    - 其他：`--no-commit`、`-b main`
+
+- `scripts/rebase-worktrees-into-main-skip-errors.sh`（宽容模式）
+  - 用途：逐分支整合。每合入一个分支后，以“更新后的 `main`”为基线处理下一个；若出现冲突，会自动 `rebase --abort` 并跳过该分支，最终输出整合/跳过列表。
+  - 常用：
+    - 预演：`bash scripts/rebase-worktrees-into-main-skip-errors.sh -n -v`
+    - 默认：`bash scripts/rebase-worktrees-into-main-skip-errors.sh`
+    - 指定顺序：`bash scripts/rebase-worktrees-into-main-skip-errors.sh --order camellia,rose,violet`
+    - 合入后推送：`bash scripts/rebase-worktrees-into-main-skip-errors.sh -p`
+    - 其他：`--no-commit`、`-m`、`-b main`
+
+注意：两个脚本都基于 rebase，不会产生 merge commit；执行前请确保 `main` 工作区干净（无未提交变更）。
 
 ## AI 修改准则
 
 如果修改代码（比如添加功能或者重构）后导致文档和代码逻辑出现不一致的情况，请你酌情修改
+
+若你使用了 `pnpm run dev` 等启动开发服务器的命令，请**一定**在任务完成时清除掉已经启动的开发服务器进程
