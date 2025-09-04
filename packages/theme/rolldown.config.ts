@@ -1,5 +1,4 @@
 import typescript from "@rollup/plugin-typescript";
-import terser from "@rollup/plugin-terser";
 import { defineConfig, type RolldownOptions } from "rolldown";
 import pkg from "./package.json";
 import fs from "fs";
@@ -29,7 +28,7 @@ const plugins = [
   typescript({
     tsconfig: "./src/node/tsconfig.json",
   }),
-  ...(!isDev ? [terser({ format: { comments: false } })] : []),
+  // Note: skip minification for faster builds; node-side ESM doesn't need terser
 ];
 
 // Auto-discover plugins

@@ -15,10 +15,26 @@ function isDark() {
   return document.documentElement.classList.contains("dark");
 }
 
+function loadMermaidFromCDN(version = "11.2.1"): Promise<any> {
+  return new Promise((resolve, reject) => {
+    if ((window as any).mermaid) return resolve((window as any).mermaid);
+    const script = document.createElement("script");
+    script.src = `https://cdn.jsdelivr.net/npm/mermaid@${version}/dist/mermaid.min.js`;
+    script.async = true;
+    script.onload = () => resolve((window as any).mermaid);
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+}
+
 async function ensureMermaid() {
   if (mermaid) return mermaid;
-  const mod = await import("mermaid");
-  mermaid = mod.default || (mod as any);
+  try {
+    const mod = await import("mermaid");
+    mermaid = (mod as any).default || (mod as any);
+  } catch {
+    mermaid = await loadMermaidFromCDN();
+  }
   mermaid.initialize({
     startOnLoad: false,
     securityLevel: "loose",

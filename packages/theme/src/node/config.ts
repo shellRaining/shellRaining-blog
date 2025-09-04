@@ -24,7 +24,12 @@ export function createConfig({
     vite: {
       build: {
         target: "esnext",
+        rollupOptions: {
+          // Exclude heavy libs from the bundle; client loads via CDN fallback
+          external: ["mermaid"],
+        },
       },
+      optimizeDeps: { exclude: ["mermaid"] },
       plugins: [
         fontPlugin,
         RssPlugin(rss),
