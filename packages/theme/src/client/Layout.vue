@@ -2,6 +2,7 @@
 import DefaultTheme from "vitepress/theme-without-fonts";
 import Title from "./Doc/Title.vue";
 import Viewer from "./Viewer/Viewer.vue";
+import CopyInlineCode from "./components/CopyInlineCode.vue";
 import Home from "./Home/Home.vue";
 import AppearanceSwitcher from "./Home/AppearanceSwitcher.vue";
 import Sidebar from "./Sidebar/Sidebar.vue";
@@ -24,7 +25,10 @@ const { isMobile } = useMobile();
 
     <template #doc-before>
       <Title />
-      <ClientOnly><Viewer /></ClientOnly>
+      <ClientOnly>
+        <Viewer />
+        <CopyInlineCode />
+      </ClientOnly>
     </template>
 
     <template #home-features-after>
