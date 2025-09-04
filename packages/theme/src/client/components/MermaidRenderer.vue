@@ -5,7 +5,8 @@ let mermaid: any | null = null;
 let observer: MutationObserver | null = null;
 const Z_MIN = 0.25;
 const Z_MAX = 4;
-const Z_STEP = 0.2;
+const Z_STEP = 0.2; // toolbar button step
+const Z_WHEEL_STEP = 0.03; // ctrl/cmd + wheel step (less sensitive)
 
 const modalOpen = ref(false);
 const modalContainer = ref<HTMLDivElement | null>(null);
@@ -162,7 +163,7 @@ function buildInteractiveShell(
     (e) => {
       if (!(e.ctrlKey || e.metaKey)) return;
       e.preventDefault();
-      const delta = e.deltaY < 0 ? Z_STEP : -Z_STEP;
+      const delta = e.deltaY < 0 ? Z_WHEEL_STEP : -Z_WHEEL_STEP;
       zoomAt(delta, e.clientX, e.clientY);
     },
     { passive: false },
