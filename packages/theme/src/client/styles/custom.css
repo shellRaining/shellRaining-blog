@@ -120,3 +120,43 @@
     display: none; /* 打印时隐藏图片 */
   }
 }
+
+/* Inline code: copy affordance and feedback */
+.VPDoc .content :not(pre) > code {
+  cursor: pointer;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, outline-color 0.2s ease;
+}
+
+.VPDoc .content :not(pre) > code:hover {
+  background: var(--vp-c-bg-soft);
+}
+
+.inline-code-copied {
+  outline: 2px solid var(--vp-c-brand);
+  outline-offset: 2px;
+  background: var(--vp-c-brand-soft) !important;
+}
+
+/* Toast for copy feedback */
+.inline-copy-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%) translateY(16px);
+  background: var(--vp-c-bg-soft);
+  color: var(--vp-c-text-1);
+  border: 1px solid var(--vp-c-border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  line-height: 1;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 1000;
+}
+
+.inline-copy-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
