@@ -3,6 +3,7 @@ import DefaultTheme from "vitepress/theme-without-fonts";
 import Title from "./Doc/Title.vue";
 import Viewer from "./Viewer/Viewer.vue";
 import CopyInlineCode from "./components/CopyInlineCode.vue";
+import MermaidRenderer from "./components/MermaidRenderer.vue";
 import Home from "./Home/Home.vue";
 import AppearanceSwitcher from "./Home/AppearanceSwitcher.vue";
 import Sidebar from "./Sidebar/Sidebar.vue";
@@ -28,6 +29,7 @@ const { isMobile } = useMobile();
       <ClientOnly>
         <Viewer />
         <CopyInlineCode />
+        <MermaidRenderer />
       </ClientOnly>
     </template>
 

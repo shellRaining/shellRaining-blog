@@ -4,6 +4,7 @@ import markdownItSub from "markdown-it-sub";
 import markdownItTaskLists from "markdown-it-task-lists";
 import type { MarkdownOptions } from "vitepress";
 import { createLinkCardPlugin } from "../plugins/link-card";
+import { createMermaidMarkdown } from "../plugins/mermaid";
 
 export const markdownConf: MarkdownOptions = {
   math: true,
@@ -20,5 +21,8 @@ export const markdownConf: MarkdownOptions = {
         includeDomains: [],
       }),
     );
+
+    // Mermaid fenced code support: ```mermaid
+    md.use(createMermaidMarkdown());
   },
 };
