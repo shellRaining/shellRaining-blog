@@ -242,9 +242,34 @@
 }
 
 .inline-code-copied {
-  outline: 2px solid var(--vp-c-brand);
-  outline-offset: 2px;
-  background: var(--vp-c-brand-soft) !important;
+  /* Remove purple outline; rely on pulse animation for feedback */
+  outline: none;
+  outline-offset: 0;
+}
+
+/* Immediate visual feedback on press */
+.inline-code-active {
+  /* Remove purple outline; subtle press state handled by pulse */
+  outline: none;
+  outline-offset: 0;
+}
+
+/* Ripple effect for inline code */
+/* Pulse ring using box-shadow; does not affect layout and works across wraps */
+.inline-code-pulse {
+  animation: inline-code-pulse 420ms ease-out;
+}
+
+@keyframes inline-code-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--vp-c-brand) 40%, transparent);
+  }
+  70% {
+    box-shadow: 0 0 0 6px color-mix(in oklab, var(--vp-c-brand) 10%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 12px rgba(0,0,0,0);
+  }
 }
 
 /* Toast for copy feedback */
