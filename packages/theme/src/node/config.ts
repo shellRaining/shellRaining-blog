@@ -41,7 +41,7 @@ export function createConfig({
       ],
     },
     head: headConf,
-    ignoreDeadLinks: 'localhostLinks',
+    ignoreDeadLinks: "localhostLinks",
     themeConfig: {
       socialLinks: [],
       sidebar: [
