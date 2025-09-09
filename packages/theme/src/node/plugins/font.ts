@@ -6,7 +6,13 @@ import {
 } from "../fontmin";
 import { join } from "path";
 import { basename, dirname } from "path";
-import { unlinkSync, existsSync, readFileSync, writeFileSync, mkdirSync } from "fs";
+import {
+  unlinkSync,
+  existsSync,
+  readFileSync,
+  writeFileSync,
+  mkdirSync,
+} from "fs";
 import crypto from "crypto";
 import type { HeadConfig, SiteConfig } from "vitepress";
 import type { PluginOption } from "vite";
@@ -25,7 +31,12 @@ export const fontPlugin = {
     const text = Array.from(allChars).join("");
 
     // Prepare cache directory and manifest under .vitepress/cache/font-subset
-    const cacheDir = join(siteConfig.srcDir, ".vitepress", "cache", "font-subset");
+    const cacheDir = join(
+      siteConfig.srcDir,
+      ".vitepress",
+      "cache",
+      "font-subset",
+    );
     mkdirSync(cacheDir, { recursive: true });
     const manifestPath = join(cacheDir, "manifest.json");
     let manifest: Record<string, { hash: string; cacheFile: string }> = {};
@@ -43,11 +54,15 @@ export const fontPlugin = {
       const absoluteDest = join(siteConfig.outDir, dest);
 
       // Compute a content hash to detect changes (font file + text)
-      const fontStat = existsSync(absoluteSrc) ? readFileSync(absoluteSrc) : undefined;
+      const fontStat = existsSync(absoluteSrc)
+        ? readFileSync(absoluteSrc)
+        : undefined;
       const textHash = crypto.createHash("sha256").update(text).digest("hex");
       const inputHash = crypto
         .createHash("sha256")
-        .update(Buffer.concat([fontStat ?? Buffer.alloc(0), Buffer.from(textHash)]))
+        .update(
+          Buffer.concat([fontStat ?? Buffer.alloc(0), Buffer.from(textHash)]),
+        )
         .digest("hex");
 
       const destBase = basename(dest);
@@ -57,8 +72,13 @@ export const fontPlugin = {
       let subsettedFontBuffer: Uint8Array;
 
       // Try cache first
-      if (manifest[dest]?.hash === inputHash && existsSync(manifest[dest].cacheFile)) {
-        subsettedFontBuffer = new Uint8Array(readFileSync(manifest[dest].cacheFile));
+      if (
+        manifest[dest]?.hash === inputHash &&
+        existsSync(manifest[dest].cacheFile)
+      ) {
+        subsettedFontBuffer = new Uint8Array(
+          readFileSync(manifest[dest].cacheFile),
+        );
       } else if (existsSync(cacheFile)) {
         subsettedFontBuffer = new Uint8Array(readFileSync(cacheFile));
         manifest[dest] = { hash: inputHash, cacheFile };
