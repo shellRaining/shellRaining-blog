@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "lerna": "^8.2.3",
+    "mermaid": "^11.10.1",
     "prettier": "^3.6.2"
   }
 }
