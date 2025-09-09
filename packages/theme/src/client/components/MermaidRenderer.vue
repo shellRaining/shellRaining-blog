@@ -7,6 +7,7 @@ const Z_MIN = 0.25;
 const Z_MAX = 4;
 const Z_STEP = 0.2; // toolbar button step
 const Z_WHEEL_STEP = 0.03; // ctrl/cmd + wheel step (less sensitive)
+const Z_WHEEL_STEP_MODAL = 0.02; // modal wheel step (even less sensitive)
 
 const modalOpen = ref(false);
 const modalContainer = ref<HTMLDivElement | null>(null);
@@ -70,9 +71,15 @@ function buildInteractiveShell(
     enableClose?: boolean;
     onClose?: () => void;
     onOpenModal?: () => void;
+    modalMode?: boolean;
   } = {},
 ) {
-  const { enableClose = false, onClose, onOpenModal } = options;
+  const {
+    enableClose = false,
+    onClose,
+    onOpenModal,
+    modalMode = false,
+  } = options;
 
   const toolbar = document.createElement("div");
   toolbar.className = "mmd-toolbar";
@@ -157,13 +164,14 @@ function buildInteractiveShell(
     else if (enableClose && action === "close") onClose?.();
   });
 
-  // Wheel zoom with Ctrl/Cmd
+  // Wheel zoom - Ctrl/Cmd in normal mode, always active in modal
   viewport.addEventListener(
     "wheel",
     (e) => {
-      if (!(e.ctrlKey || e.metaKey)) return;
+      if (!modalMode && !(e.ctrlKey || e.metaKey)) return;
       e.preventDefault();
-      const delta = e.deltaY < 0 ? Z_WHEEL_STEP : -Z_WHEEL_STEP;
+      const step = modalMode ? Z_WHEEL_STEP_MODAL : Z_WHEEL_STEP;
+      const delta = e.deltaY < 0 ? step : -step;
       zoomAt(delta, e.clientX, e.clientY);
     },
     { passive: false },
@@ -217,6 +225,7 @@ async function openModal(graph: string) {
   buildInteractiveShell(wrapper, svgEl, {
     enableClose: true,
     onClose: closeModal,
+    modalMode: true,
   });
 
   // ESC to close
