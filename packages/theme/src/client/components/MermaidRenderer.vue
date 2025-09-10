@@ -212,15 +212,27 @@ async function openModal(graph: string) {
   modalOpen.value = true;
   await nextTick();
   if (!modalContainer.value) return;
+
+  // 设置模态框容器并添加加载状态
+  modalContainer.value.classList.add("mmd-modal-loading");
+  modalContainer.value.innerHTML = "";
+
   const m = await ensureMermaid();
   const { svg } = await m.render(`mmd-modal-${Date.now()}`, graph);
   const temp = document.createElement("div");
   temp.innerHTML = svg;
   const svgEl = temp.querySelector("svg") as SVGSVGElement | null;
-  if (!svgEl) return;
+
+  if (!svgEl) {
+    modalContainer.value.classList.remove("mmd-modal-loading");
+    return;
+  }
+
+  // 移除加载状态并构建交互式shell
+  modalContainer.value.classList.remove("mmd-modal-loading");
+
   const wrapper = document.createElement("div");
   wrapper.className = "mmd-dialog";
-  modalContainer.value.innerHTML = "";
   modalContainer.value.appendChild(wrapper);
   buildInteractiveShell(wrapper, svgEl, {
     enableClose: true,
@@ -243,6 +255,9 @@ function closeModal() {
 }
 
 async function renderOne(el: HTMLElement, index: number) {
+  // 添加加载状态
+  el.classList.add("mmd-loading");
+
   const m = await ensureMermaid();
   const graph = getGraph(el);
   if (!graph) return;
@@ -257,6 +272,9 @@ async function renderOne(el: HTMLElement, index: number) {
     el.setAttribute("data-processed", "true");
   } catch (e) {
     el.innerHTML = `<pre class="mmd-error">${(e as Error).message}</pre>`;
+  } finally {
+    // 移除加载状态
+    el.classList.remove("mmd-loading");
   }
 }
 
@@ -264,11 +282,12 @@ async function renderAll(root: ParentNode = document) {
   const nodes = Array.from(
     root.querySelectorAll<HTMLElement>("#VPContent .mermaid"),
   );
-  let i = 0;
-  for (const el of nodes) {
-    if (el.getAttribute("data-processed") === "true") continue;
-    await renderOne(el, i++);
-  }
+  // 并行处理所有图表而不是串行，确保都能显示加载状态
+  const promises = nodes.map((el, index) => {
+    if (el.getAttribute("data-processed") === "true") return Promise.resolve();
+    return renderOne(el, index);
+  });
+  await Promise.all(promises);
 }
 
 function observeContent() {
