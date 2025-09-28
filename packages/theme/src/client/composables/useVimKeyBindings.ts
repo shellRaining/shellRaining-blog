@@ -19,6 +19,7 @@ import {
   UI_CONSTANTS,
   PAGE_TYPES,
   ACTION_TYPES,
+  SELECTORS,
 } from "../config/vimConstants";
 
 export interface VimKeyBinding {
@@ -236,6 +237,23 @@ export function useVimKeyBindings() {
     }
   };
 
+  const handlePointerDown = (event: PointerEvent | MouseEvent) => {
+    if (pageType.value !== PAGE_TYPES.HOME) return;
+
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+
+    if (target.closest(SELECTORS.POST_TITLE)) return;
+
+    if (!isSelectionActive.value) return;
+
+    isSelectionActive.value = false;
+    selectedIndex.value = -1;
+    const elements = getSelectableElements();
+    DOMUtils.updateSelectionClass(elements, -1, false);
+    saveHomepageState();
+  };
+
   // Handler mapping for actions
   const handlerMap: Record<string, () => void | boolean> = {
     [ACTION_TYPES.NAVIGATE_UP]: navigateUp,
@@ -439,6 +457,7 @@ export function useVimKeyBindings() {
   // Lifecycle
   onMounted(() => {
     document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("pointerdown", handlePointerDown);
     window.addEventListener("scroll", handleScroll, { passive: true });
     // Initialize with a slight delay to ensure DOM is ready
     setTimeout(() => {
@@ -448,6 +467,7 @@ export function useVimKeyBindings() {
 
   onUnmounted(() => {
     document.removeEventListener("keydown", handleKeyDown);
+    document.removeEventListener("pointerdown", handlePointerDown);
     window.removeEventListener("scroll", handleScroll);
     if (keyPressTimeout.value) {
       clearTimeout(keyPressTimeout.value);
