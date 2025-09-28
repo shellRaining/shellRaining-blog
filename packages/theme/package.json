@@ -44,7 +44,7 @@
   "scripts": {
     "build": "rm -rf ./dist/ && NODE_ENV=production rolldown -c ./rolldown.config.ts",
     "build:watch": "rolldown -c ./rolldown.config.ts -w",
-    "dev": "NODE_ENV=development rolldown -c ./rolldown.config.ts -w",
+    "dev": "bun run ./scripts/dev.ts",
     "test": "vitest",
     "format": "prettier --write \"src/**/*.{ts,vue,js,json}\""
   },

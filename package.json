@@ -4,7 +4,7 @@
   "description": "",
   "type": "module",
   "scripts": {
-    "dev": "lerna run build --scope @shellraining/theme && lerna run dev --scope @shellraining/content",
+    "dev": "bun run ./tooling/dev.ts",
     "dev:theme": "lerna run dev --scope @shellraining/theme",
     "dev:content": "lerna run dev --scope @shellraining/content",
     "build": "lerna run build --scope @shellraining/theme && lerna run build --scope @shellraining/content",
