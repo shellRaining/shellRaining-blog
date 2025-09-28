@@ -429,4 +429,3 @@ alias deepseek_yolo='deepseek --dangerously-skip-permissions'
 - https://x.com/axtrur/status/1965293655910126038 命令行 alias
 - https://x.com/shao__meng/status/1950196917595754662 七个彻底改变工作方式的实用模式和技巧
 - https://x.com/vista8/status/1962867419233538442 终端快捷键
-
