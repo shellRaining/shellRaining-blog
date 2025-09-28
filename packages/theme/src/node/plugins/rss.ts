@@ -138,17 +138,13 @@ export async function getPostsData(config: SiteConfig, ops: RSSOptions) {
   return posts;
 }
 
-export async function genFeed(config: SiteConfig, rssOptions: RSSOptions) {
-  if (!rssOptions) return;
+async function generateRssContent(
+  config: SiteConfig,
+  rssOptions: RSSOptions,
+): Promise<string> {
+  const { baseUrl, transform = (v: string) => v, ...restOps } = rssOptions;
 
-  const {
-    baseUrl,
-    filename,
-    transform = (v: string) => v,
-    ...restOps
-  } = rssOptions;
   const feed = new Feed({ id: baseUrl, link: baseUrl, ...restOps });
-
   const posts = await getPostsData(config, rssOptions);
 
   for (const post of posts) {
@@ -167,16 +163,23 @@ export async function genFeed(config: SiteConfig, rssOptions: RSSOptions) {
       date: new Date(date),
     });
   }
-  const RSSFilename = filename || "feed.rss";
-  const RSSFilepath = path.join(config.outDir, RSSFilename);
 
-  // 确保RSS内容以正确的UTF-8编码生成
-  const rssContent = feed
+  return feed
     .rss2()
     .replace(
       '<?xml version="1.0" encoding="utf-8"?>',
       '<?xml version="1.0" encoding="UTF-8"?>',
     );
+}
+
+export async function genFeed(config: SiteConfig, rssOptions: RSSOptions) {
+  if (!rssOptions) return;
+
+  const { filename } = rssOptions;
+  const rssContent = await generateRssContent(config, rssOptions);
+
+  const RSSFilename = filename || "feed.rss";
+  const RSSFilepath = path.join(config.outDir, RSSFilename);
 
   // 添加UTF-8 BOM以确保浏览器正确识别编码
   const utf8BOM = "\uFEFF";
@@ -199,6 +202,34 @@ export function RssPlugin(rssOptions: RSSOptions): PluginOption {
       if (config?.vitepress && config.build.ssr) {
         await genFeed(config.vitepress, rssOptions);
       }
+    },
+    configureServer(server) {
+      server.middlewares.use("/feed.rss", async (req, res, next) => {
+        if (req.method !== "GET") {
+          return next();
+        }
+
+        try {
+          if (!config?.vitepress) {
+            res.statusCode = 500;
+            res.end("VitePress config not available");
+            return;
+          }
+
+          const rssContent = await generateRssContent(
+            config.vitepress,
+            rssOptions,
+          );
+
+          res.setHeader("Content-Type", "application/rss+xml; charset=UTF-8");
+          res.setHeader("Cache-Control", "no-cache");
+          res.end(rssContent);
+        } catch (error) {
+          console.error("Error generating RSS feed:", error);
+          res.statusCode = 500;
+          res.end("Error generating RSS feed");
+        }
+      });
     },
   };
 }
