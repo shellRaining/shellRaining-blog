@@ -15,7 +15,9 @@ import {
 } from "fs";
 import crypto from "crypto";
 import type { HeadConfig, SiteConfig } from "vitepress";
-import type { PluginOption } from "vite";
+import type { PluginOption, ViteDevServer } from "vite";
+
+const devSubsetAssets = new Map<string, Buffer>();
 
 export const fontPlugin = {
   name: "vite-plugin-blog-fontmin",
@@ -26,7 +28,21 @@ export const fontPlugin = {
     if (env.name !== "client") return;
 
     const siteConfig: SiteConfig = (env.config as any).vitepress;
-    const userFontConfig: FontConfig[] = siteConfig.site.themeConfig.font;
+    const themeFonts = siteConfig.site?.themeConfig?.font;
+    const userFontConfig: FontConfig[] = Array.isArray(themeFonts)
+      ? themeFonts
+      : [];
+
+    if (userFontConfig.length === 0) {
+      if (env.mode !== "build") {
+        devSubsetAssets.clear();
+      }
+      return;
+    }
+
+    if (env.mode !== "build") {
+      devSubsetAssets.clear();
+    }
     const allChars = getAllChars(siteConfig.pages);
     const text = Array.from(allChars).join("");
 
@@ -100,12 +116,16 @@ export const fontPlugin = {
           crossorigin: "anonymous",
         },
       ]);
-      env.mode === "build" &&
+      if (env.mode === "build") {
         this.emitFile({
           type: "asset",
           fileName: dest,
           source: subsettedFontBuffer,
         });
+      } else {
+        const publicPath = `/${dest}`;
+        devSubsetAssets.set(publicPath, Buffer.from(subsettedFontBuffer));
+      }
     }
 
     // Persist manifest updates
@@ -118,13 +138,39 @@ export const fontPlugin = {
     siteConfig.site.head.push(...appendHeads);
   },
 
+  configureServer(server: ViteDevServer) {
+    server.middlewares.use((req, res, next) => {
+      const url = req.url?.split("?")[0];
+      if (!url) {
+        return next();
+      }
+
+      const asset = devSubsetAssets.get(url);
+      if (!asset) {
+        return next();
+      }
+
+      res.statusCode = 200;
+      res.setHeader("Content-Type", "font/woff2");
+      res.setHeader("Cache-Control", "no-cache");
+      res.end(asset);
+    });
+  },
+
   // 这个钩子函数用来删除 vitepress 默认复制的字体文件
   generateBundle() {
     const env = this.environment;
     if (env.name !== "client") return;
 
     const siteConfig: SiteConfig = (env.config as any).vitepress;
-    const userFontConfig: FontConfig[] = siteConfig.site.themeConfig.font;
+    const themeFonts = siteConfig.site?.themeConfig?.font;
+    const userFontConfig: FontConfig[] = Array.isArray(themeFonts)
+      ? themeFonts
+      : [];
+
+    if (userFontConfig.length === 0) {
+      return;
+    }
 
     for (const fontConfig of userFontConfig) {
       const src = fontConfig.src.replace(/^\/+/, ""); // 去掉开头的斜杠
@@ -135,7 +181,9 @@ export const fontPlugin = {
       const fontname = basename(absoluteSrc);
       const absoluteDestDir = dirname(absoluteDest);
       const copyedFontPath = join(absoluteDestDir, fontname);
-      unlinkSync(copyedFontPath);
+      if (existsSync(copyedFontPath)) {
+        unlinkSync(copyedFontPath);
+      }
     }
   },
 } satisfies PluginOption as any;
