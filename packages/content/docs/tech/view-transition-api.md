@@ -12,7 +12,7 @@ date: 2024-08-02
 下面有一个动画实现的示例，如果你缓慢的拖动进度条，你看到的是一张张静止的动画快照，如果快速拖动，那么这些快照就会组合形成动画
 
 <script setup>
-import Animation from "./animation.vue"
+import Animation from "./Animation.vue"
 </script>
 
 <Animation></Animation>

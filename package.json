@@ -7,13 +7,14 @@
     "dev": "bun run ./tooling/dev.ts",
     "dev:theme": "lerna run dev --scope @shellraining/theme",
     "dev:content": "lerna run dev --scope @shellraining/content",
-    "build": "lerna run build --scope @shellraining/theme && lerna run build --scope @shellraining/content",
+    "build": "pnpm run check:content && lerna run build --scope @shellraining/theme && lerna run build --scope @shellraining/content",
     "build:theme": "lerna run build --scope @shellraining/theme",
     "build:content": "lerna run build --scope @shellraining/content",
     "preview": "lerna run preview --scope @shellraining/content",
     "test": "lerna run test --scope @shellraining/theme",
     "format": "lerna run format",
-    "clean": "lerna exec -- rm -rf dist node_modules/.cache && lerna clean --yes"
+    "clean": "lerna exec -- rm -rf dist node_modules/.cache && lerna clean --yes",
+    "check:content": "bun run ./tooling/check-content.ts"
   },
   "keywords": [],
   "author": "",
@@ -29,6 +30,7 @@
   "devDependencies": {
     "lerna": "^8.2.4",
     "mermaid": "^11.12.0",
-    "prettier": "^3.6.2"
+    "prettier": "^3.6.2",
+    "gray-matter": "^4.0.3"
   }
 }
