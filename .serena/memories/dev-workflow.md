@@ -1,2 +1,0 @@
-- Root `pnpm dev` uses Bun to run `tooling/dev.ts`, spawning theme/content dev tasks with prefixed logs and coordinated shutdown (single Ctrl+C).
-- Theme package dev runs via Bun executing `scripts/dev.ts`, auto-building `dist` if missing before starting rolldown watch.
