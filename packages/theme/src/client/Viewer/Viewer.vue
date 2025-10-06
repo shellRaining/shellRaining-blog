@@ -4,37 +4,54 @@ import "viewerjs/dist/viewer.css";
 
 let viewer: any = null;
 
+async function initViewer() {
+  const docDomContainer = document.querySelector("#VPContent") as HTMLElement;
+  if (!docDomContainer) return;
+
+  const ViewerModule = await import("viewerjs");
+  viewer = new ViewerModule.default(docDomContainer, {
+    toolbar: {
+      prev: {
+        show: 1,
+        size: "large",
+      },
+      next: {
+        show: 1,
+        size: "large",
+      },
+    },
+  });
+}
+
 async function previewImage(e: Event) {
-  const target = e.target as HTMLElement; // maybe the img element
-  const currentTarget = e.currentTarget as HTMLElement; // the event binded element
+  const target = e.target as HTMLElement;
   if (target.tagName.toLowerCase() !== "img") return;
 
+  // 排除 link card 中的图片
+  if (target.closest(".link-card")) return;
+
   if (!viewer) {
-    const ViewerModule = await import("viewerjs");
-    viewer = new ViewerModule.default(currentTarget, {
-      toolbar: {
-        prev: {
-          show: 1,
-          size: "large",
-        },
-        next: {
-          show: 1,
-          size: "large",
-        },
-      },
-    });
+    await initViewer();
   }
-  viewer.show();
+  viewer?.show();
 }
 
 onMounted(() => {
   const docDomContainer = document.querySelector("#VPContent");
   docDomContainer?.addEventListener("click", previewImage);
+
+  // 空闲时预加载 viewer.js，避免点击延迟
+  if ("requestIdleCallback" in window) {
+    requestIdleCallback(() => initViewer());
+  } else {
+    setTimeout(() => initViewer(), 2000);
+  }
 });
 
 onUnmounted(() => {
   const docDomContainer = document.querySelector("#VPContent");
   docDomContainer?.removeEventListener("click", previewImage);
+  viewer?.destroy();
 });
 </script>
 

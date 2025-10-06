@@ -6,17 +6,10 @@
     "translation",
     "life"
   ],
-  "allowedExtensions": [
-    ".md",
-    ".vue"
-  ],
+  "allowedExtensions": [".md", ".vue"],
   "namePattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
-  "ignoredDirectories": [
-    ".obsidian"
-  ],
-  "ignoredFiles": [
-    ".DS_Store"
-  ],
+  "ignoredDirectories": [".obsidian"],
+  "ignoredFiles": [".DS_Store"],
   "allowedTags": [
     "beancount",
     "css",
