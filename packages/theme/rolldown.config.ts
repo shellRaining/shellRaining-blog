@@ -1,30 +1,15 @@
 import typescript from "@rollup/plugin-typescript";
 import { defineConfig, type RolldownOptions } from "rolldown";
-import pkg from "./package.json";
+import nodeExternals from "rollup-plugin-node-externals";
 import fs from "fs";
 import path from "path";
-
-// Define external dependencies
-const external = [
-  "fs",
-  "path",
-  "child_process",
-  "crypto",
-  "url",
-  "node:fs",
-  "node:path",
-  "node:child_process",
-  "node:crypto",
-  "node:url",
-  ...Object.keys(pkg.dependencies || {}),
-  ...Object.keys(pkg.peerDependencies || {}),
-];
 
 // Environment detection
 const isDev = process.env.NODE_ENV === "development";
 
 // Common plugins
 const plugins = [
+  nodeExternals(),
   typescript({
     tsconfig: "./src/node/tsconfig.json",
   }),
@@ -65,7 +50,6 @@ const mainConfig = {
     preserveModules: true,
     preserveModulesRoot: "src/node",
   },
-  external,
   plugins,
 } as RolldownOptions;
 

@@ -57,6 +57,7 @@
     "@types/node": "^22.16.5",
     "@types/subset-font": "^2.3.0",
     "rolldown": "1.0.0-beta.21",
+    "rollup-plugin-node-externals": "^8.1.1",
     "vite": "^6.3.5",
     "vitest": "^3.2.4"
   }
