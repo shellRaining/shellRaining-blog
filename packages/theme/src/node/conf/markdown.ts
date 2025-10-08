@@ -5,6 +5,7 @@ import markdownItTaskLists from "markdown-it-task-lists";
 import type { MarkdownOptions } from "vitepress";
 import { createLinkCardPlugin } from "../plugins/link-card";
 import { createMermaidMarkdown } from "../plugins/mermaid";
+import { createLazyImagePlugin } from "../plugins/lazy-image";
 
 export const markdownConf: MarkdownOptions = {
   math: true,
@@ -24,5 +25,15 @@ export const markdownConf: MarkdownOptions = {
 
     // Mermaid fenced code support: ```mermaid
     md.use(createMermaidMarkdown());
+
+    // LazyImage: 自动将 ![](…) 转换为 <LazyImage>
+    md.use(
+      createLazyImagePlugin({
+        enabled: true,
+        defaultAspectRatio: 4 / 3,
+        detectRemoteSize: true,
+        exclude: [/favicon\.ico$/i, /^\/icons?\//i, /\.svg$/i],
+      }),
+    );
   },
 };
