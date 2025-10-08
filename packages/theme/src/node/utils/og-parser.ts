@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { createHash } from "crypto";
+import { CacheManager } from "./cache-manager";
 
 export interface OpenGraphData {
   title?: string;
@@ -11,69 +11,13 @@ export interface OpenGraphData {
   type?: string;
 }
 
-interface CachedData {
-  data: OpenGraphData;
-  timestamp: number;
-}
-
-const CACHE_DIR = path.join(process.cwd(), ".vitepress", ".link-card-cache");
-const CACHE_TTL = 24 * 60 * 60 * 1000; // 24小时
-
-// 确保缓存目录存在
-function ensureCacheDir() {
-  if (!fs.existsSync(CACHE_DIR)) {
-    fs.mkdirSync(CACHE_DIR, { recursive: true });
-  }
-}
-
-// 生成URL的缓存key
-function getCacheKey(url: string): string {
-  return createHash("md5").update(url).digest("hex");
-}
-
-// 从缓存中读取数据
-function getCachedData(url: string): OpenGraphData | null {
-  try {
-    ensureCacheDir();
-    const cacheKey = getCacheKey(url);
-    const cachePath = path.join(CACHE_DIR, `${cacheKey}.json`);
-
-    if (!fs.existsSync(cachePath)) {
-      return null;
-    }
-
-    const cached: CachedData = JSON.parse(fs.readFileSync(cachePath, "utf-8"));
-
-    // 检查缓存是否过期
-    if (Date.now() - cached.timestamp > CACHE_TTL) {
-      fs.unlinkSync(cachePath);
-      return null;
-    }
-
-    return cached.data;
-  } catch (error) {
-    console.warn(`[LinkCard] Error reading cache for ${url}:`, error);
-    return null;
-  }
-}
-
-// 将数据写入缓存
-function setCachedData(url: string, data: OpenGraphData) {
-  try {
-    ensureCacheDir();
-    const cacheKey = getCacheKey(url);
-    const cachePath = path.join(CACHE_DIR, `${cacheKey}.json`);
-
-    const cached: CachedData = {
-      data,
-      timestamp: Date.now(),
-    };
-
-    fs.writeFileSync(cachePath, JSON.stringify(cached, null, 2));
-  } catch (error) {
-    console.warn(`[LinkCard] Error writing cache for ${url}:`, error);
-  }
-}
+// 创建缓存管理器
+const cache = new CacheManager<OpenGraphData>({
+  strategy: "multi-file",
+  cachePath: path.join(process.cwd(), ".vitepress", "cache", "link-card"),
+  ttl: 24 * 60 * 60 * 1000, // 24小时
+  logPrefix: "LinkCard",
+});
 
 // 解析HTML中的Open Graph标签
 function parseOpenGraphTags(html: string): OpenGraphData {
@@ -166,7 +110,7 @@ export async function getOpenGraphData(
   }
 
   // 检查缓存
-  const cached = getCachedData(url);
+  const cached = cache.get(url);
   if (cached) {
     return cached;
   }
@@ -214,7 +158,7 @@ export async function getOpenGraphData(
     }
 
     // 缓存结果
-    setCachedData(url, ogData);
+    cache.set(url, ogData);
 
     return ogData;
   } catch (error) {
