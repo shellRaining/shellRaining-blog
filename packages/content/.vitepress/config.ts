@@ -21,6 +21,10 @@ export default defineConfig<ShellRainingBlogThemeConfig>({
   description: "A VitePress Site",
   themeConfig: {
     logo: { src: "/favicon.ico", width: 24, height: 24 },
+    nav: [
+      { text: "首页", link: "/" },
+      { text: "照片墙", link: "/photos/" },
+    ],
     socialLinks: [
       {
         icon: {

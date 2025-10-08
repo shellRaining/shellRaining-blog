@@ -5,6 +5,7 @@
   "main": "./src/index.ts",
   "dependencies": {
     "dayjs": "^1.11.13",
+    "exifreader": "^4.32.0",
     "feed": "^5.1.0",
     "gray-matter": "^4.0.3",
     "markdown-it-mark": "^4.0.0",
@@ -15,7 +16,10 @@
     "mermaid": "^11.2.1",
     "p-limit": "^7.1.1",
     "probe-image-size": "^7.2.3",
+    "sharp": "^0.34.4",
     "subset-font": "^2.4.0",
+    "swiper": "^12.0.2",
+    "thumbhash": "^0.1.1",
     "viewerjs": "^1.11.7"
   },
   "peerDependencies": {

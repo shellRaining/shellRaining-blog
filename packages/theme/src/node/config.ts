@@ -6,6 +6,7 @@ import { headConf } from "./conf/head";
 import { markdownConf } from "./conf/markdown";
 import { RssPlugin, type RSSOptions } from "./plugins/rss";
 import { linkCardPreloadPlugin } from "./plugins/link-card-preload";
+import { photoThumbHashPlugin } from "./plugins/photo-thumbhash";
 
 type themeOpts = {
   baseUrl: string;
@@ -37,6 +38,10 @@ export function createConfig({
           enabled: true,
           excludeDomains: [],
           includeDomains: [],
+        }),
+        photoThumbHashPlugin({
+          enabled: true,
+          dataFilePath: "photos/data.ts",
         }),
       ],
     },

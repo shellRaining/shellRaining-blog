@@ -1,0 +1,246 @@
+<template>
+  <div class="photo-grid-container">
+    <div class="photo-grid">
+      <div
+        v-for="(photo, index) in photos"
+        :key="index"
+        class="photo-item"
+        @click="openViewer(index)"
+      >
+        <!-- ThumbHash 占位符 -->
+        <div
+          v-if="photo.thumbhashDataURL"
+          class="photo-placeholder"
+          :style="{
+            backgroundImage: `url(${photo.thumbhashDataURL})`,
+            aspectRatio: photo.aspectRatio || 1,
+          }"
+        ></div>
+
+        <!-- 实际图片 -->
+        <img
+          :src="photo.url"
+          :alt="photo.caption || `Photo ${index + 1}`"
+          class="photo-image"
+          loading="lazy"
+          :style="{ aspectRatio: photo.aspectRatio || 1 }"
+        />
+
+        <!-- Hover 遮罩 -->
+        <div class="photo-overlay">
+          <div class="photo-info">
+            <h3 v-if="photo.caption" class="photo-caption">
+              {{ photo.caption }}
+            </h3>
+            <div class="photo-meta">
+              <span v-if="photo.date" class="photo-date">{{
+                formatDate(photo.date)
+              }}</span>
+              <span v-if="photo.location" class="photo-location">{{
+                photo.location
+              }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 照片查看器 -->
+    <PhotoViewer
+      v-if="viewerVisible"
+      :photos="photos"
+      :initial-index="currentIndex"
+      @close="closeViewer"
+    />
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref } from "vue";
+import PhotoViewer from "./PhotoViewer.vue";
+
+export interface Photo {
+  url: string;
+  caption?: string;
+  date?: string;
+  location?: string;
+  tags?: string[];
+  thumbhash?: string;
+  thumbhashDataURL?: string;
+  aspectRatio?: number;
+}
+
+interface Props {
+  photos: Photo[];
+}
+
+defineProps<Props>();
+
+const viewerVisible = ref(false);
+const currentIndex = ref(0);
+
+function openViewer(index: number) {
+  currentIndex.value = index;
+  viewerVisible.value = true;
+}
+
+function closeViewer() {
+  viewerVisible.value = false;
+}
+
+function formatDate(date: string): string {
+  try {
+    return new Date(date).toLocaleDateString("zh-CN", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  } catch {
+    return date;
+  }
+}
+</script>
+
+<style scoped>
+.photo-grid-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .photo-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .photo-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1025px) {
+  .photo-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.photo-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  cursor: pointer;
+  background: var(--vp-c-bg-soft);
+}
+
+.photo-placeholder {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(20px);
+  transform: scale(1.1);
+}
+
+.photo-image {
+  position: relative;
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.photo-item:hover .photo-image {
+  transform: scale(1.05);
+}
+
+.photo-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.8) 0%,
+    rgba(0, 0, 0, 0.4) 50%,
+    transparent 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  display: flex;
+  align-items: flex-end;
+  padding: 1.5rem;
+}
+
+.photo-item:hover .photo-overlay {
+  opacity: 1;
+}
+
+.photo-info {
+  color: white;
+  width: 100%;
+}
+
+.photo-caption {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.4;
+}
+
+.photo-meta {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.875rem;
+  opacity: 0.9;
+}
+
+.photo-date,
+.photo-location {
+  display: flex;
+  align-items: center;
+}
+
+.photo-date::before {
+  content: "📅";
+  margin-right: 0.25rem;
+}
+
+.photo-location::before {
+  content: "📍";
+  margin-right: 0.25rem;
+}
+
+/* 响应式字体 */
+@media (max-width: 768px) {
+  .photo-caption {
+    font-size: 0.875rem;
+  }
+
+  .photo-meta {
+    font-size: 0.75rem;
+  }
+}
+
+/* 加载动画 */
+.photo-image {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+</style>
