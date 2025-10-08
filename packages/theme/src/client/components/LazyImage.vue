@@ -1,38 +1,45 @@
 <template>
-  <div class="lazy-image-container" :style="containerStyle">
-    <!-- 骨架屏 -->
-    <div v-if="showSkeleton" class="lazy-image-skeleton">
-      <div class="skeleton-shimmer"></div>
-    </div>
-
-    <!-- 错误状态 -->
-    <div v-else-if="error" class="lazy-image-error">
-      <div class="error-icon">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="8" x2="12" y2="12"></line>
-          <line x1="12" y1="16" x2="12.01" y2="16"></line>
-        </svg>
+  <ClientOnly>
+    <div class="lazy-image-container" :style="containerStyle">
+      <!-- 骨架屏 -->
+      <div v-if="showSkeleton" class="lazy-image-skeleton">
+        <div class="skeleton-shimmer"></div>
       </div>
-      <span class="error-text">加载失败</span>
-    </div>
 
-    <!-- 实际图片 -->
-    <img
-      v-else
-      :src="src"
-      :alt="alt"
-      :loading="loading"
-      class="lazy-image"
-      @load="handleLoad"
-      @error="handleError"
-    />
-  </div>
+      <!-- 错误状态 -->
+      <div v-else-if="error" class="lazy-image-error">
+        <div class="error-icon">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </div>
+        <span class="error-text">加载失败</span>
+      </div>
+
+      <!-- 实际图片 -->
+      <img
+        v-else
+        :src="src"
+        :alt="alt"
+        :loading="loading"
+        class="lazy-image"
+        @load="handleLoad"
+        @error="handleError"
+      />
+    </div>
+    <template #fallback>
+      <div class="lazy-image-container" :style="containerStyle">
+        <img :src="src" :alt="alt" :loading="loading" class="lazy-image" />
+      </div>
+    </template>
+  </ClientOnly>
 </template>
 
 <script lang="ts" setup>
