@@ -254,3 +254,48 @@ const truncatedDescription = computed(() => {
   }
 }
 </style>
+
+<style>
+/* 全局样式：控制 LinkCard 在文档流中的间距 */
+.VPDoc .content .link-card {
+  margin: 1.5rem 0;
+}
+
+.VPDoc .content .link-card:first-child {
+  margin-top: 0;
+}
+
+.VPDoc .content .link-card:last-child {
+  margin-bottom: 0;
+}
+
+/* 确保链接卡片在文档内容中的间距正确 */
+.VPDoc .content p + .link-card,
+.VPDoc .content .link-card + p,
+.VPDoc .content .link-card + h1,
+.VPDoc .content .link-card + h2,
+.VPDoc .content .link-card + h3,
+.VPDoc .content .link-card + h4,
+.VPDoc .content .link-card + h5,
+.VPDoc .content .link-card + h6 {
+  margin-top: 1.5rem;
+}
+
+/* 链接卡片在打印时的样式 */
+@media print {
+  .link-card {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+
+  .link-card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .link-card-image {
+    display: none; /* 打印时隐藏图片 */
+  }
+}
+</style>
