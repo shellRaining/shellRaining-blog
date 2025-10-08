@@ -130,9 +130,6 @@ async function extractExifMetadata(buffer: Buffer): Promise<{
       const lon = tags.gps.Longitude;
       // 将坐标格式化为字符串（后续可以调用地理编码 API 转换为地名）
       location = `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
-      console.log(
-        `[PhotoThumbHash] Found GPS coordinates: ${location} (可在后续版本中转换为地名)`,
-      );
     }
 
     return { date, location };

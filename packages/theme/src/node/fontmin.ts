@@ -21,9 +21,10 @@ export interface FontConfig {
 
 /**
  * @param pages 所有页面的绝对路径
+ * @param srcDir VitePress srcDir 路径，用于查找 photos 数据文件
  * @returns 所有页面中出现的字符集合
  */
-export function getAllChars(pages: string[]): Set<string> {
+export function getAllChars(pages: string[], srcDir?: string): Set<string> {
   const allChars = new Set<string>();
 
   for (let i = 0; i < pages.length; i++) {
@@ -36,6 +37,21 @@ export function getAllChars(pages: string[]): Set<string> {
     } catch (error) {
       console.error(`Error reading file ${pages[i]}: ${error}`);
       throw error;
+    }
+  }
+
+  // 添加 photos 数据中的文本
+  if (srcDir) {
+    try {
+      const photosDataPath = path.join(srcDir, "photos", "data.ts");
+      if (readFileSync(photosDataPath)) {
+        const photosContent = readFileSync(photosDataPath, "utf-8");
+        for (const char of photosContent) {
+          allChars.add(char);
+        }
+      }
+    } catch (error) {
+      // photos/data.ts 不存在或读取失败，跳过
     }
   }
 

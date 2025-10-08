@@ -43,7 +43,7 @@ export const fontPlugin = {
     if (env.mode !== "build") {
       devSubsetAssets.clear();
     }
-    const allChars = getAllChars(siteConfig.pages);
+    const allChars = getAllChars(siteConfig.pages, siteConfig.srcDir);
     const text = Array.from(allChars).join("");
 
     // Prepare cache directory and manifest under .vitepress/cache/font-subset
