@@ -160,7 +160,6 @@ async function checkFile(
 
 function report(errors: string[]) {
   if (errors.length === 0) {
-    console.log("内容命名和标签校验通过 \u2705");
     return;
   }
   console.error("内容校验失败：");

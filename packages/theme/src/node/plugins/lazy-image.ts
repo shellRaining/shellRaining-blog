@@ -120,25 +120,12 @@ export async function preloadImageSizes() {
   }
 
   const urls = Array.from(globalImageUrls);
-  console.log(
-    `[LazyImage] Detecting sizes for ${urls.length} images (cached images will be skipped)...`,
-  );
-  const startTime = Date.now();
-
   const results = await batchDetectImageSizes(urls);
 
   // 将结果填充到全局缓存
   results.forEach((dimensions, url) => {
     globalSizeCache.set(url, dimensions);
   });
-
-  const duration = Date.now() - startTime;
-  const successCount = Array.from(results.values()).filter(
-    (d) => d !== null,
-  ).length;
-  console.log(
-    `[LazyImage] Detection completed: ${successCount}/${urls.length} successful in ${duration}ms`,
-  );
 
   batchDetectionDone = true;
 }

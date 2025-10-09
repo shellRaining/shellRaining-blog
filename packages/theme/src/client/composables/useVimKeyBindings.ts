@@ -363,20 +363,12 @@ export function useVimKeyBindings() {
       // Series navigation - use n/p for next/prev article in series
       if (KeyUtils.matchesBinding(event, config.value.navigation.nextSeries)) {
         event.preventDefault();
-        const result = navigateNextSeries();
-        if (!result) {
-          // Optional: Provide visual feedback when no next article exists
-          console.log("No next article in series");
-        }
+        navigateNextSeries();
         return;
       }
       if (KeyUtils.matchesBinding(event, config.value.navigation.prevSeries)) {
         event.preventDefault();
-        const result = navigatePrevSeries();
-        if (!result) {
-          // Optional: Provide visual feedback when no previous article exists
-          console.log("No previous article in series");
-        }
+        navigatePrevSeries();
         return;
       }
     }
