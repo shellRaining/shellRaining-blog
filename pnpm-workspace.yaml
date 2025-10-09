@@ -1,5 +1,9 @@
 packages:
   - packages/*
+
 onlyBuiltDependencies:
   - esbuild
+  - exifreader
+  - nx
+  - sharp
   - vue-demi
