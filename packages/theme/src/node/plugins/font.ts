@@ -16,6 +16,7 @@ import {
 import crypto from "crypto";
 import type { HeadConfig, SiteConfig } from "vitepress";
 import type { PluginOption, ViteDevServer } from "vite";
+import { logger, LogLevels, buildMetrics } from "../utils/logger";
 
 const devSubsetAssets = new Map<string, Buffer>();
 
@@ -39,6 +40,9 @@ export const fontPlugin = {
       }
       return;
     }
+
+    // 性能监控开始
+    const startTime = performance.now();
 
     if (env.mode !== "build") {
       devSubsetAssets.clear();
@@ -136,6 +140,18 @@ export const fontPlugin = {
     const fontFaceCSS = generateFontFaceCSS(userFontConfig);
     appendHeads.push(["style", {}, fontFaceCSS]);
     siteConfig.site.head.push(...appendHeads);
+
+    // 性能监控结束
+    const duration = performance.now() - startTime;
+    const charCount = text.length;
+    const details = `${userFontConfig.length} font(s), ${charCount} unique characters`;
+
+    buildMetrics.record(
+      "Font Subsetting",
+      duration,
+      userFontConfig.length,
+      details,
+    );
   },
 
   configureServer(server: ViteDevServer) {

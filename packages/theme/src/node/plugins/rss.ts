@@ -5,6 +5,7 @@ import type { SiteConfig, MarkdownEnv } from "vitepress";
 import { Feed } from "feed";
 import type { FeedOptions } from "feed";
 import matter from "gray-matter";
+import { logger, LogLevels, buildMetrics } from "../utils/logger";
 
 // Helper functions that were in @sugarat/theme-shared
 
@@ -186,7 +187,6 @@ export async function genFeed(config: SiteConfig, rssOptions: RSSOptions) {
   const finalContent = utf8BOM + rssContent;
 
   await fs.promises.writeFile(RSSFilepath, finalContent, { encoding: "utf8" });
-  console.log("\n🎉 RSS generated", RSSFilename);
 }
 
 // Logic from index.ts
@@ -200,7 +200,13 @@ export function RssPlugin(rssOptions: RSSOptions): PluginOption {
     },
     async buildEnd() {
       if (config?.vitepress && config.build.ssr) {
+        const startTime = performance.now();
+
         await genFeed(config.vitepress, rssOptions);
+
+        const duration = performance.now() - startTime;
+
+        buildMetrics.record("RSS Generation", duration);
       }
     },
     configureServer(server) {

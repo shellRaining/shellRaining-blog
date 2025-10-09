@@ -7,6 +7,7 @@ import { markdownConf } from "./conf/markdown";
 import { RssPlugin, type RSSOptions } from "./plugins/rss";
 import { linkCardPreloadPlugin } from "./plugins/link-card-preload";
 import { photoThumbHashPlugin } from "./plugins/photo-thumbhash";
+import { buildLoggerPlugin } from "./plugins/build-logger";
 
 type themeOpts = {
   baseUrl: string;
@@ -43,6 +44,7 @@ export function createConfig({
           enabled: true,
           dataFilePath: "photos/data.ts",
         }),
+        buildLoggerPlugin,
       ],
     },
     head: headConf,

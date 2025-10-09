@@ -4,6 +4,7 @@
   "author": "shellRaining",
   "main": "./src/index.ts",
   "dependencies": {
+    "consola": "^3.4.2",
     "dayjs": "^1.11.13",
     "exifreader": "^4.32.0",
     "feed": "^5.1.0",

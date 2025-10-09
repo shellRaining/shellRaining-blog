@@ -1,11 +1,9 @@
 import type { PluginOption } from "vite";
 import type { SiteConfig } from "vitepress";
-import {
-  batchGenerateThumbHash,
-  type ThumbHashResult,
-} from "../utils/thumbhash-generator";
+import { batchGenerateThumbHash } from "../utils/thumbhash-generator";
 import path from "path";
 import { existsSync, readFileSync, writeFileSync } from "fs";
+import { logger, LogLevels, buildMetrics } from "../utils/logger";
 
 export interface PhotoThumbHashOptions {
   enabled?: boolean;
@@ -46,22 +44,17 @@ export const photoThumbHashPlugin = (
 
       // 检查文件是否存在
       if (!existsSync(dataFilePath)) {
-        console.log(
-          `[PhotoThumbHash] Data file not found: ${dataFilePath}, skipping`,
-        );
         return;
       }
 
-      console.log(
-        `[PhotoThumbHash] Processing photos from ${opts.dataFilePath}...`,
-      );
+      // 性能监控开始
+      const startTime = performance.now();
 
       try {
         // 读取照片数据文件
         const photos = await extractPhotosFromDataFile(dataFilePath);
 
         if (photos.length === 0) {
-          console.log("[PhotoThumbHash] No photos found");
           return;
         }
 
@@ -69,15 +62,8 @@ export const photoThumbHashPlugin = (
         const photosNeedingHash = photos.filter((photo) => !photo.thumbhash);
 
         if (photosNeedingHash.length === 0) {
-          console.log(
-            "[PhotoThumbHash] All photos already have thumbhash, skipping",
-          );
           return;
         }
-
-        console.log(
-          `[PhotoThumbHash] Generating thumbhash for ${photosNeedingHash.length} photos...`,
-        );
 
         // 批量生成 thumbhash
         const urls = photosNeedingHash.map((p) => p.url);
@@ -107,12 +93,15 @@ export const photoThumbHashPlugin = (
         if (updateCount > 0) {
           // 回写文件
           await writePhotosToDataFile(dataFilePath, photos);
-          console.log(
-            `[PhotoThumbHash] Updated ${updateCount} photos with thumbhash`,
-          );
         }
+
+        // 性能监控结束
+        const duration = performance.now() - startTime;
+        const details = `${updateCount} photos updated, ${photos.length} total`;
+
+        buildMetrics.record("Photo ThumbHash", duration, updateCount, details);
       } catch (error) {
-        console.error("[PhotoThumbHash] Error processing photos:", error);
+        logger.error("[PhotoThumbHash] Error processing photos:", error);
       }
     },
   };
