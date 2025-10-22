@@ -207,3 +207,16 @@ git commit -m "配置 Git LFS 追踪字体文件"
 git lfs install
 git lfs pull
 ```
+
+## stash 部分文件
+
+我们直接使用 `git stash push -m` 暂存时，会存储当前所有的改动，如果我只想要存储 add 的文件，可以通过命令 `git stash push --staged` 完成，如果想要存储未 add 的文件，可以通过命令 `git stash push --keep-index`
+
+可以看到我们这里使用了 `git stash push` 命令，他实际上是 `git stash` 的现代化写法，主要原因是让 stash 命令族结构更统一，这个命令族有比如：
+
+``` bash
+git stash apply
+git stash drop
+git stash show
+git stash push
+```
