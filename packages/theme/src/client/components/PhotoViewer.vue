@@ -13,6 +13,7 @@
         </div>
         <div class="toolbar-right">
           <button
+            id="photo-viewer-share-button"
             type="button"
             class="toolbar-button"
             title="分享"
@@ -35,6 +36,7 @@
             </svg>
           </button>
           <button
+            id="photo-viewer-close-button"
             type="button"
             class="toolbar-button"
             title="关闭 (ESC)"

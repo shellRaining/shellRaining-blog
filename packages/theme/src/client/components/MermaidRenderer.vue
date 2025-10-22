@@ -81,14 +81,17 @@ function buildInteractiveShell(
     modalMode = false,
   } = options;
 
+  // Generate unique ID suffix for this instance
+  const uniqueId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
   const toolbar = document.createElement("div");
   toolbar.className = "mmd-toolbar";
   toolbar.innerHTML = `
-    <button class="mmd-btn" data-action="zoom-in" title="放大">+</button>
-    <button class="mmd-btn" data-action="zoom-out" title="缩小">−</button>
-    <button class="mmd-btn" data-action="reset" title="重置">⟳</button>
-    <button class="mmd-btn" data-action="view" title="全屏">⛶</button>
-    ${enableClose ? '<button class="mmd-btn" data-action="close" title="关闭">✕</button>' : ""}
+    <button id="mmd-zoom-in-${uniqueId}" class="mmd-btn" data-action="zoom-in" title="放大">+</button>
+    <button id="mmd-zoom-out-${uniqueId}" class="mmd-btn" data-action="zoom-out" title="缩小">−</button>
+    <button id="mmd-reset-${uniqueId}" class="mmd-btn" data-action="reset" title="重置">⟳</button>
+    <button id="mmd-view-${uniqueId}" class="mmd-btn" data-action="view" title="全屏">⛶</button>
+    ${enableClose ? `<button id="mmd-close-${uniqueId}" class="mmd-btn" data-action="close" title="关闭">✕</button>` : ""}
   `;
 
   const viewport = document.createElement("div");

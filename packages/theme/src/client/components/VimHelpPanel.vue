@@ -95,6 +95,7 @@ onUnmounted(() => {
           <header class="vim-help-header">
             <h2>Vim Key Bindings</h2>
             <button
+              id="vim-help-close-button"
               class="close-btn"
               @click="$emit('close')"
               aria-label="Close"

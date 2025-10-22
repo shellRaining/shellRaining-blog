@@ -19,6 +19,13 @@ export default defineConfig<ShellRainingBlogThemeConfig>({
   lang: "zh-cn",
   title,
   description: "A VitePress Site",
+  vue: {
+    template: {
+      compilerOptions: {
+        isCustomElement: (tag) => tag.startsWith("swiper-"),
+      },
+    },
+  },
   themeConfig: {
     logo: { src: "/favicon.ico", width: 24, height: 24 },
     nav: [
