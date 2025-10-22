@@ -21,7 +21,7 @@ export interface FontConfig {
 
 /**
  * @param pages 所有页面的绝对路径
- * @param srcDir VitePress srcDir 路径，用于查找 photos 数据文件
+ * @param srcDir VitePress srcDir 路径，用于查找 photos 数据文件和配置文件
  * @returns 所有页面中出现的字符集合
  */
 export function getAllChars(pages: string[], srcDir?: string): Set<string> {
@@ -40,15 +40,35 @@ export function getAllChars(pages: string[], srcDir?: string): Set<string> {
     }
   }
 
+  // 添加 VitePress 配置文件中的文本（导航栏、侧边栏等）
+  if (srcDir) {
+    try {
+      const configPath = path.join(srcDir, ".vitepress", "config.ts");
+      const configContent = readFileSync(configPath, "utf-8");
+      for (const char of configContent) {
+        allChars.add(char);
+      }
+    } catch (error) {
+      // config.ts 不存在，尝试 config.js
+      try {
+        const configPath = path.join(srcDir, ".vitepress", "config.js");
+        const configContent = readFileSync(configPath, "utf-8");
+        for (const char of configContent) {
+          allChars.add(char);
+        }
+      } catch (error) {
+        // 配置文件不存在，跳过
+      }
+    }
+  }
+
   // 添加 photos 数据中的文本
   if (srcDir) {
     try {
       const photosDataPath = path.join(srcDir, "photos", "data.ts");
-      if (readFileSync(photosDataPath)) {
-        const photosContent = readFileSync(photosDataPath, "utf-8");
-        for (const char of photosContent) {
-          allChars.add(char);
-        }
+      const photosContent = readFileSync(photosDataPath, "utf-8");
+      for (const char of photosContent) {
+        allChars.add(char);
       }
     } catch (error) {
       // photos/data.ts 不存在或读取失败，跳过
