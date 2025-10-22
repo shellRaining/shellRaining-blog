@@ -1,6 +1,6 @@
 <template>
   <Teleport to="body">
-    <div class="photo-viewer" @click.self="close">
+    <div class="photo-viewer">
       <!-- 背景遮罩 -->
       <div class="photo-viewer-backdrop"></div>
 
@@ -65,7 +65,7 @@
           :keyboard="{ enabled: true }"
           :navigation="true"
           :loop="false"
-          @slidechange="onSlideChange"
+          @swiperslidechange="onSlideChange"
         >
           <swiper-slide v-for="(photo, index) in photos" :key="index">
             <div class="slide-content">
@@ -87,44 +87,77 @@
         </swiper-container>
       </div>
 
-      <!-- 底部信息栏 -->
-      <div v-if="currentPhoto" class="photo-viewer-info">
-        <h3 v-if="currentPhoto.caption" class="info-caption">
-          {{ currentPhoto.caption }}
-        </h3>
-        <div class="info-meta">
-          <span v-if="currentPhoto.date" class="meta-item">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
+      <!-- 底部区域（信息栏 + 缩略图）合并 -->
+      <div class="photo-viewer-bottom">
+        <!-- 底部信息栏 -->
+        <div v-if="currentPhoto" class="photo-viewer-info">
+          <h3 v-if="currentPhoto.caption" class="info-caption">
+            {{ currentPhoto.caption }}
+          </h3>
+          <div class="info-meta">
+            <span v-if="currentPhoto.date" class="meta-item">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              {{ formatDate(currentPhoto.date) }}
+            </span>
+            <span v-if="currentPhoto.location" class="meta-item">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              {{ currentPhoto.location }}
+            </span>
+          </div>
+        </div>
+
+        <!-- 缩略图预览条 -->
+        <div class="photo-viewer-thumbnails">
+          <div ref="thumbnailsContainerRef" class="thumbnails-container">
+            <div
+              v-for="(photo, index) in photos"
+              :key="index"
+              :ref="
+                (el) => {
+                  if (el) thumbnailRefs[index] = el as HTMLElement;
+                }
+              "
+              class="thumbnail-item"
+              :class="{ active: index === currentIndex }"
+              @click="goToSlide(index)"
             >
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-              <line x1="16" y1="2" x2="16" y2="6"></line>
-              <line x1="8" y1="2" x2="8" y2="6"></line>
-              <line x1="3" y1="10" x2="21" y2="10"></line>
-            </svg>
-            {{ formatDate(currentPhoto.date) }}
-          </span>
-          <span v-if="currentPhoto.location" class="meta-item">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-              <circle cx="12" cy="10" r="3"></circle>
-            </svg>
-            {{ currentPhoto.location }}
-          </span>
+              <div
+                v-if="photo.thumbhashDataURL"
+                class="thumbnail-placeholder"
+                :style="{ backgroundImage: `url(${photo.thumbhashDataURL})` }"
+              ></div>
+              <img
+                :src="photo.url"
+                :alt="photo.caption || `Photo ${index + 1}`"
+                class="thumbnail-image"
+                loading="lazy"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -132,7 +165,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, nextTick } from "vue";
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from "vue";
 import { register } from "swiper/element/bundle";
 
 // 注册 Swiper Web Components
@@ -167,11 +200,23 @@ const emit = defineEmits<Emits>();
 const swiperRef = ref<any>(null);
 const currentIndex = ref(props.initialIndex);
 const zoomedSlides = ref(new Set<number>());
+const thumbnailsContainerRef = ref<HTMLElement | null>(null);
+const thumbnailRefs: HTMLElement[] = [];
 
 const currentPhoto = computed(() => props.photos[currentIndex.value]);
 
 function onSlideChange(event: any) {
-  currentIndex.value = event.detail[0].activeIndex;
+  // Swiper Web Components 事件格式：event.detail[0] 是 swiper 实例
+  const swiper = event.detail?.[0];
+  if (swiper && typeof swiper.activeIndex === "number") {
+    currentIndex.value = swiper.activeIndex;
+  }
+}
+
+function goToSlide(index: number) {
+  if (swiperRef.value?.swiper) {
+    swiperRef.value.swiper.slideTo(index);
+  }
 }
 
 function toggleZoom(index: number) {
@@ -217,11 +262,40 @@ function formatDate(date: string): string {
   }
 }
 
+function scrollThumbnailIntoView() {
+  if (!thumbnailsContainerRef.value) return;
+
+  const activeThumbnail = thumbnailRefs[currentIndex.value];
+  if (!activeThumbnail) return;
+
+  const container = thumbnailsContainerRef.value;
+  const thumbnailRect = activeThumbnail.getBoundingClientRect();
+  const containerRect = container.getBoundingClientRect();
+
+  // 计算需要滚动的距离，使缩略图居中
+  const scrollLeft =
+    activeThumbnail.offsetLeft -
+    container.offsetWidth / 2 +
+    activeThumbnail.offsetWidth / 2;
+
+  container.scrollTo({
+    left: scrollLeft,
+    behavior: "smooth",
+  });
+}
+
 function handleKeydown(event: KeyboardEvent) {
   if (event.key === "Escape") {
     close();
   }
 }
+
+// 监听当前索引变化，自动滚动缩略图
+watch(currentIndex, () => {
+  nextTick(() => {
+    scrollThumbnailIntoView();
+  });
+});
 
 onMounted(() => {
   // 锁定 body 滚动
@@ -229,6 +303,11 @@ onMounted(() => {
 
   // 监听键盘事件
   window.addEventListener("keydown", handleKeydown);
+
+  // 初始化时滚动到当前缩略图
+  nextTick(() => {
+    scrollThumbnailIntoView();
+  });
 });
 
 onUnmounted(() => {
@@ -377,16 +456,102 @@ swiper-slide {
   opacity: 0.7;
 }
 
-/* 底部信息栏 */
-.photo-viewer-info {
+/* 底部区域（合并信息栏和缩略图） */
+.photo-viewer-bottom {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 10;
-  padding: 1.5rem;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, transparent 100%);
+  z-index: 11;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.9) 0%,
+    rgba(0, 0, 0, 0.7) 50%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  backdrop-filter: blur(10px);
+  padding-top: 2rem; /* 顶部留空，用于渐变过渡 */
+}
+
+/* 底部信息栏 */
+.photo-viewer-info {
+  padding: 0 1.5rem 1rem;
   color: white;
+}
+
+/* 缩略图预览条 */
+.photo-viewer-thumbnails {
+  padding: 1rem 0;
+}
+
+.thumbnails-container {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0 1.5rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 隐藏滚动条但保持功能 */
+.thumbnails-container::-webkit-scrollbar {
+  height: 4px;
+}
+
+.thumbnails-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+.thumbnails-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+}
+
+.thumbnails-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.thumbnail-item {
+  position: relative;
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+  opacity: 0.6;
+}
+
+.thumbnail-item:hover {
+  opacity: 1;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.thumbnail-item.active {
+  opacity: 1;
+  border-color: var(--vp-c-brand-1, #646cff);
+  box-shadow: 0 0 0 2px rgba(100, 108, 255, 0.3);
+}
+
+.thumbnail-placeholder {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(4px);
+  transform: scale(1.1);
+}
+
+.thumbnail-image {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .info-caption {
@@ -419,8 +584,26 @@ swiper-slide {
     padding: 0.75rem 1rem;
   }
 
+  .photo-viewer-bottom {
+    padding-top: 1.5rem;
+  }
+
   .photo-viewer-info {
-    padding: 1rem;
+    padding: 0 1rem 0.75rem;
+  }
+
+  .photo-viewer-thumbnails {
+    padding: 0.75rem 0;
+  }
+
+  .thumbnails-container {
+    padding: 0 1rem;
+    gap: 0.5rem;
+  }
+
+  .thumbnail-item {
+    width: 60px;
+    height: 60px;
   }
 
   .info-caption {
