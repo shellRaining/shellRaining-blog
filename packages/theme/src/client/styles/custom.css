@@ -39,6 +39,15 @@
   transform: translateY(-16px);
 }
 
+/* Vim key bindings styles */
+.post-title.vim-selected {
+  background: var(--vp-c-brand-soft) !important;
+  color: var(--vp-c-brand) !important;
+  border-radius: 4px;
+  outline: 2px solid var(--vp-c-brand);
+  outline-offset: 2px;
+}
+
 /* Inline code: copy affordance and feedback */
 .VPDoc .content :not(pre) > code {
   cursor: pointer;
