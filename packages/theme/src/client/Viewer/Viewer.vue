@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { onMounted, onUnmounted } from "vue";
+import { onContentUpdated } from "vitepress";
 import "viewerjs/dist/viewer.css";
 
 let viewer: any = null;
@@ -21,6 +22,13 @@ async function initViewer() {
       },
     },
   });
+}
+
+function destroyViewer() {
+  if (viewer) {
+    viewer.destroy();
+    viewer = null;
+  }
 }
 
 async function previewImage(e: Event) {
@@ -48,10 +56,22 @@ onMounted(() => {
   }
 });
 
+// 在路由切换/内容更新时重新初始化 viewer
+onContentUpdated(() => {
+  destroyViewer();
+
+  // 使用 nextTick 确保 DOM 已更新
+  if ("requestIdleCallback" in window) {
+    requestIdleCallback(() => initViewer());
+  } else {
+    setTimeout(() => initViewer(), 100);
+  }
+});
+
 onUnmounted(() => {
   const docDomContainer = document.querySelector("#VPContent");
   docDomContainer?.removeEventListener("click", previewImage);
-  viewer?.destroy();
+  destroyViewer();
 });
 </script>
 
