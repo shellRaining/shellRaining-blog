@@ -34,3 +34,65 @@ https://github.com/modelcontextprotocol/modelcontextprotocol/discussions/90#disc
 5. 重复 2 和 3 步
 
 ### 实战例子
+
+我们写一个简单的 server 的例子：
+
+```TypeScript
+const server = new McpServer(
+  {
+    name: "simple-roots-server",
+    version: "1.0.0",
+  },
+  { capabilities: {} },
+);
+
+let roots: string[] = [];
+
+function extractRoots(response: ListRootsResult) {
+  if (response && "roots" in response) {
+    return response.roots.map((root) => root.uri);
+  }
+  return [];
+}
+
+server.server.oninitialized = async () => {
+  const clientCapabilities = server.server.getClientCapabilities();
+
+  // 由于 roots 是客户端能力，因此使用前需要检查
+  if (clientCapabilities?.roots) {
+    const response = await server.server.listRoots();
+    roots = extractRoots(response);
+    console.error("初始工作区的项目路径有: ", roots);
+  } else {
+    console.error("客户端不支持 roots 能力");
+  }
+};
+
+server.server.setNotificationHandler(
+  RootsListChangedNotificationSchema,
+  async () => {
+    const response = await server.server.listRoots();
+    roots = extractRoots(response);
+    console.error("工作区的项目路径更新为: ", roots);
+  },
+);
+
+// 注册一个使用 roots 功能的工具
+server.registerTool(
+  "print-pwd",
+  { description: "输出当前工作区的所有项目路径" },
+  async (): Promise<CallToolResult> => {
+    return {
+      content: [
+        {
+          type: "text",
+          text: `当前工作区的项目路径有: ${roots.join(", ")}`,
+        },
+      ],
+    };
+  },
+);
+
+const transport = new StdioServerTransport();
+server.connect(transport);
+```
