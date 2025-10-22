@@ -98,6 +98,16 @@ function buildInteractiveShell(
   // Ensure SVG scales crisply inside viewport
   svgEl.removeAttribute("width");
   svgEl.removeAttribute("height");
+  // Remove max-width from inline styles to prevent clipping in modal
+  const style = svgEl.getAttribute("style");
+  if (style) {
+    const newStyle = style.replace(/max-width\s*:\s*[^;]+;?/gi, "");
+    if (newStyle.trim()) {
+      svgEl.setAttribute("style", newStyle);
+    } else {
+      svgEl.removeAttribute("style");
+    }
+  }
   svgEl.setAttribute("preserveAspectRatio", "xMidYMid meet");
   canvas.appendChild(svgEl);
   viewport.appendChild(canvas);

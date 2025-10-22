@@ -214,7 +214,7 @@ git lfs pull
 
 可以看到我们这里使用了 `git stash push` 命令，他实际上是 `git stash` 的现代化写法，主要原因是让 stash 命令族结构更统一，这个命令族有比如：
 
-``` bash
+```bash
 git stash apply
 git stash drop
 git stash show
