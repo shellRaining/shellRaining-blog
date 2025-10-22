@@ -5,6 +5,7 @@
         v-for="(photo, index) in photos"
         :key="index"
         class="photo-item"
+        :style="{ aspectRatio: dynamicAspectRatio }"
         @click="openViewer(index)"
       >
         <!-- ThumbHash 占位符 -->
@@ -13,7 +14,6 @@
           class="photo-placeholder"
           :style="{
             backgroundImage: `url(${photo.thumbhashDataURL})`,
-            aspectRatio: photo.aspectRatio || 1,
           }"
         ></div>
 
@@ -23,7 +23,6 @@
           :alt="photo.caption || `Photo ${index + 1}`"
           class="photo-image"
           loading="lazy"
-          :style="{ aspectRatio: photo.aspectRatio || 1 }"
         />
 
         <!-- Hover 遮罩 -->
@@ -56,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import PhotoViewer from "./PhotoViewer.vue";
 
 export interface Photo {
@@ -74,10 +73,22 @@ interface Props {
   photos: Photo[];
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
 
 const viewerVisible = ref(false);
 const currentIndex = ref(0);
+
+// 根据图片数量动态计算宽高比
+const dynamicAspectRatio = computed(() => {
+  const count = props.photos.length;
+  if (count <= 6) {
+    return "16 / 9"; // 1-6张图片：宽屏比例
+  } else if (count <= 12) {
+    return "4 / 3"; // 7-12张图片：中等比例
+  } else {
+    return "1 / 1"; // 12张以上：正方形
+  }
+});
 
 function openViewer(index: number) {
   currentIndex.value = index;
@@ -140,6 +151,7 @@ function formatDate(date: string): string {
   border-radius: 8px;
   cursor: pointer;
   background: var(--vp-c-bg-soft);
+  /* aspect-ratio 通过内联样式动态设置 */
 }
 
 .photo-placeholder {
@@ -154,7 +166,7 @@ function formatDate(date: string): string {
 .photo-image {
   position: relative;
   width: 100%;
-  height: auto;
+  height: 100%;
   display: block;
   object-fit: cover;
   transition: transform 0.3s ease;
