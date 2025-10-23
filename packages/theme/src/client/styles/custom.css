@@ -274,3 +274,41 @@
   color: var(--vp-c-text-2);
   white-space: nowrap;
 }
+
+/* 行内代码复制 Toast 提示 */
+.inline-copy-toast {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  padding: 8px 16px;
+  background: var(--vp-c-bg-soft);
+  color: var(--vp-c-text-1);
+  border: 1px solid var(--vp-c-border);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow:
+    0 3px 6px -4px rgba(0, 0, 0, 0.12),
+    0 6px 16px 0 rgba(0, 0, 0, 0.08),
+    0 9px 28px 8px rgba(0, 0, 0, 0.05);
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.inline-copy-toast.show {
+  opacity: 1;
+}
+
+.dark .inline-copy-toast {
+  background: var(--vp-c-bg-soft);
+  border-color: var(--vp-c-divider);
+  box-shadow:
+    0 3px 6px -4px rgba(0, 0, 0, 0.24),
+    0 6px 16px 0 rgba(0, 0, 0, 0.16),
+    0 9px 28px 8px rgba(0, 0, 0, 0.12);
+}

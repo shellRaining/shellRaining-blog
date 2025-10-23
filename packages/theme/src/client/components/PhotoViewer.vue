@@ -163,12 +163,16 @@
         </div>
       </div>
     </div>
+
+    <!-- Toast 提示 -->
+    <Toast ref="toastRef" />
   </Teleport>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick, watch } from "vue";
 import { register } from "swiper/element/bundle";
+import Toast from "./Toast.vue";
 
 // 注册 Swiper Web Components
 register();
@@ -204,6 +208,7 @@ const currentIndex = ref(props.initialIndex);
 const zoomedSlides = ref(new Set<number>());
 const thumbnailsContainerRef = ref<HTMLElement | null>(null);
 const thumbnailRefs: HTMLElement[] = [];
+const toastRef = ref<InstanceType<typeof Toast> | null>(null);
 
 const currentPhoto = computed(() => props.photos[currentIndex.value]);
 
@@ -233,22 +238,37 @@ function close() {
   emit("close");
 }
 
-function sharePhoto() {
+function getPhotoSlug(url: string): string {
+  const filename = url.split("/").pop() || "";
+  return filename.replace(/\.[^.]+$/, "");
+}
+
+async function sharePhoto() {
   const photo = currentPhoto.value;
   if (!photo) return;
 
-  // 复制图片 URL 到剪贴板
-  if (navigator.clipboard) {
-    navigator.clipboard
-      .writeText(photo.url)
-      .then(() => {
-        alert("图片链接已复制到剪贴板");
-      })
-      .catch(() => {
-        alert("复制失败");
-      });
-  } else {
-    alert(photo.url);
+  // 构建完整的 URL（包括 hash）
+  const slug = getPhotoSlug(photo.url);
+  const fullUrl = `${window.location.origin}${window.location.pathname}#${slug}`;
+
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(fullUrl);
+      toastRef.value?.show("链接已复制");
+    } else {
+      // Fallback for non-secure contexts
+      const textarea = document.createElement("textarea");
+      textarea.value = fullUrl;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+      toastRef.value?.show("链接已复制");
+    }
+  } catch (error) {
+    toastRef.value?.show("复制失败");
   }
 }
 
