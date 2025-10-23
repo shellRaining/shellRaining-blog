@@ -55,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import PhotoViewer from "./PhotoViewer.vue";
 
 export interface Photo {
@@ -90,13 +90,56 @@ const dynamicAspectRatio = computed(() => {
   }
 });
 
+// 从照片 URL 提取文件名（不含扩展名）作为 slug
+function getPhotoSlug(url: string): string {
+  const filename = url.split("/").pop() || "";
+  return filename.replace(/\.[^.]+$/, ""); // 移除扩展名
+}
+
+// 根据 slug 查找照片索引
+function findPhotoIndexBySlug(slug: string): number {
+  return props.photos.findIndex(
+    (photo) => getPhotoSlug(photo.url).toLowerCase() === slug.toLowerCase(),
+  );
+}
+
+// 处理 hash 变化（浏览器前进/后退）
+function handleHashChange() {
+  const hash = window.location.hash.slice(1); // 移除 # 号
+
+  if (!hash) {
+    // hash 被清除，关闭预览器
+    if (viewerVisible.value) {
+      viewerVisible.value = false;
+    }
+    return;
+  }
+
+  const index = findPhotoIndexBySlug(hash);
+  if (index !== -1) {
+    currentIndex.value = index;
+    viewerVisible.value = true;
+  }
+}
+
 function openViewer(index: number) {
   currentIndex.value = index;
   viewerVisible.value = true;
+
+  // 设置 hash 为照片文件名
+  const slug = getPhotoSlug(props.photos[index].url);
+  window.location.hash = slug;
 }
 
 function closeViewer() {
   viewerVisible.value = false;
+
+  // 清除 hash（会触发 hashchange 事件，但此时 viewerVisible 已经是 false）
+  history.pushState(
+    null,
+    "",
+    window.location.pathname + window.location.search,
+  );
 }
 
 function formatDate(date: string): string {
@@ -110,6 +153,25 @@ function formatDate(date: string): string {
     return date;
   }
 }
+
+onMounted(() => {
+  // 检查初始 hash，如果有则打开对应照片
+  const initialHash = window.location.hash.slice(1);
+  if (initialHash) {
+    const index = findPhotoIndexBySlug(initialHash);
+    if (index !== -1) {
+      currentIndex.value = index;
+      viewerVisible.value = true;
+    }
+  }
+
+  // 监听 hash 变化
+  window.addEventListener("hashchange", handleHashChange);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("hashchange", handleHashChange);
+});
 </script>
 
 <style scoped>
