@@ -22,7 +22,11 @@ export default defineConfig<ShellRainingBlogThemeConfig>({
   description: "A VitePress Site",
   head: [
     ["link", { rel: "manifest", href: "/manifest.webmanifest" }],
-    ["script", { src: "/registerSW.js" }],
+    [
+      "script",
+      {},
+      "if('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(err => console.error('SW registration failed:', err)) }) }",
+    ],
   ],
   vite: {
     plugins: [
@@ -59,7 +63,7 @@ export default defineConfig<ShellRainingBlogThemeConfig>({
         },
         registerType: "autoUpdate",
         includeAssets: ["favicon.ico", "apple-touch-icon.png", "safari-pinned-tab.svg"],
-        injectRegister: "auto",
+        injectRegister: null,
       }),
     ],
   },
