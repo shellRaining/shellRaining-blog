@@ -28,8 +28,8 @@ async function toggleAppearance({ x, y }: MouseEvent) {
   document.documentElement.animate(
     { clipPath: isDark.value ? clipPath.reverse() : clipPath },
     {
-      duration: 500,
-      easing: "ease-in",
+      duration: 400,
+      easing: "ease-out",
       pseudoElement: `::view-transition-${isDark.value ? "old" : "new"}(root)`,
     },
   );
@@ -80,13 +80,19 @@ async function toggleAppearance({ x, y }: MouseEvent) {
   mix-blend-mode: normal;
 }
 
-::view-transition-old(root),
-.dark::view-transition-new(root) {
+::view-transition-old(root) {
   z-index: 1;
 }
 
-::view-transition-new(root),
+::view-transition-new(root) {
+  z-index: 9999;
+}
+
 .dark::view-transition-old(root) {
   z-index: 9999;
+}
+
+.dark::view-transition-new(root) {
+  z-index: 1;
 }
 </style>
