@@ -1,4 +1,5 @@
 import { defineConfig } from "vitepress";
+import { VitePWA } from "vite-plugin-pwa";
 import { createConfig } from "@shellraining/theme/config";
 import type { ShellRainingBlogThemeConfig } from "@shellraining/theme/config";
 
@@ -19,6 +20,53 @@ export default defineConfig<ShellRainingBlogThemeConfig>({
   lang: "zh-cn",
   title,
   description: "A VitePress Site",
+  head: [
+    ["link", { rel: "manifest", href: "/manifest.webmanifest" }],
+    [
+      "script",
+      {},
+      "if('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(err => console.error('SW registration failed:', err)) }) }",
+    ],
+  ],
+  vite: {
+    plugins: [
+      VitePWA({
+        manifest: {
+          name: "shellRaining's blog",
+          short_name: "shellRaining",
+          description: "shellRaining's personal blog - tech, reading notes, and life",
+          theme_color: "#ffffff",
+          background_color: "#ffffff",
+          display: "standalone",
+          icons: [
+            {
+              src: "/android-chrome-192x192.png",
+              sizes: "192x192",
+              type: "image/png",
+              purpose: "any maskable",
+            },
+            {
+              src: "/android-chrome-384x384.png",
+              sizes: "384x384",
+              type: "image/png",
+              purpose: "any maskable",
+            },
+            {
+              src: "/apple-touch-icon.png",
+              sizes: "180x180",
+              type: "image/png",
+            },
+          ],
+        },
+        workbox: {
+          globPatterns: ["**/*.{css,js,html,svg,png,ico,txt,woff2}"],
+        },
+        registerType: "autoUpdate",
+        includeAssets: ["favicon.ico", "apple-touch-icon.png", "safari-pinned-tab.svg"],
+        injectRegister: null,
+      }),
+    ],
+  },
   vue: {
     template: {
       compilerOptions: {
