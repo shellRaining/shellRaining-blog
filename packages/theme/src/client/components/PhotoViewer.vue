@@ -67,23 +67,32 @@
           :keyboard="{ enabled: true }"
           :navigation="true"
           :loop="false"
+          :allow-touch-move="!isDragging && !touchState.isDragging"
           @swiperslidechange="onSlideChange"
         >
           <swiper-slide v-for="(photo, index) in photos" :key="index">
             <div class="slide-content">
               <div
                 class="photo-container"
-                :class="{ zoomed: zoomedSlides.has(index) }"
-                @dblclick="toggleZoom(index)"
+                @dblclick="(e) => handleDoubleClick(e, index)"
+                @wheel="(e) => handleWheel(e, index)"
+                @mousedown="(e) => handleMouseDown(e, index)"
+                @mousemove="(e) => handleMouseMove(e, index)"
+                @mouseup="handleMouseUp"
+                @mouseleave="handleMouseUp"
+                @touchstart="(e) => handleTouchStart(e, index)"
+                @touchmove="(e) => handleTouchMove(e, index)"
+                @touchend="(e) => handleTouchEnd(e, index)"
               >
                 <img
                   :src="photo.url"
                   :alt="photo.caption || `Photo ${index + 1}`"
                   class="viewer-image"
+                  :style="getImageStyle(index)"
                   draggable="false"
                 />
               </div>
-              <div class="zoom-hint">双击或捏合缩放</div>
+              <div class="zoom-hint">双击或捏合缩放 · 滚轮缩放</div>
             </div>
           </swiper-slide>
         </swiper-container>
@@ -205,12 +214,210 @@ const emit = defineEmits<Emits>();
 
 const swiperRef = ref<any>(null);
 const currentIndex = ref(props.initialIndex);
-const zoomedSlides = ref(new Set<number>());
 const thumbnailsContainerRef = ref<HTMLElement | null>(null);
 const thumbnailRefs: HTMLElement[] = [];
 const toastRef = ref<InstanceType<typeof Toast> | null>(null);
 
+// 图片缩放和平移状态
+interface ImageTransform {
+  scale: number;
+  translateX: number;
+  translateY: number;
+}
+
+const imageTransforms = ref<Map<number, ImageTransform>>(new Map());
+
 const currentPhoto = computed(() => props.photos[currentIndex.value]);
+
+// 获取或初始化图片变换状态
+function getTransform(index: number): ImageTransform {
+  if (!imageTransforms.value.has(index)) {
+    imageTransforms.value.set(index, {
+      scale: 1,
+      translateX: 0,
+      translateY: 0,
+    });
+  }
+  return imageTransforms.value.get(index)!;
+}
+
+// 重置图片变换状态
+function resetTransform(index: number) {
+  imageTransforms.value.set(index, {
+    scale: 1,
+    translateX: 0,
+    translateY: 0,
+  });
+}
+
+// 触摸和手势状态
+interface TouchState {
+  startDistance: number;
+  startScale: number;
+  lastX: number;
+  lastY: number;
+  isDragging: boolean;
+}
+
+const touchState = ref<TouchState>({
+  startDistance: 0,
+  startScale: 1,
+  lastX: 0,
+  lastY: 0,
+  isDragging: false,
+});
+
+// 计算两点间距离（用于pinch缩放）
+function getDistance(touch1: Touch, touch2: Touch): number {
+  const dx = touch1.clientX - touch2.clientX;
+  const dy = touch1.clientY - touch2.clientY;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+// 处理触摸开始
+function handleTouchStart(event: TouchEvent, index: number) {
+  const transform = getTransform(index);
+  
+  if (event.touches.length === 2) {
+    // 双指触摸：准备缩放
+    event.preventDefault();
+    touchState.value.startDistance = getDistance(
+      event.touches[0],
+      event.touches[1]
+    );
+    touchState.value.startScale = transform.scale;
+  } else if (event.touches.length === 1 && transform.scale > 1) {
+    // 单指触摸且已放大：准备拖动
+    event.preventDefault();
+    touchState.value.isDragging = true;
+    touchState.value.lastX = event.touches[0].clientX;
+    touchState.value.lastY = event.touches[0].clientY;
+  }
+}
+
+// 处理触摸移动
+function handleTouchMove(event: TouchEvent, index: number) {
+  const transform = getTransform(index);
+  
+  if (event.touches.length === 2) {
+    // 双指缩放
+    event.preventDefault();
+    const currentDistance = getDistance(event.touches[0], event.touches[1]);
+    const scale = (currentDistance / touchState.value.startDistance) * touchState.value.startScale;
+    
+    // 限制缩放范围 1x-4x
+    transform.scale = Math.max(1, Math.min(4, scale));
+    
+    // 如果缩放到1，重置平移
+    if (transform.scale <= 1) {
+      transform.translateX = 0;
+      transform.translateY = 0;
+    }
+  } else if (event.touches.length === 1 && touchState.value.isDragging && transform.scale > 1) {
+    // 单指拖动
+    event.preventDefault();
+    const deltaX = event.touches[0].clientX - touchState.value.lastX;
+    const deltaY = event.touches[0].clientY - touchState.value.lastY;
+    
+    transform.translateX += deltaX;
+    transform.translateY += deltaY;
+    
+    touchState.value.lastX = event.touches[0].clientX;
+    touchState.value.lastY = event.touches[0].clientY;
+  }
+}
+
+// 处理触摸结束
+function handleTouchEnd(event: TouchEvent, index: number) {
+  touchState.value.isDragging = false;
+  
+  // 如果缩放回到1，确保重置平移
+  const transform = getTransform(index);
+  if (transform.scale <= 1) {
+    transform.translateX = 0;
+    transform.translateY = 0;
+  }
+}
+
+// 双击缩放
+function handleDoubleClick(event: MouseEvent, index: number) {
+  event.preventDefault();
+  const transform = getTransform(index);
+  
+  if (transform.scale > 1) {
+    // 已放大，缩小到原始大小
+    resetTransform(index);
+  } else {
+    // 原始大小，放大到2倍
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    transform.scale = 2;
+    // 以点击位置为中心放大
+    transform.translateX = (centerX - x) * 0.5;
+    transform.translateY = (centerY - y) * 0.5;
+  }
+}
+
+// 鼠标滚轮缩放
+function handleWheel(event: WheelEvent, index: number) {
+  event.preventDefault();
+  const transform = getTransform(index);
+  
+  const delta = -event.deltaY;
+  const scaleChange = delta > 0 ? 1.1 : 0.9;
+  const newScale = transform.scale * scaleChange;
+  
+  // 限制缩放范围
+  transform.scale = Math.max(1, Math.min(4, newScale));
+  
+  // 如果缩放到1，重置平移
+  if (transform.scale <= 1) {
+    transform.translateX = 0;
+    transform.translateY = 0;
+  }
+}
+
+// 鼠标拖动（当放大时）
+let isDragging = false;
+let dragStartX = 0;
+let dragStartY = 0;
+
+function handleMouseDown(event: MouseEvent, index: number) {
+  const transform = getTransform(index);
+  if (transform.scale > 1) {
+    isDragging = true;
+    dragStartX = event.clientX - transform.translateX;
+    dragStartY = event.clientY - transform.translateY;
+    event.preventDefault();
+  }
+}
+
+function handleMouseMove(event: MouseEvent, index: number) {
+  if (isDragging) {
+    const transform = getTransform(index);
+    transform.translateX = event.clientX - dragStartX;
+    transform.translateY = event.clientY - dragStartY;
+    event.preventDefault();
+  }
+}
+
+function handleMouseUp() {
+  isDragging = false;
+}
+
+// 获取图片变换样式
+function getImageStyle(index: number): Record<string, string> {
+  const transform = getTransform(index);
+  return {
+    transform: `translate(${transform.translateX}px, ${transform.translateY}px) scale(${transform.scale})`,
+    cursor: transform.scale > 1 ? 'grab' : 'zoom-in',
+    transition: isDragging || touchState.value.isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+  };
+}
 
 function onSlideChange(event: any) {
   // Swiper Web Components 事件格式：event.detail[0] 是 swiper 实例
@@ -223,14 +430,6 @@ function onSlideChange(event: any) {
 function goToSlide(index: number) {
   if (swiperRef.value?.swiper) {
     swiperRef.value.swiper.slideTo(index);
-  }
-}
-
-function toggleZoom(index: number) {
-  if (zoomedSlides.value.has(index)) {
-    zoomedSlides.value.delete(index);
-  } else {
-    zoomedSlides.value.add(index);
   }
 }
 
@@ -312,11 +511,17 @@ function handleKeydown(event: KeyboardEvent) {
   }
 }
 
-// 监听当前索引变化，自动滚动缩略图
-watch(currentIndex, () => {
+// 监听当前索引变化，自动滚动缩略图并重置上一个图片的缩放
+watch(currentIndex, (newIndex, oldIndex) => {
   nextTick(() => {
     scrollThumbnailIntoView();
   });
+  
+  // 重置上一个图片的变换状态（可选）
+  if (oldIndex !== undefined && oldIndex !== newIndex) {
+    // 可以选择重置或保留缩放状态
+    // resetTransform(oldIndex);
+  }
 });
 
 onMounted(() => {
@@ -325,6 +530,14 @@ onMounted(() => {
 
   // 监听键盘事件
   window.addEventListener("keydown", handleKeydown);
+  
+  // 添加全局鼠标事件监听，确保拖动平滑
+  window.addEventListener("mousemove", (e) => {
+    if (isDragging) {
+      handleMouseMove(e as MouseEvent, currentIndex.value);
+    }
+  });
+  window.addEventListener("mouseup", handleMouseUp);
 
   // 初始化时滚动到当前缩略图
   nextTick(() => {
@@ -338,6 +551,9 @@ onUnmounted(() => {
 
   // 移除键盘监听
   window.removeEventListener("keydown", handleKeydown);
+  
+  // 移除全局鼠标监听
+  window.removeEventListener("mouseup", handleMouseUp);
 });
 </script>
 
@@ -443,13 +659,8 @@ swiper-slide {
   position: relative;
   max-width: 90%;
   max-height: 80%;
-  transition: transform 0.3s ease;
-  cursor: zoom-in;
-}
-
-.photo-container.zoomed {
-  transform: scale(1.5);
-  cursor: zoom-out;
+  overflow: hidden;
+  touch-action: none; /* 禁用浏览器默认手势 */
 }
 
 .viewer-image {
@@ -457,6 +668,8 @@ swiper-slide {
   max-height: 80vh;
   object-fit: contain;
   user-select: none;
+  transform-origin: center center;
+  will-change: transform; /* 优化性能 */
 }
 
 .zoom-hint {
