@@ -44,7 +44,7 @@
 
         <!-- 缩放提示 -->
         <div class="zoom-hint">
-          双击或滚轮缩放 · 拖动移动 · ESC 关闭
+          双击放大 · 滚轮缩放 · 拖动移动 · ESC 关闭
         </div>
       </div>
     </Transition>
@@ -73,6 +73,13 @@ const scale = ref(1);
 const translateX = ref(0);
 const translateY = ref(0);
 const isDragging = ref(false);
+
+// 鼠标拖动状态
+const dragStartX = ref(0);
+const dragStartY = ref(0);
+
+// 保存原始 body overflow 值
+const originalBodyOverflow = ref("");
 
 // 触摸状态
 interface TouchState {
@@ -151,22 +158,19 @@ function handleWheel(event: WheelEvent) {
 }
 
 // 鼠标拖动
-let dragStartX = 0;
-let dragStartY = 0;
-
 function handleMouseDown(event: MouseEvent) {
   if (scale.value > 1) {
     isDragging.value = true;
-    dragStartX = event.clientX - translateX.value;
-    dragStartY = event.clientY - translateY.value;
+    dragStartX.value = event.clientX - translateX.value;
+    dragStartY.value = event.clientY - translateY.value;
     event.preventDefault();
   }
 }
 
 function handleMouseMove(event: MouseEvent) {
   if (isDragging.value) {
-    translateX.value = event.clientX - dragStartX;
-    translateY.value = event.clientY - dragStartY;
+    translateX.value = event.clientX - dragStartX.value;
+    translateY.value = event.clientY - dragStartY.value;
     event.preventDefault();
   }
 }
@@ -244,9 +248,12 @@ watch(
   (newValue) => {
     if (newValue) {
       resetTransform();
+      // 保存原始 overflow 值并锁定滚动
+      originalBodyOverflow.value = document.body.style.overflow;
       document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = "";
+      // 恢复原始 overflow 值
+      document.body.style.overflow = originalBodyOverflow.value;
     }
   }
 );
@@ -261,7 +268,8 @@ onUnmounted(() => {
   window.removeEventListener("keydown", handleKeydown);
   window.removeEventListener("mousemove", handleMouseMove);
   window.removeEventListener("mouseup", handleMouseUp);
-  document.body.style.overflow = "";
+  // 恢复原始 overflow 值
+  document.body.style.overflow = originalBodyOverflow.value;
 });
 </script>
 
