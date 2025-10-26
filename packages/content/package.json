@@ -14,5 +14,10 @@
   "license": "ISC",
   "dependencies": {
     "@shellraining/theme": "workspace:*"
+  },
+  "devDependencies": {
+    "@vite-pwa/vitepress": "^1.0.1",
+    "vite-plugin-pwa": "^1.1.0",
+    "workbox-window": "^7.3.0"
   }
 }
