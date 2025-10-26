@@ -20,6 +20,10 @@ export default defineConfig<ShellRainingBlogThemeConfig>({
   lang: "zh-cn",
   title,
   description: "A VitePress Site",
+  head: [
+    ["link", { rel: "manifest", href: "/manifest.webmanifest" }],
+    ["script", { src: "/registerSW.js" }],
+  ],
   vite: {
     plugins: [
       VitePWA({
