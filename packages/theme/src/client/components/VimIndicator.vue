@@ -65,7 +65,7 @@ const indicators = computed(() => {
 </script>
 
 <template>
-  <div class="vim-indicator">
+  <div class="vim-indicator" role="presentation" aria-hidden="true">
     <span
       v-for="(indicator, index) in indicators"
       :key="indicator.key"
@@ -96,6 +96,12 @@ const indicators = computed(() => {
   align-items: center;
   gap: 0.5rem;
   user-select: none;
+}
+
+@media print {
+  .vim-indicator {
+    display: none !important;
+  }
 }
 
 .vim-indicator:hover {

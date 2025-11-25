@@ -86,7 +86,7 @@ date: 2024-09-02
    git diff --stat 1a0cc9d 39e955e
    ```
 
-3. 如果你想在图形界面中查看差异（如果你安装了图形化diff工具）：
+3. 如果你想在图形界面中查看差异（如果你安装了图形化 diff 工具）：
 
    ```plaintext
    git difftool 1a0cc9d 39e955e
@@ -220,3 +220,9 @@ git stash drop
 git stash show
 git stash push
 ```
+
+## 查看两次变更间的详情
+
+有时候想看一次任务（分为多个 commit）之间有哪些文件变动或者变更行数，可以使用 `git diff hashA..hashB --stat` 实现
+
+如果想看当前暂存区的变更行数，可以使用 `git diff --cached --stat HEAD`，但是使用的时候要注意，要把所有的变更都索引起来，如果是新建的文件没有 add 的话，是不会被统计进去的
