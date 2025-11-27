@@ -268,6 +268,7 @@ onUnmounted(() => {
   font-weight: 600;
   margin: 0 0 0.5rem 0;
   line-height: 1.4;
+  white-space: pre-line;
 }
 
 .photo-meta {
