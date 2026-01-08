@@ -80,10 +80,16 @@ function escapeAttr(str: string): string {
     .replace(/>/g, "&gt;");
 }
 
-// 转义JSON字符串，用于Vue组件属性
-function escapeJson(str: string): string {
-  // 使用JSON.stringify，然后转义单引号以便在单引号属性中使用
-  return JSON.stringify(str).replace(/'/g, "\\'");
+// 转义字符串，用于Vue组件属性
+// 使用HTML实体转义，避免Vue模板解析问题
+function escapeForVueAttr(str: string): string {
+  return str
+    .replace(/\\/g, "\\\\") // 反斜杠
+    .replace(/'/g, "&#39;") // 单引号使用HTML实体
+    .replace(/"/g, "&quot;") // 双引号
+    .replace(/</g, "&lt;") // 小于号
+    .replace(/>/g, "&gt;") // 大于号
+    .replace(/&(?!#?\w+;)/g, "&amp;"); // & 符号（避免重复转义已有实体）
 }
 
 // 渲染链接卡片的HTML
@@ -105,11 +111,11 @@ function renderLinkCard(url: string, ogData: OpenGraphData | null): string {
 
     const result = `<LinkCard
       id="${escapeAttr("link-" + linkId)}"
-      :url='${escapeJson(url)}'
-      :title='${escapeJson(title)}'
-      :description='${escapeJson(description)}'
-      :image='${escapeJson(image)}'
-      :siteName='${escapeJson(finalSiteName)}'
+      url='${escapeForVueAttr(url)}'
+      title='${escapeForVueAttr(title)}'
+      description='${escapeForVueAttr(description)}'
+      image='${escapeForVueAttr(image)}'
+      siteName='${escapeForVueAttr(finalSiteName)}'
     ></LinkCard>`;
 
     return result;
