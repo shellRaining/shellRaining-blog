@@ -167,7 +167,7 @@ collection: vitepress
 
 ## 执行构建命令
 
-在我们文档根目录下执行 `pnpm run build` 的时候，会执行 `vitepress build` 命令，这个 `vitepress` 是一个可执行脚本（bin），其位置在 vitepress 包中的 `package.json` 有指出来，一般是 `bin/vitepress.js`，这个文件会间接调用 `cli.js`（被编译之前在 `/src/node/cli.ts`），然后执行其中真正的构建命令
+在我们文档根目录下执行 `bun run build` 的时候，会执行 `vitepress build` 命令，这个 `vitepress` 是一个可执行脚本（bin），其位置在 vitepress 包中的 `package.json` 有指出来，一般是 `bin/vitepress.js`，这个文件会间接调用 `cli.js`（被编译之前在 `/src/node/cli.ts`），然后执行其中真正的构建命令
 
 > [!note]
 >

@@ -50,8 +50,8 @@
   },
   "scripts": {
     "build": "rm -rf ./dist/ && NODE_ENV=production rolldown -c ./rolldown.config.ts",
-    "build:watch": "rolldown -c ./rolldown.config.ts -w",
-    "dev": "bun run ./scripts/dev.ts",
+    "build:watch": "NODE_ENV=development rolldown -c ./rolldown.config.ts -w",
+    "dev": "NODE_ENV=development rolldown -c ./rolldown.config.ts -w",
     "test": "vitest",
     "format": "prettier --write \"src/**/*.{ts,vue,js,json}\""
   },
@@ -61,7 +61,6 @@
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.1.4",
     "@types/markdown-it": "^14.1.2",
-    "@types/node": "^22.16.5",
     "@types/subset-font": "^2.3.0",
     "rolldown": "1.0.0-beta.21",
     "rollup-plugin-node-externals": "^8.1.1",

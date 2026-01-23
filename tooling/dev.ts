@@ -40,7 +40,12 @@ function pipeStream(stream: NodeJS.ReadableStream | null, name: string) {
   });
 }
 
-function spawnTask(name: string, command: string, args: string[], options: SpawnOptions) {
+function spawnTask(
+  name: string,
+  command: string,
+  args: string[],
+  options: SpawnOptions,
+) {
   const child = spawn(command, args, options);
   const handle: TaskHandle = { name, process: child };
   tasks.add(handle);
@@ -65,7 +70,10 @@ function spawnTask(name: string, command: string, args: string[], options: Spawn
   });
 
   child.on("error", (error) => {
-    log(name, `Process error: ${error instanceof Error ? error.message : String(error)}`);
+    log(
+      name,
+      `Process error: ${error instanceof Error ? error.message : String(error)}`,
+    );
     exitCode = exitCode ?? 1;
     shutdown("SIGTERM");
   });
@@ -93,27 +101,17 @@ function main() {
     FORCE_COLOR: process.env.FORCE_COLOR ?? "1",
   } as NodeJS.ProcessEnv;
 
-  spawnTask(
-    "theme",
-    "bun",
-    ["run", "./scripts/dev.ts"],
-    {
-      cwd: path.join(repoRoot, "packages/theme"),
-      env: baseEnv,
-      stdio: ["inherit", "pipe", "pipe"],
-    },
-  );
+  spawnTask("theme", "bun", ["run", "dev"], {
+    cwd: path.join(repoRoot, "packages/theme"),
+    env: baseEnv,
+    stdio: ["inherit", "pipe", "pipe"],
+  });
 
-  spawnTask(
-    "content",
-    "pnpm",
-    ["run", "dev"],
-    {
-      cwd: path.join(repoRoot, "packages/content"),
-      env: baseEnv,
-      stdio: ["inherit", "pipe", "pipe"],
-    },
-  );
+  spawnTask("content", "bun", ["run", "dev"], {
+    cwd: path.join(repoRoot, "packages/content"),
+    env: baseEnv,
+    stdio: ["inherit", "pipe", "pipe"],
+  });
 }
 
 main();

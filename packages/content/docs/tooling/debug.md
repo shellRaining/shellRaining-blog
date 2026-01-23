@@ -41,8 +41,8 @@ export async function resolveUserConfig(
 ```json package.json
 {
   "scripts": {
-    "docs:dev": "wait-on -d 100 dist/node/cli.js && pnpm -F=docs dev",
-    "docs:debug": "NODE_OPTIONS='--inspect-brk' pnpm docs:dev"
+    "docs:dev": "wait-on -d 100 dist/node/cli.js && bun -F=docs dev",
+    "docs:debug": "NODE_OPTIONS='--inspect-brk' bun docs:dev"
   }
 }
 ```

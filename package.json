@@ -5,15 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "bun run ./tooling/dev.ts",
-    "dev:theme": "lerna run dev --scope @shellraining/theme",
-    "dev:content": "lerna run dev --scope @shellraining/content",
-    "build": "pnpm run check:content && lerna run build --scope @shellraining/theme && lerna run build --scope @shellraining/content",
-    "build:theme": "lerna run build --scope @shellraining/theme",
-    "build:content": "lerna run build --scope @shellraining/content",
-    "preview": "lerna run preview --scope @shellraining/content",
-    "test": "lerna run test --scope @shellraining/theme",
-    "format": "lerna run format",
-    "clean": "lerna exec -- rm -rf dist node_modules/.cache && lerna clean --yes",
+    "dev:theme": "bun --filter @shellraining/theme dev",
+    "dev:content": "bun --filter @shellraining/content dev",
+    "build": "bun run check:content && bun --filter @shellraining/theme build && bun --filter @shellraining/content build",
+    "build:theme": "bun --filter @shellraining/theme build",
+    "build:content": "bun --filter @shellraining/content build",
+    "preview": "bun --filter @shellraining/content preview",
+    "test": "bun --filter @shellraining/theme test",
+    "format": "bun --filter '*' format",
+    "clean": "bun --filter '*' exec rm -rf dist node_modules/.cache && rm -rf node_modules",
     "check:content": "bun run ./tooling/check-content.ts"
   },
   "keywords": [],
@@ -22,6 +22,11 @@
   "workspaces": [
     "packages/*"
   ],
+  "trustedDependencies": [
+    "sharp",
+    "exifreader",
+    "esbuild"
+  ],
   "dependencies": {
     "@vueuse/core": "^13.9.0",
     "vitepress": "2.0.0-alpha.15",
@@ -29,8 +34,8 @@
   },
   "devDependencies": {
     "gray-matter": "^4.0.3",
-    "lerna": "^8.2.4",
     "mermaid": "^11.12.2",
+    "@types/node": "^22.16.5",
     "prettier": "^3.7.4"
   }
 }

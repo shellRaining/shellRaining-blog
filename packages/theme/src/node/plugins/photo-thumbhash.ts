@@ -3,7 +3,7 @@ import type { SiteConfig } from "vitepress";
 import { batchGenerateThumbHash } from "../utils/thumbhash-generator";
 import path from "path";
 import { existsSync, readFileSync, writeFileSync } from "fs";
-import { logger, LogLevels, buildMetrics } from "../utils/logger";
+import { logger } from "../utils/logger";
 
 export interface PhotoThumbHashOptions {
   enabled?: boolean;
@@ -46,9 +46,6 @@ export const photoThumbHashPlugin = (
       if (!existsSync(dataFilePath)) {
         return;
       }
-
-      // 性能监控开始
-      const startTime = performance.now();
 
       try {
         // 读取照片数据文件
@@ -94,12 +91,6 @@ export const photoThumbHashPlugin = (
           // 回写文件
           await writePhotosToDataFile(dataFilePath, photos);
         }
-
-        // 性能监控结束
-        const duration = performance.now() - startTime;
-        const details = `${updateCount} photos updated, ${photos.length} total`;
-
-        buildMetrics.record("Photo ThumbHash", duration, updateCount, details);
       } catch (error) {
         logger.error("[PhotoThumbHash] Error processing photos:", error);
       }

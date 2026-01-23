@@ -90,7 +90,7 @@ Claude code hook 能够约束 AI，产生可预期的确定性行为，所以很
         "hooks": [
           {
             "type": "command",
-            "command": "pnpm run format" // 具体的格式化指令需要自己写，有些情况下可能需要全量格式化，有些情况下又可能只格式化修改后的文件
+            "command": "bun run format" // 具体的格式化指令需要自己写，有些情况下可能需要全量格式化，有些情况下又可能只格式化修改后的文件
           }
         ]
       }

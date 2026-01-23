@@ -1,3 +1,10 @@
+---
+title: Alma 桌面 Agent 应用体验
+tag:
+  - tooling
+date: 2025-01-23
+---
+
 ## 详细介绍
 
 这是一款类似 cherry studio 的桌面 agent 应用，可以编排各种 AI 服务提供商（如 ChatGPT、Anthropic、Gemini 等），值得一提的是，他支持通过 ACP 协议使用其他应用的 API，打开 API 提供商配置页面，可以看到提供了易用的界面方便用户配置

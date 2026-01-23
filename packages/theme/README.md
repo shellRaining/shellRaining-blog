@@ -46,4 +46,4 @@ export default defineConfigWithTheme<ShellRainingBlogThemeConfig>({
 
 ## 本地开发
 
-本仓库使用 Bun 直接运行 TypeScript 开发脚本。仓库根目录的 `pnpm dev` 会调用 `tooling/dev.ts` 同时拉起主题与内容站点的开发环境，并对日志做统一前缀、自动清理，按一次 `Ctrl+C` 即可收起全部进程。若只需调试主题，可在 `packages/theme` 目录下执行 `bun run ./scripts/dev.ts`，脚本会在缺失构建产物时自动触发一次初始化构建，然后进入增量编译。
+本仓库使用 Bun 直接运行 TypeScript 开发脚本。仓库根目录的 `bun dev` 会调用 `tooling/dev.ts` 同时拉起主题与内容站点的开发环境，并对日志做统一前缀、自动清理，按一次 `Ctrl+C` 即可收起全部进程。若只需调试主题，可在 `packages/theme` 目录下执行 `bun run ./scripts/dev.ts`，脚本会在缺失构建产物时自动触发一次初始化构建，然后进入增量编译。

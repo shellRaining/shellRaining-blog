@@ -1,4 +1,3 @@
-import fs from "fs";
 import path from "path";
 import probe from "probe-image-size";
 import pLimit from "p-limit";

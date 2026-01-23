@@ -20,7 +20,7 @@ Vite 是一个前端构建工具，它由两部分构成：
 安装方式如下，运行如下命令：
 
 ```bash
-pnpm create vite
+bun create vite
 ```
 
 然后按照提示操作即可
