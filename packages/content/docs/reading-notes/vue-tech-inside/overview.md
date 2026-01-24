@@ -234,7 +234,7 @@ async function runParallel(maxConcurrency, source, iteratorFn) {
 
 按照遍历顺序依次进行编译，如果发现已经在编译的任务个数多于 CPU 核心数，就一直等待，直到某个任务编译完成，接着遍历添加任务
 
-这里面的 `runParallel` 函数和我们自己写的 [Promise.all](../../tech/promise.md#Promise.all) 函数很像，只不过他将构建函数作为参数传到了这个并行控制函数中，我们是将他作为一个 task 放入到数组，并无差异
+这里面的 `runParallel` 函数和我们自己写的 [Promise.all](../../fundamentals/promise.md#Promise.all) 函数很像，只不过他将构建函数作为参数传到了这个并行控制函数中，我们是将他作为一个 task 放入到数组，并无差异
 
 #### 编译单个子包
 

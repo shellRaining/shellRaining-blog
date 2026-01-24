@@ -176,4 +176,4 @@ declare global {
 }
 ```
 
-这里不可以用 let 替换 var，因为 let 声明的变量并不是放在 globalThis 下的，详情可以看 [执行上下文](../../tech/execute-context.md)
+这里不可以用 let 替换 var，因为 let 声明的变量并不是放在 globalThis 下的，详情可以看 [执行上下文](../../fundamentals/execute-context.md)
