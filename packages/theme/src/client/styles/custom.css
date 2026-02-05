@@ -99,6 +99,12 @@
   padding: 4px;
   box-shadow: 0 6px 20px rgba(0,0,0,0.06);
   backdrop-filter: blur(6px);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.mermaid:hover .mmd-toolbar {
+  opacity: 1;
 }
 
 .mmd-btn {
@@ -147,6 +153,10 @@
 .mmd-dialog {
   position: absolute;
   inset: 0;
+}
+
+.mmd-dialog .mmd-toolbar {
+  opacity: 1;
 }
 
 .mmd-dialog .mmd-viewport {
