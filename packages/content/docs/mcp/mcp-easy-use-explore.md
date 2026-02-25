@@ -26,7 +26,7 @@ MCP server 让 agent 能够利用更多工具与外界交互，但是这种能�
 
 可以先看一下我的这篇文章来了解什么是基于代码执行的 MCP server
 
-https://shellraining.xyz/docs/reading-notes/mcp/code-execute-with-mcp.html
+https://shellraining.xyz/docs/mcp/code-execute-with-mcp.html
 
 严格意义上来说，这种方法并不能解决运行时的问题，它只是间接的缓解运行时的影响。Agent 可以借助 skill 下载运行时，或者指定已有的运行时路径。这在某些场合是有用的，比如我们通过 VSCode 连接开发机，`.vscode-server` 下面就有一个 node 二进制文件，我们可以通过 skill 让模型率先知道二进制文件的路径，然后通过这个特殊的运行时将 server 跑起来，算是一个非常无奈的方案
 
