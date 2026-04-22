@@ -227,3 +227,17 @@ git stash push
 有时候想看一次任务（分为多个 commit）之间有哪些文件变动或者变更行数，可以使用 `git diff hashA..hashB --stat` 实现
 
 如果想看当前暂存区的变更行数，可以使用 `git diff --cached --stat HEAD`，但是使用的时候要注意，要把所有的变更都索引起来，如果是新建的文件没有 add 的话，是不会被统计进去的
+
+## git 清理锁文件
+
+```bash
+fatal: Unable to create 'xxx/xxx': File exists.
+
+Another git process seems to be running in this repository, e.g.
+an editor opened by 'git commit'. Please make sure all processes
+are terminated then try again. If it still fails, a git process
+may have crashed in this repository earlier:
+remove the file manually to continue.
+```
+
+这是一个残留的 Git 锁文件，不是当前有进程真的占用了它。直接删除 `.git/index.lock` 文件即可解决问题：
