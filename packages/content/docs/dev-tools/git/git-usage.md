@@ -249,5 +249,5 @@ remove the file manually to continue.
 1. 并行任务隔离：先 clone 一次远程仓库作为 base，然后每个任务实例用 --local 从 base 快速派生，各自独立修改互不干扰
 2. CI/CD 中并行构建 — 多个 job 共享一份 object store，各自 checkout 不同分支
 
-他跟 worktree 有些区别，`git clone --local` 是两个独立仓库，各自有完整的 `.git` 目录，只是 objects 通过硬链接共享。
+它跟 worktree 有些区别，`git clone --local` 是两个独立仓库，各自有完整的 `.git` 目录，只是 objects 通过硬链接共享。
 git worktree 是同一个仓库，只有一个 `.git`，只是多出几个工作目录。它在 `.git/worktrees/` 下存储每个 worktree 的 HEAD 和 index，但 objects、refs、config 都是共享主仓库的那一份。
