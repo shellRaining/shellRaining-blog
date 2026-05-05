@@ -20,7 +20,7 @@
 ni @shellraining-blog/theme # 将 ni 替换为你喜欢的包管理器
 ```
 
-现在 `.vitepress/theme/index.ts` 中添加下面代码引入主题：
+在 `.vitepress/theme/index.ts` 中添加如下代码引入主题：
 
 ```typescript
 import shellRainingBlogTheme from "@shellraining-blog/theme";
