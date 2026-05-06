@@ -8,7 +8,7 @@
 
 1. 性能极佳：lighthouse 四项全部满分，LCP 仅需 0.4s
 2. 自定义字体：可以任意设置自己需要的字体，主题会自动进行子集化工作，无需担心引入字体过大
-3. 拓展 markdown 语法：新增 math、sup、sub、mark、mark、taskList 语法
+3. 拓展 markdown 语法：新增 math、sup、sub、mark、taskList 语法
 4. viewer.js 图片预览：可以在文章页面放大预览
 5. 完善的类型支持：主题提供了完善的类型支持，可以在编辑器中获得智能提示
 6. 文章编辑历史：通过将 git 提交历史信息注入文章中，可以查看文章的编辑历史
