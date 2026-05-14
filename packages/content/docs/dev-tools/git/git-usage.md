@@ -209,6 +209,22 @@ git lfs install
 git lfs pull
 ```
 
+## 大文件迁移
+
+有时候我们的仓库不小心将大文件作为普通文件提交到了 Git 历史里面，后续由于种种原因需要迁移到 LFS，这时候可以借助 Git LFS 的自动迁移工具来处理。具体操作步骤如下：
+
+1. 运行 `git lfs migrate info` 来查看有哪些大文件
+2. 运行 `git lfs migrate info --everything` 查看哪些类型占空间
+3. 执行迁移命令：
+   `git lfs migrate import --everything --include="[通配符]"`
+   这里的通配符是指你想要迁移的文件类型，比方说 `*.zip` 等等
+4. 最后使用 `git lfs ls-files` 查看一下结果
+
+这样做会修改 Git 历史，因此我们需要进行强推（force push）。这种方式需要仓库的成员相互协调，否则容易造成团队合作的不愉快。
+
+> [!IMPORTANT]
+> 强推之后，GitHub 或 GitLab 上的旧历史大文件不一定立刻释放，需要在平台上进行 GC（垃圾回收）。同时，要记得备份好历史仓库，避免迁移失败。
+
 ## stash 部分文件
 
 我们直接使用 `git stash push -m` 暂存时，会存储当前所有的改动，如果我只想要存储 add 的文件，可以通过命令 `git stash push --staged` 完成，如果想要存储未 add 的文件，可以通过命令 `git stash push --keep-index`
