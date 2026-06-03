@@ -187,43 +187,126 @@ git ls-files -v | grep '^h'
 
 ## 大文件存储
 
-我在给我的博客添加落霞孤鹜字体时，需要加入一个大小为 20MB 左右的 ttf 文件，但 git 对大文件管理并不是很友好，因此考虑引入 git lfs
+我在给博客添加落霞孤鹜字体时，需要加入一个大小为 20MB 左右的 ttf 文件。Git 可以保存这种文件，但它会把每一次修改后的完整对象都放进历史里，后续 clone、fetch、打包都会被这些对象拖慢。Git LFS 的思路是：Git 仓库里只保存一个很小的 pointer 文件，真正的大文件放在 LFS 存储里。
 
-1. 首先是下载 git-lfs 工具
-2. 然后再我们的博客仓库根目录初始化 git lfs
-3. 指定需要用 git lfs 管理的文件类型
-4. 这时候可以看到多了一个 `.gitattributes` 文件，我们追踪并提交它和要上传的大文件即可
+适合放进 LFS 的一般是字体、图片源文件、音视频、压缩包、模型权重、设计稿、二进制发布包这类文件。不适合放进去的是经常需要 diff 的源码、配置、文本数据，因为 LFS pointer 只告诉 Git “这里有一个外部对象”，不会提供正常文本合并体验。
+
+新项目接入 LFS 的流程比较简单：
+
+1. 安装 `git-lfs` 工具。
+2. 在仓库里初始化 LFS filter。
+3. 用 `git lfs track` 记录哪些文件模式需要进入 LFS。
+4. 提交 `.gitattributes` 和对应的大文件。
 
 ```bash
 brew install git-lfs
 git lfs install
 git lfs track "*.ttf"
-git add .
+git add .gitattributes packages/content/public/fonts/LXGWWenKaiGBScreen.ttf
 git commit -m "配置 Git LFS 追踪字体文件"
 ```
 
-上面提到的是上传的步骤，如果要在其他设备克隆这个大文件，也需要一些额外的操作（初始化和单独拉取大文件）
+`git lfs track` 会改写 `.gitattributes`，常见内容类似这样：
+
+```bash
+*.ttf filter=lfs diff=lfs merge=lfs -text
+```
+
+这里的 `filter=lfs` 决定提交时写入 pointer、checkout 时还原真实文件，`-text` 表示不要对它做文本换行转换。`.gitattributes` 必须提交到仓库，否则别人 clone 时不知道哪些文件应该交给 LFS 处理。
+
+在其他设备上克隆仓库时，一般只需要先安装 LFS，再执行正常 clone。大多数新版本 Git LFS 会在 checkout 时自动拉取对象，如果遇到文件仍然是 pointer，可以手动拉取：
 
 ```bash
 git lfs install
 git lfs pull
 ```
 
-## 大文件迁移
+## Git LFS 迁移
 
-有时候我们的仓库不小心将大文件作为普通文件提交到了 Git 历史里面，后续由于种种原因需要迁移到 LFS，这时候可以借助 Git LFS 的自动迁移工具来处理。具体操作步骤如下：
+如果大文件已经作为普通 Git object 进入历史，仅仅添加 `.gitattributes` 不会修复旧提交。旧提交里的 blob 还在，仓库体积也不会明显下降。这时需要做历史改写，把历史里的大文件替换成 LFS pointer。
 
-1. 运行 `git lfs migrate info` 来查看有哪些大文件
-2. 运行 `git lfs migrate info --everything` 查看哪些类型占空间
-3. 执行迁移命令：
-   `git lfs migrate import --everything --include="[通配符]"`
-   这里的通配符是指你想要迁移的文件类型，比方说 `*.zip` 等等
-4. 最后使用 `git lfs ls-files` 查看一下结果
+迁移前先确认两件事：
 
-这样做会修改 Git 历史，因此我们需要进行强推（force push）。这种方式需要仓库的成员相互协调，否则容易造成团队合作的不愉快。
+1. 这个仓库是否允许改写历史。如果很多人都在同一个分支上开发，需要先约定冻结提交窗口。
+2. 大文件应该按文件模式迁移，还是只迁移某几个路径。模式越宽，影响的历史越多。
+
+建议先做一个本地备份，不要直接在唯一工作区里操作：
+
+```bash
+git clone --mirror git@github.com:owner/repo.git repo-backup.git
+git tag before-lfs-migration
+```
+
+`--mirror` 会保留所有 refs，适合做灾难恢复。`before-lfs-migration` 则是在当前仓库里留下一个可读的回退锚点。真实迁移前最好确认工作区是干净的：
+
+```bash
+git status --short
+git branch --show-current
+```
+
+然后先分析历史里哪些文件占空间：
+
+```bash
+git lfs migrate info --everything
+git lfs migrate info --everything --top=20
+```
+
+如果只想迁移某些后缀，可以使用 `--include`。多个模式用逗号分隔：
+
+```bash
+git lfs migrate import --everything --include="*.zip,*.psd,*.ttf"
+```
+
+如果 `.gitattributes` 里已经配置好了 LFS 规则，可以使用 `--fixup`，让 Git LFS 按这些规则迁移历史：
+
+```bash
+git lfs migrate import --everything --fixup
+```
+
+`--everything` 会处理所有本地 refs，包括分支和标签。对于个人仓库这通常最省心；对于协作仓库，可能只想迁移主分支，避免改写无关分支：
+
+```bash
+git lfs migrate import --include-ref=refs/heads/main --include="*.zip,*.psd,*.ttf"
+```
+
+迁移完成后要检查三类结果：
+
+```bash
+git lfs ls-files
+git status --short
+git log --all -- packages/content/public/fonts/LXGWWenKaiGBScreen.ttf
+```
+
+`git lfs ls-files` 能看到哪些文件已经变成 LFS 对象；`git status --short` 应该是干净的；`git log --all -- <path>` 可以确认相关路径的历史还在，只是文件内容从普通 blob 变成了 pointer。
+
+确认没有问题后，再推送改写后的历史：
+
+```bash
+git push --force-with-lease origin main
+git push --force-with-lease origin --tags
+git lfs push --all origin
+```
+
+这里优先使用 `--force-with-lease`，它会检查远端分支是否在你迁移期间被别人推进过。若远端已有新提交，它会拒绝覆盖，比普通 `--force` 更适合协作仓库。
+
+其他协作者在迁移后不要继续基于旧历史提交。最简单的方式是重新 clone；如果要保留本地仓库，需要先备份自己的改动，再重置到新的远端历史：
+
+```bash
+git fetch origin
+git switch main
+git reset --hard origin/main
+git lfs pull
+```
+
+如果迁移后发现问题，可以从备份恢复。对于本地仓库，可以回到迁移前的 tag；对于远端仓库，可以从 mirror 备份推回原来的 refs：
+
+```bash
+git reset --hard before-lfs-migration
+git push --force-with-lease origin main
+```
 
 > [!IMPORTANT]
-> 强推之后，GitHub 或 GitLab 上的旧历史大文件不一定立刻释放，需要在平台上进行 GC（垃圾回收）。同时，要记得备份好历史仓库，避免迁移失败。
+> 历史改写只会让新的分支历史不再引用旧 blob，不代表托管平台会立刻释放所有存储。GitHub、GitLab 等平台可能还会保留旧对象、缓存、PR refs 或 LFS 配额记录。迁移后如果目标是减少远端仓库占用，需要结合平台文档处理旧 refs、缓存和垃圾回收。
 
 ## stash 部分文件
 
