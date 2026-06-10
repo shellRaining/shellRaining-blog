@@ -33,4 +33,3 @@ dns:
   - DOMAIN-SUFFIX,baidu-int.com,DIRECT
   - IP-CIDR,10.11.152.208/32,DIRECT,no-resolve
 ```
-
