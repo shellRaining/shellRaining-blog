@@ -1,5 +1,5 @@
 ---
-title: AI coding 复刻 CC98 过程中的经验于思考
+title: AI coding 复刻 CC98 过程中的经验与思考
 tag:
   - practice
 date: 2026-07-20
